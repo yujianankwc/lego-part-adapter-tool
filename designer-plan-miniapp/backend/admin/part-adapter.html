@@ -1166,14 +1166,14 @@
     <div class="wrap">
       <div class="product-head">
         <div class="product-copy card">
-          <div class="eyebrow">Designer Tool</div>
-          <h1>乐高零件适配工具</h1>
+          <div class="eyebrow">给玩家和设计师用</div>
+          <h1>乐高零件适配助手</h1>
           <p>
-            面向 MOC 设计师的乐高到高砖转换工具。先导入 Studio 清单，再直连高砖判断，最后把缺色、缺件、印刷件和可替换建议清晰展示出来，
-            让设计师只关注需要修改的部分，而不是被大量底层规则打断。
+            把 Studio 导出的零件清单，快速整理成更适合高砖生产的版本。上传后，系统会直接告诉你哪些可以照用、哪些只是缺颜色、
+            哪些需要换件，让你把精力放在真正需要调整的地方。
           </p>
           <div class="hint" style="margin-top: 12px">
-            设计制作：<strong>酷玩潮</strong>。本工具提供零件适配参考与整理建议，最终替换方案仍建议由设计师或审核人员结合结构与外观要求确认。
+            设计制作：<strong>酷玩潮</strong>。这里提供的是替换建议和整理结果；最终是否替换、怎么替换，建议结合结构强度、外观效果和库存情况一起确认。
           </div>
         </div>
         <div class="card topbar settings-shell">
@@ -1219,27 +1219,27 @@
 
       <div class="card hero">
         <div class="hero-panel">
-          <h2>像工具一样用，像平台一样积累</h2>
+          <h2>先看结论，再决定怎么改</h2>
           <p>
-            这个页面已经按独立工具方式运行：高频操作放前，低频配置收后。你后面单独挂公网时，直接保留这个交互结构即可，
-            当前所有适配规则、分析记录、导出都走独立接口和独立存储，不改原有业务表。
+            复杂的匹配规则已经放在后面。你在前面看到的，只是最关键的结果：能不能直接用、要不要换颜色、需不需要换件，
+            这样看一眼就能知道下一步该怎么改。
           </p>
         </div>
         <div class="hero-metrics" id="topMetrics">
           <div class="metric-box">
-            <div class="label">总零件种类</div>
+            <div class="label">清单种类数</div>
             <div class="value" id="metricTypes">0</div>
           </div>
           <div class="metric-box">
-            <div class="label">总零件数量</div>
+            <div class="label">清单总数量</div>
             <div class="value" id="metricQty">0</div>
           </div>
           <div class="metric-box">
-            <div class="label">自动适配率</div>
+            <div class="label">可直接处理</div>
             <div class="value" id="metricAutoRate">0%</div>
           </div>
           <div class="metric-box">
-            <div class="label">可生产率</div>
+            <div class="label">可继续推进</div>
             <div class="value" id="metricProdRate">0%</div>
           </div>
         </div>
@@ -1248,38 +1248,68 @@
       <div class="card quick-guide">
         <div class="quick-guide-head">
           <div>
-            <h3>快速使用</h3>
-            <div class="muted-strong">先完成导入和转换，再看自动替换结果；规则、同步、喂料都放到低频区，避免打断主流程。</div>
+            <h3>怎么用最快</h3>
+            <div class="muted-strong">按 1、2、3 的顺序走就行：先上传清单，再看高砖判断，最后查看需要修改的部分。</div>
           </div>
           <div class="core-actions">
             <label class="mode-toggle"><input id="simpleMode" type="checkbox" checked /> 简版模式</label>
-            <button onclick="importBomFile()">1. 导入文件</button>
-            <button onclick="convertWithGobricks()">2. 直连高砖</button>
-            <button onclick="runAdapter()">3. 运行适配</button>
-            <button onclick="downloadCsv()">4. 导出生产 BOM</button>
+            <button onclick="importBomFile()">1. 上传清单</button>
+            <button onclick="convertWithGobricks()">2. 获取高砖结果</button>
+            <button onclick="runAdapter()">3. 生成替换建议</button>
+            <button onclick="downloadCsv()">4. 导出生产清单</button>
           </div>
         </div>
         <div class="step-strip">
           <div class="step-card">
             <div class="step-no">1</div>
-            <div class="step-title">导入原始清单</div>
-            <div class="step-desc">上传 Studio 导出的 CSV / XLSX，系统先做本地识别和标准化。</div>
+            <div class="step-title">上传你的清单</div>
+            <div class="step-desc">支持 Studio 导出的 CSV / XLSX，上传后会先自动整理格式。</div>
           </div>
           <div class="step-card">
             <div class="step-no">2</div>
-            <div class="step-title">直连高砖判断</div>
-            <div class="step-desc">拿到高砖原始结果后，再由本地规则做纠偏和补充建议。</div>
+            <div class="step-title">看高砖原始结果</div>
+            <div class="step-desc">先帮你看清楚哪些已经能用，哪些是缺颜色，哪些是缺零件。</div>
           </div>
           <div class="step-card">
             <div class="step-no">3</div>
-            <div class="step-title">看最终建议</div>
-            <div class="step-desc">重点看自动替换结果、异常审核队列和图片缺口清单。</div>
+            <div class="step-title">看修改建议</div>
+            <div class="step-desc">重点只看需要你动手改的部分，能直接用的会尽量少打扰你。</div>
           </div>
           <div class="step-card">
             <div class="step-no">4</div>
-            <div class="step-title">需要时再进阶</div>
-            <div class="step-desc">颜色参考、全局喂料、规则维护都保留，但默认不干扰主流程。</div>
+            <div class="step-title">需要时再细调</div>
+            <div class="step-desc">想继续补图、对色或维护规则时，再展开高级功能就可以。</div>
           </div>
+        </div>
+      </div>
+
+      <div class="card compact-card" id="analyticsPanel" data-public-block>
+        <div class="section-title-row">
+          <h3>内部使用统计</h3>
+          <span class="section-tip">仅内部可见，用于查看访问与使用情况</span>
+        </div>
+        <div class="hero-metrics" style="margin-top: 10px">
+          <div class="metric-box">
+            <div class="label">今日访问</div>
+            <div class="value" id="analyticsTodayViews">0</div>
+          </div>
+          <div class="metric-box">
+            <div class="label">今日访客</div>
+            <div class="value" id="analyticsTodayUsers">0</div>
+          </div>
+          <div class="metric-box">
+            <div class="label">今日使用</div>
+            <div class="value" id="analyticsTodayUses">0</div>
+          </div>
+          <div class="metric-box">
+            <div class="label">近 7 天使用</div>
+            <div class="value" id="analyticsLast7Uses">0</div>
+          </div>
+        </div>
+        <div class="hint" id="analyticsSummaryHint" style="margin-top: 10px">等待加载统计。</div>
+        <div class="subtle-card" style="margin-top: 10px">
+          <div class="field-label">最近操作</div>
+          <div id="analyticsRecentList" class="hint" style="margin-top: 8px">暂无数据。</div>
         </div>
       </div>
 
@@ -1360,7 +1390,7 @@
           <div class="subtle-card">
             <div class="field-label">当前文件</div>
             <div id="sourceNameDisplay" class="muted-strong">shan-hai-ling-he-bom.txt</div>
-            <div class="hint" style="margin-top: 6px">项目名称和设计师默认隐藏，直接导入文件即可开始处理。</div>
+            <div class="hint" style="margin-top: 6px">直接上传文件就能开始，不需要先填项目名称。</div>
           </div>
           <div class="subtle-card">
             <div class="field-label">当前策略</div>
@@ -1374,7 +1404,7 @@
         </div>
 
         <div class="stack">
-          <div class="section-kicker">Strategy</div>
+          <div class="section-kicker">调整偏好</div>
           <div>
             <label class="field-label" for="colorMode">颜色策略</label>
             <select id="colorMode">
@@ -1386,34 +1416,34 @@
           <label><input id="allowDisplaySub" type="checkbox" checked /> 允许展示件相似替换</label>
           <label><input id="allowStructuralSub" type="checkbox" /> 允许结构件相似替换</label>
           <div class="toolbar">
-            <button onclick="runAdapter()">运行适配</button>
-            <button onclick="loadDemoBom()">载入示例 BOM</button>
-            <button onclick="downloadCsv()">导出生产 BOM</button>
+            <button onclick="runAdapter()">生成替换建议</button>
+            <button onclick="loadDemoBom()">载入示例清单</button>
+            <button onclick="downloadCsv()">导出生产清单</button>
             <button onclick="loadJobs()">刷新记录</button>
           </div>
           <div class="toolbar">
             <input id="bomFileInput" type="file" accept=".csv,.txt,.tsv,.xlsx" style="min-width: 220px" />
-            <button onclick="importBomFile()">导入文件</button>
-            <button onclick="convertWithGobricks()">直连高砖转换</button>
+            <button onclick="importBomFile()">上传文件</button>
+            <button onclick="convertWithGobricks()">获取高砖结果</button>
             <span class="hint" id="bomImportHint">支持 csv / txt / tsv / xlsx。</span>
           </div>
-          <div class="hint">BOM 格式：每行 `乐高编号|颜色编号|数量|名称|标签`，标签可填 `printed` / `structural` / `display`。</div>
+          <div class="hint">如果你是从 Studio 导出，直接上传文件就可以；下面的文本框更适合临时手动修改。</div>
         </div>
       </div>
 
       <div class="card compact-card">
         <div class="section-title-row">
-          <h3>1. BOM 导入</h3>
-          <span class="section-tip">高频操作：这里是整个工具的起点</span>
+          <h3>1. 清单内容</h3>
+          <span class="section-tip">先把你的原始清单放进来</span>
         </div>
-        <div class="hint" style="margin-bottom: 10px">优先使用文件导入；只有临时调整时，再手工修改下面的 BOM 文本。</div>
+        <div class="hint" style="margin-bottom: 10px">优先直接上传文件；只有临时改几条时，再手动编辑下面内容。</div>
         <textarea id="bomInput" class="code"></textarea>
       </div>
 
       <div class="card compact-card">
         <div class="section-title-row">
-          <h3>2. 适配结果总览</h3>
-          <span class="section-tip">先看这行摘要，再决定是否进入长表</span>
+          <h3>2. 结果总览</h3>
+          <span class="section-tip">先看整体情况，再往下看详细建议</span>
         </div>
         <div class="status-strip">
           <div class="pill-list" id="stagePills"></div>
@@ -1425,8 +1455,8 @@
         <details class="fold-card" id="convertSectionFold">
           <summary class="fold-summary">
             <div class="fold-summary-copy">
-              <h3>2.1 高砖直连增强结果</h3>
-              <div class="hint">默认收起。这里用于查看高砖接口原始返回与本地纠偏结果。</div>
+              <h3>2.1 高砖原始结果（已帮你整理）</h3>
+              <div class="hint">默认收起。这里会把高砖的原始结果整理得更容易看，方便你快速判断哪些地方要改。</div>
             </div>
             <span class="fold-toggle"></span>
           </summary>
@@ -1456,9 +1486,9 @@
                 <option value="50" selected>50</option>
                 <option value="100">100</option>
               </select>
-              <button type="button" onclick="exportDesignerPdf()">导出设计师版 PDF</button>
-              <button type="button" onclick="exportDesignerXls()">导出设计师版 CSV</button>
-              <span class="hint" id="designerExportHint">基于当前直连结果导出，仅保留设计师调整所需信息。</span>
+              <button type="button" onclick="exportDesignerPdf()">导出给设计师（PDF）</button>
+              <button type="button" onclick="exportDesignerXls()">导出给设计师（CSV）</button>
+              <span class="hint" id="designerExportHint">会尽量只保留设计师真正需要处理的信息，减少无关干扰。</span>
             </div>
             <div class="pager-bar">
               <div class="pager-actions">
@@ -1493,8 +1523,8 @@
 
       <div class="card table-wrap">
         <div class="section-title-row" style="padding: 14px 16px 2px; margin-bottom: 0">
-          <h3>3. 自动替换结果</h3>
-          <span class="section-tip">核心工作区：优先查看这里</span>
+          <h3>3. 推荐修改清单</h3>
+          <span class="section-tip">这里最重要，优先看这里就够了</span>
         </div>
         <div class="toolbar" style="margin: 12px 0">
           <label class="field-label" for="resultImageFilter">图片状态筛选</label>
@@ -1544,8 +1574,8 @@
 
       <div class="card table-wrap">
         <div class="section-title-row" style="padding: 14px 16px 2px; margin-bottom: 0">
-          <h3>4. 异常审核队列</h3>
-          <span class="section-tip">只看需要人工确认的条目</span>
+          <h3>4. 需要你确认的部分</h3>
+          <span class="section-tip">只保留系统拿不准、需要你拍板的条目</span>
         </div>
         <table>
           <thead>
@@ -1570,8 +1600,8 @@
 
       <div class="card">
         <div class="section-title-row" style="padding: 14px 16px 0; margin-bottom: 0">
-          <h3>4.1 图片缺口清单</h3>
-          <span class="section-tip">优先补最影响判断的无图项</span>
+          <h3>4.1 还缺图片的零件</h3>
+          <span class="section-tip">先补这些，会更容易判断怎么改</span>
         </div>
         <div class="hint" id="imageGapSummaryLine">等待运行适配后统计无图条目。</div>
         <div id="imageGapList" class="compact-grid" style="margin-top: 12px">
@@ -1905,6 +1935,67 @@
           throw new Error(body.detail || '请求失败')
         }
         return body
+      }
+
+      async function loadAnalytics() {
+        if (isPublicToolMode()) {
+          return
+        }
+        const ret = await apiGet('/api/admin/part-adapter/analytics')
+        renderAnalytics(ret.summary || {})
+      }
+
+      function renderAnalytics(summary) {
+        const safe = summary && typeof summary === 'object' ? summary : {}
+        const today = safe.today && typeof safe.today === 'object' ? safe.today : {}
+        const last7 = safe.last_7_days && typeof safe.last_7_days === 'object' ? safe.last_7_days : {}
+        const todayUses =
+          Number(today.import_bom || 0) +
+          Number(today.convert_gobricks || 0) +
+          Number(today.analyze || 0) +
+          Number(today.exports || 0)
+        const last7Uses =
+          Number(last7.import_bom || 0) +
+          Number(last7.convert_gobricks || 0) +
+          Number(last7.analyze || 0) +
+          Number(last7.exports || 0)
+        document.getElementById('analyticsTodayViews').textContent = String(Number(today.page_views || 0))
+        document.getElementById('analyticsTodayUsers').textContent = String(Number(today.unique_visitors || 0))
+        document.getElementById('analyticsTodayUses').textContent = String(todayUses)
+        document.getElementById('analyticsLast7Uses').textContent = String(last7Uses)
+        document.getElementById('analyticsSummaryHint').textContent =
+          `今日导入 ${Number(today.import_bom || 0)} 次；直连高砖 ${Number(today.convert_gobricks || 0)} 次；运行适配 ${Number(today.analyze || 0)} 次；导出 ${Number(today.exports || 0)} 次。`
+        const recent = Array.isArray(safe.recent) ? safe.recent : []
+        const host = document.getElementById('analyticsRecentList')
+        if (!recent.length) {
+          host.textContent = '暂无数据。'
+          return
+        }
+        host.innerHTML = recent
+          .map((item) => {
+            const safeItem = item && typeof item === 'object' ? item : {}
+            const at = String(safeItem.at || '-')
+            const eventType = String(safeItem.event_type || '-')
+            const sourceName = String(safeItem.source_name || '').trim()
+            const route = String(safeItem.route || '').trim()
+            const detail = sourceName || route || '-'
+            return `<div style="display:flex;gap:10px;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #dbe4f8;"><span><strong>${escapeHtml(eventType)}</strong> · ${escapeHtml(detail)}</span><span class="muted">${escapeHtml(at)}</span></div>`
+          })
+          .join('')
+      }
+
+      async function trackAnalyticsEvent(eventType, sourceName = '') {
+        try {
+          await apiPost('/api/admin/part-adapter/analytics/event', {
+            event_type: String(eventType || '').trim(),
+            source_name: String(sourceName || '').trim(),
+          })
+          if (!isPublicToolMode()) {
+            await loadAnalytics()
+          }
+        } catch (err) {
+          // keep the tool flow uninterrupted if analytics fails
+        }
       }
 
       async function apiPut(path, payload) {
@@ -2873,6 +2964,7 @@
           win.focus()
           win.print()
         }, 300)
+        void trackAnalyticsEvent('export_designer_pdf', document.getElementById('sourceName').value || '')
       }
 
       function exportDesignerXls() {
@@ -2893,6 +2985,7 @@
         URL.revokeObjectURL(url)
         document.getElementById('designerExportHint').textContent = `已导出设计师版 CSV，共 ${rows.length} 条。Excel 可直接打开；图片列为可点击链接，如需内嵌图片排版请使用 PDF 导出。`
         setStatus('设计师版 CSV 已导出')
+        void trackAnalyticsEvent('export_designer_csv', document.getElementById('sourceName').value || '')
       }
 
       function formatPrice(value) {
@@ -3885,6 +3978,9 @@
           document.getElementById('sourceName').value = ret.filename || file.name || ''
           syncSourceDisplay()
           document.getElementById('bomImportHint').textContent = `已导入 ${ret.filename || file.name}，解析 ${ret.row_count || 0} 行。`
+          if (!isPublicToolMode()) {
+            await loadAnalytics()
+          }
           setStatus('文件已导入')
         } catch (err) {
           const activeTicker = window.__partAdapterTicker
@@ -3932,6 +4028,9 @@
           }
           renderConvertReport(ret.report || null)
           await loadRules()
+          if (!isPublicToolMode()) {
+            await loadAnalytics()
+          }
           if (isPublicToolMode()) {
             focusConvertSection()
           }
@@ -3963,6 +4062,9 @@
           const ret = await apiPost('/api/admin/part-adapter/analyze', payload)
           renderJob(ret.job || null)
           await loadJobs()
+          if (!isPublicToolMode()) {
+            await loadAnalytics()
+          }
           setStatus('适配完成')
         } catch (err) {
           alert(err.message || '适配失败')
@@ -4039,6 +4141,9 @@
           link.click()
           link.remove()
           URL.revokeObjectURL(url)
+          if (!isPublicToolMode()) {
+            await loadAnalytics()
+          }
           setStatus('CSV 已导出')
         } catch (err) {
           alert(err.message || '导出失败')
@@ -4051,7 +4156,11 @@
           setStatus('加载中...')
           syncStrategyPills()
           renderConvertReport(null)
-          await Promise.all([loadRules(), loadJobs()])
+          const tasks = [loadRules(), loadJobs()]
+          if (!isPublicToolMode()) {
+            tasks.push(loadAnalytics())
+          }
+          await Promise.all(tasks)
           setStatus('已刷新')
         } catch (err) {
           setStatus(`加载失败：${err.message || '请求异常'}`)
