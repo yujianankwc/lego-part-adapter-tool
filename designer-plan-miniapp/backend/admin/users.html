@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>原创设计师计划后台 · 用户管理</title>
+    <link rel="stylesheet" href="/admin-assets/admin.css" />
+  </head>
+  <body>
+    <div class="wrap" id="adminPageRoot" data-admin-module="user" data-single-module="1">
+      <h1>原创设计师计划运营后台</h1>
+      <div class="card row">
+        <input id="baseUrl" value="http://127.0.0.1:8002" style="min-width: 260px" />
+        <input id="adminToken" value="kwc-admin-dev" style="min-width: 220px" />
+        <select id="adminRole" style="min-width: 140px" onchange="handleAdminRoleChange()">
+          <option value="superadmin">超级管理员</option>
+          <option value="operator">运营</option>
+          <option value="finance">财务</option>
+          <option value="reviewer">审核</option>
+        </select>
+        <input id="adminOperator" value="运营同学" style="min-width: 160px" />
+        <button onclick="loadAll()">刷新数据</button>
+        <span id="status" class="muted"></span>
+      </div>
+
+      <div class="card module-nav">
+        <button class="module-btn" data-module-btn="overview" onclick="setAdminModule('overview')">总览</button>
+        <button class="module-btn" data-module-btn="project" onclick="setAdminModule('project')">项目管理</button>
+        <button class="module-btn" data-module-btn="order" onclick="setAdminModule('order')">订单管理</button>
+        <button class="module-btn" data-module-btn="user" onclick="setAdminModule('user')">用户管理</button>
+        <button class="module-btn" data-module-btn="submission" onclick="setAdminModule('submission')">投稿审核</button>
+        <button class="module-btn" data-module-btn="designer" onclick="setAdminModule('designer')">设计师分成</button>
+        <button class="module-btn" data-module-btn="feedback" onclick="setAdminModule('feedback')">反馈中心</button>
+        
+        <button class="module-btn" data-module-btn="setting" onclick="setAdminModule('setting')">设置中心</button>
+      </div>
+
+      <div class="card module-card" data-modules="user">
+        <h3>用户中心</h3>
+        <div class="row">
+          <input id="userKeyword" placeholder="搜索 openid / 昵称" style="min-width: 280px" />
+          <button onclick="loadUsers()">查询用户</button>
+        </div>
+        <div class="muted" id="userSummary"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>用户</th>
+              <th>身份</th>
+              <th>订单统计</th>
+              <th>交易金额</th>
+              <th>投稿/预约</th>
+              <th>最近活跃</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="userRows"></tbody>
+        </table>
+      </div>
+
+      <div class="card module-card" data-modules="user" id="userDetailCard" style="display: none">
+        <h3>用户详情</h3>
+        <div class="row">
+          <span id="userDetailTitle" class="tag"></span>
+          <span id="userDetailSummary" class="muted"></span>
+          <a id="userDetailExportLink" class="btn-link" href="#" target="_blank">导出该用户流水</a>
+          <button class="btn-small" onclick="closeUserDetail()">关闭详情</button>
+        </div>
+        <div class="row">
+          <div style="flex: 2; min-width: 360px">
+            <h4>订单时间线</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>订单号</th>
+                  <th>模式</th>
+                  <th>金额</th>
+                  <th>状态</th>
+                  <th>时间</th>
+                </tr>
+              </thead>
+              <tbody id="userDetailOrderRows"></tbody>
+            </table>
+          </div>
+          <div style="flex: 1; min-width: 320px">
+            <h4>投稿记录</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>作品</th>
+                  <th>状态</th>
+                  <th>时间</th>
+                </tr>
+              </thead>
+              <tbody id="userDetailSubmissionRows"></tbody>
+            </table>
+            <h4>预约记录</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>作品</th>
+                  <th>预约时间</th>
+                </tr>
+              </thead>
+              <tbody id="userDetailReservationRows"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h4>设计师信息</h4>
+          <div id="userDetailDesignerBox" class="muted"></div>
+        </div>
+        <div>
+          <h4>操作日志</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>操作人</th>
+                <th>类型</th>
+                <th>目标</th>
+                <th>详情</th>
+              </tr>
+            </thead>
+            <tbody id="userDetailActionRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script src="/admin-assets/admin.js"></script>
+  </body>
+</html>

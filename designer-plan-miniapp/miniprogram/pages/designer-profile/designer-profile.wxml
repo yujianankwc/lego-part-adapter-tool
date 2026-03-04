@@ -1,0 +1,27 @@
+<view class="container">
+  <view class="card" wx:if="{{profile}}">
+    <view class="head">
+      <image class="avatar" wx:if="{{profile.avatar_url}}" src="{{profile.avatar_url}}" mode="aspectFill" />
+      <view class="avatar placeholder" wx:else>师</view>
+      <view class="head-meta">
+        <view class="name">{{profile.display_name || '设计师'}}</view>
+        <view class="muted">状态：{{profile.status_text || profile.status}}</view>
+      </view>
+    </view>
+    <view class="bio">{{profile.bio || '设计师暂未填写个人介绍。'}}</view>
+    <view class="muted" wx:if="{{profile.updated_at}}">最近更新：{{profile.updated_at}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">关联项目</view>
+    <view class="empty" wx:if="{{assignments.length === 0}}">暂无关联项目。</view>
+    <view class="assignment-item" wx:for="{{assignments}}" wx:key="work_id">
+      <view class="assignment-head">
+        <text class="assignment-name">{{item.work_name}}</text>
+        <text class="assignment-share">{{item.share_percent}}%</text>
+      </view>
+      <view class="muted">项目ID：{{item.work_id}}</view>
+      <view class="muted" wx:if="{{item.updated_at}}">更新时间：{{item.updated_at}}</view>
+    </view>
+  </view>
+</view>

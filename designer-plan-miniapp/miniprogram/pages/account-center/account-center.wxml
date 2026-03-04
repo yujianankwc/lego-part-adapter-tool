@@ -1,0 +1,39 @@
+<view class="container">
+  <view class="card head-card">
+    <view class="title">登录与注册</view>
+    <view class="muted">支持微信一键登录。首次登录后完善昵称即完成注册。</view>
+    <button class="primary-btn login-btn" bindtap="handleWechatLogin">微信一键登录</button>
+  </view>
+
+  <view class="card">
+    <view class="section-title">账号信息</view>
+    <view class="info-row">
+      <text class="label">OpenID</text>
+      <text class="value">{{profile.openid || '-'}}</text>
+    </view>
+    <view class="info-row">
+      <text class="label">注册状态</text>
+      <text class="value">{{profile.registered ? '已注册' : '待完善昵称'}}</text>
+    </view>
+    <view class="info-row">
+      <text class="label">当前昵称</text>
+      <text class="value">{{profile.nickname || '-'}}</text>
+    </view>
+    <view class="info-row">
+      <text class="label">最近更新</text>
+      <text class="value">{{profile.updated_at || '-'}}</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">{{profile.registered ? '更新昵称' : '完成注册'}}</view>
+    <input
+      class="input"
+      placeholder="请输入昵称（1-32字符）"
+      maxlength="32"
+      value="{{nicknameInput}}"
+      bindinput="handleNicknameInput"
+    />
+    <button class="primary-btn" bindtap="handleSaveProfile">{{profile.registered ? '保存昵称' : '完成注册'}}</button>
+  </view>
+</view>

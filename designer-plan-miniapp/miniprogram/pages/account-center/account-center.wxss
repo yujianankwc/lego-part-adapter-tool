@@ -1,0 +1,45 @@
+.head-card {
+  background: linear-gradient(135deg, #0e2f86, #1a57d8);
+  color: #fff;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 800;
+  margin-bottom: 8rpx;
+}
+
+.login-btn {
+  margin-top: 14rpx;
+  background: #ffffff;
+  color: #103897;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10rpx;
+  gap: 12rpx;
+}
+
+.label {
+  color: #4f5f8b;
+  flex-shrink: 0;
+}
+
+.value {
+  color: #1f2a44;
+  font-weight: 600;
+  max-width: 68%;
+  text-align: right;
+  word-break: break-all;
+}
+
+.input {
+  border: 1rpx solid #cfdaf7;
+  border-radius: 14rpx;
+  padding: 16rpx 18rpx;
+  margin-bottom: 14rpx;
+  background: #f9fbff;
+}

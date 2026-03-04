@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>原创设计师计划后台 · 总览</title>
+    <link rel="stylesheet" href="/admin-assets/admin.css" />
+  </head>
+  <body>
+    <div class="wrap" id="adminPageRoot" data-admin-module="overview" data-single-module="1">
+      <h1>原创设计师计划运营后台</h1>
+      <div class="card row">
+        <input id="baseUrl" value="http://127.0.0.1:8002" style="min-width: 260px" />
+        <input id="adminToken" value="kwc-admin-dev" style="min-width: 220px" />
+        <select id="adminRole" style="min-width: 140px" onchange="handleAdminRoleChange()">
+          <option value="superadmin">超级管理员</option>
+          <option value="operator">运营</option>
+          <option value="finance">财务</option>
+          <option value="reviewer">审核</option>
+        </select>
+        <input id="adminOperator" value="运营同学" style="min-width: 160px" />
+        <button onclick="loadAll()">刷新数据</button>
+        <span id="status" class="muted"></span>
+      </div>
+
+      <div class="card module-nav">
+        <button class="module-btn" data-module-btn="overview" onclick="setAdminModule('overview')">总览</button>
+        <button class="module-btn" data-module-btn="project" onclick="setAdminModule('project')">项目管理</button>
+        <button class="module-btn" data-module-btn="order" onclick="setAdminModule('order')">订单管理</button>
+        <button class="module-btn" data-module-btn="user" onclick="setAdminModule('user')">用户管理</button>
+        <button class="module-btn" data-module-btn="submission" onclick="setAdminModule('submission')">投稿审核</button>
+        <button class="module-btn" data-module-btn="designer" onclick="setAdminModule('designer')">设计师分成</button>
+        <button class="module-btn" data-module-btn="feedback" onclick="setAdminModule('feedback')">反馈中心</button>
+        
+        <button class="module-btn" data-module-btn="setting" onclick="setAdminModule('setting')">设置中心</button>
+      </div>
+
+      <div class="card module-card" data-modules="overview">
+        <h3>数据看板</h3>
+        <div id="kpis" class="kpis"></div>
+      </div>
+
+      <div class="card module-card" data-modules="overview">
+        <h3>作品发布配置</h3>
+        <div class="row">
+          <input id="workNameInput" placeholder="作品名称" style="min-width: 220px" />
+          <input id="workSubtitleInput" placeholder="副标题" style="min-width: 280px" />
+          <select id="workSaleMode">
+            <option value="preorder">预售</option>
+            <option value="crowdfunding">众筹</option>
+          </select>
+          <input id="crowdGoalInput" type="number" min="0" step="1" placeholder="众筹目标金额" style="width: 160px" />
+          <input id="crowdDeadlineInput" placeholder="众筹截止时间（YYYY-MM-DD）" style="min-width: 220px" />
+          <button onclick="saveWorkConfig()">保存发布配置</button>
+        </div>
+        <div class="muted" id="workStatusLine"></div>
+        <div class="muted">模式切换后，小程序会自动按“预售/众筹”展示并下单。</div>
+      </div>
+    </div>
+
+    <script src="/admin-assets/admin.js"></script>
+  </body>
+</html>

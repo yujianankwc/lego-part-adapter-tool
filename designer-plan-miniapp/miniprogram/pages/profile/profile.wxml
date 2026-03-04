@@ -1,0 +1,88 @@
+<view class="container">
+  <view class="card profile-head">
+    <view class="name">{{accountUser.nickname || '酷玩潮用户'}}</view>
+    <view class="muted white" wx:if="{{accountUser.openid}}">账号：{{accountUser.openid}}</view>
+    <view class="muted white">预约状态：{{reserved ? '已预约首发提醒' : '暂未预约'}}</view>
+    <button class="secondary-btn contact-btn" bindtap="handleContact">联系项目组</button>
+  </view>
+
+  <view class="card service-entry">
+    <view class="section-title">账号与服务中心</view>
+    <view class="entry-grid">
+      <button class="entry-btn" bindtap="handleGoAccountCenter">登录/注册</button>
+      <button class="entry-btn" bindtap="handleGoHelpCenter">帮助中心</button>
+      <button class="entry-btn" bindtap="handleGoFeedbackCenter">反馈中心</button>
+      <button class="entry-btn" bindtap="handleGoSettingsCenter">设置中心</button>
+    </view>
+  </view>
+
+  <view class="card designer-entry" wx:if="{{!designer.isDesigner}}">
+    <view class="section-title">设计师认证</view>
+    <view class="section-desc">认证流程：提交投稿申请 → 后台审核通过 → 开通设计师入口。</view>
+    <view class="section-desc">当前状态：{{designer.qualification.message}}</view>
+    <view class="section-desc">
+      投稿 {{designer.qualification.totalSubmissions}} 条 · 已通过 {{designer.qualification.approvedSubmissions}} 条 · 待审核 {{designer.qualification.pendingSubmissions}} 条
+    </view>
+    <view class="section-desc" wx:if="{{designer.qualification.latestStatusText}}">最近审核状态：{{designer.qualification.latestStatusText}}</view>
+    <button class="primary-btn" wx:if="{{!designer.qualification.hasApplied}}" bindtap="handleGoDesignerApply">提交设计师申请</button>
+    <button class="secondary-btn" wx:if="{{designer.qualification.hasApplied && !designer.qualification.canEnroll}}" bindtap="handleGoDesignerApply">继续投稿 / 查看进度</button>
+    <button class="primary-btn" wx:if="{{designer.qualification.canEnroll}}" bindtap="handleActivateDesigner">开通设计师入口</button>
+  </view>
+
+  <view class="card designer-entry" wx:if="{{designer.isDesigner}}">
+    <view class="section-title">设计师中心</view>
+    <view class="section-desc">当前身份：{{designer.profile.display_name || '设计师'}}（默认分成 {{designer.profile.default_share_percent}}%）</view>
+    <view class="section-desc">你已通过认证，设计师功能已开放。</view>
+    <button class="primary-btn" bindtap="handleGoDesignerCenter">进入设计师中心</button>
+  </view>
+
+  <view class="card">
+    <view class="section-title">我的数据总览</view>
+    <view class="overview-grid">
+      <view class="overview-item">
+        <view class="overview-value">{{orderOverview.totalOrders}}</view>
+        <view class="muted">订单总数</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-value">{{orderOverview.paidOrders}}</view>
+        <view class="muted">有效已支付</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-value">{{orderOverview.refundingOrders}}</view>
+        <view class="muted">退款处理中</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-value">{{orderOverview.refundedOrders}}</view>
+        <view class="muted">已退款</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-value">￥{{orderOverview.paidAmount}}</view>
+        <view class="muted">累计实付</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-value">￥{{orderOverview.netAmount}}</view>
+        <view class="muted">净消费额</view>
+      </view>
+    </view>
+    <view class="muted">预售 {{orderOverview.preorderOrders}} 单 · 众筹 {{orderOverview.crowdfundingOrders}} 单</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">我的订单</view>
+    <view class="section-desc">订单列表已独立到订单中心，支持筛选与分页查看。</view>
+    <button class="secondary-btn" bindtap="handleGoMyOrders">进入订单中心</button>
+  </view>
+
+  <view class="card">
+    <view class="section-title">我的投稿</view>
+    <view class="empty" wx:if="{{submissions.length === 0}}">暂无投稿记录，欢迎提交你的原创作品。</view>
+    <view class="submit-item" wx:for="{{submissions}}" wx:key="id">
+      <view class="submit-top">
+        <text>{{item.workName}}</text>
+        <text class="status">{{item.statusText}}</text>
+      </view>
+      <view class="muted">分类：{{item.category}} · 预计零件：{{item.estimatedPieces}}</view>
+      <view class="muted">提交时间：{{item.createdAt}}</view>
+    </view>
+  </view>
+</view>

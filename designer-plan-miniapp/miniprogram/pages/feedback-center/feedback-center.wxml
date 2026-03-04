@@ -1,0 +1,61 @@
+<view class="container">
+  <view class="card">
+    <view class="section-title">提交反馈</view>
+    <picker mode="selector" range="{{categories}}" range-key="label" value="{{categoryIndex}}" bindchange="handleCategoryChange">
+      <view class="picker">反馈类型：{{categories[categoryIndex].label}}</view>
+    </picker>
+    <picker mode="selector" range="{{priorities}}" range-key="label" value="{{priorityIndex}}" bindchange="handlePriorityChange">
+      <view class="picker">优先级：{{priorities[priorityIndex].label}}</view>
+    </picker>
+    <input
+      class="input"
+      placeholder="联系方式（选填，如微信号/手机号）"
+      maxlength="120"
+      value="{{contact}}"
+      bindinput="handleContactInput"
+    />
+    <textarea
+      class="textarea"
+      placeholder="请详细描述你的问题或建议（至少5个字）"
+      maxlength="1000"
+      value="{{content}}"
+      bindinput="handleContentInput"
+    />
+    <view class="img-toolbar">
+      <button class="secondary-btn img-btn" bindtap="handleChooseImages">上传截图（最多3张）</button>
+      <text class="muted">已上传 {{imageFiles.length}} / 3</text>
+    </view>
+    <view class="img-list" wx:if="{{imageFiles.length > 0}}">
+      <view class="img-item" wx:for="{{imageFiles}}" wx:key="*this">
+        <image class="img" src="{{item}}" mode="aspectFill"></image>
+        <button class="img-del" data-index="{{index}}" bindtap="handleRemoveImage">移除</button>
+      </view>
+    </view>
+    <button class="primary-btn" bindtap="handleSubmit">提交反馈</button>
+  </view>
+
+  <view class="card">
+    <view class="section-title">我的反馈记录</view>
+    <view class="muted" wx:if="{{loading}}">加载中...</view>
+    <view class="empty" wx:if="{{!loading && items.length === 0}}">还没有反馈记录。</view>
+    <view class="item" wx:for="{{items}}" wx:key="id">
+      <view class="top">
+        <text class="badge">{{item.status_text}}</text>
+        <text class="muted">{{item.created_at}}</text>
+      </view>
+      <view class="muted">类型：{{item.category}} · 优先级：{{item.priority_text || item.priority}}</view>
+      <view class="content">{{item.content}}</view>
+      <view class="img-list" wx:if="{{item.image_urls && item.image_urls.length > 0}}">
+        <image
+          class="img"
+          wx:for="{{item.image_urls}}"
+          wx:for-item="imgUrl"
+          wx:key="*this"
+          src="{{imgUrl}}"
+          mode="aspectFill"
+        ></image>
+      </view>
+      <view class="reply" wx:if="{{item.admin_reply}}">官方回复：{{item.admin_reply}}</view>
+    </view>
+  </view>
+</view>

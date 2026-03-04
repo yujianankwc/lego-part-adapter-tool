@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>原创设计师计划后台 · 设计师分成</title>
+    <link rel="stylesheet" href="/admin-assets/admin.css" />
+  </head>
+  <body>
+    <div class="wrap" id="adminPageRoot" data-admin-module="designer" data-single-module="1">
+      <h1>原创设计师计划运营后台</h1>
+      <div class="card row">
+        <input id="baseUrl" value="http://127.0.0.1:8002" style="min-width: 260px" />
+        <input id="adminToken" value="kwc-admin-dev" style="min-width: 220px" />
+        <select id="adminRole" style="min-width: 140px" onchange="handleAdminRoleChange()">
+          <option value="superadmin">超级管理员</option>
+          <option value="operator">运营</option>
+          <option value="finance">财务</option>
+          <option value="reviewer">审核</option>
+        </select>
+        <input id="adminOperator" value="运营同学" style="min-width: 160px" />
+        <button onclick="loadAll()">刷新数据</button>
+        <span id="status" class="muted"></span>
+      </div>
+
+      <div class="card module-nav">
+        <button class="module-btn" data-module-btn="overview" onclick="setAdminModule('overview')">总览</button>
+        <button class="module-btn" data-module-btn="project" onclick="setAdminModule('project')">项目管理</button>
+        <button class="module-btn" data-module-btn="order" onclick="setAdminModule('order')">订单管理</button>
+        <button class="module-btn" data-module-btn="user" onclick="setAdminModule('user')">用户管理</button>
+        <button class="module-btn" data-module-btn="submission" onclick="setAdminModule('submission')">投稿审核</button>
+        <button class="module-btn" data-module-btn="designer" onclick="setAdminModule('designer')">设计师分成</button>
+        <button class="module-btn" data-module-btn="feedback" onclick="setAdminModule('feedback')">反馈中心</button>
+        <button class="module-btn" data-module-btn="log" onclick="setAdminModule('log')">操作日志</button>
+        <button class="module-btn" data-module-btn="setting" onclick="setAdminModule('setting')">设置中心</button>
+      </div>
+
+      <div class="card module-card" data-modules="designer">
+        <h3>设计师分成绑定（默认 15%）</h3>
+        <div class="row">
+          <input id="assignOpenid" placeholder="设计师 openid" style="min-width: 320px" />
+          <input id="assignWorkId" placeholder="作品ID，例如 POJIANZHE-001" style="min-width: 220px" />
+          <input id="assignShare" type="number" step="0.01" min="0.01" max="1" value="0.15" style="width: 120px" />
+          <button onclick="assignDesigner()">绑定分成</button>
+        </div>
+        <div class="muted">设计师需先登录小程序一次，才能按 openid 绑定作品分成。</div>
+      </div>
+
+      <div class="card module-card" data-modules="designer">
+        <h3>设计师列表</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>设计师</th>
+              <th>头像</th>
+              <th>openId</th>
+              <th>默认分成</th>
+              <th>已绑定作品</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody id="designerRows"></tbody>
+        </table>
+      </div>
+
+      <div class="card module-card" data-modules="designer">
+        <h3>分成结算</h3>
+        <div class="row">
+          <select id="commissionStatusFilter" onchange="loadCommissions()">
+            <option value="">全部</option>
+            <option value="pending">未结算</option>
+            <option value="settled">已结算</option>
+          </select>
+          <button onclick="toggleSelectAllCommissions(true)">全选当前页</button>
+          <button onclick="toggleSelectAllCommissions(false)">清空勾选</button>
+          <button onclick="batchSettleSelected('settled')">批量设为已结算</button>
+          <button onclick="batchSettleSelected('pending')">批量设为未结算</button>
+          <button onclick="batchSettleByFilter('settled')">按筛选批量设为已结算</button>
+          <button onclick="batchSettleByFilter('pending')">按筛选批量设为未结算</button>
+          <a id="exportLink" class="btn-link" href="#" target="_blank">导出CSV</a>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>选择</th>
+              <th>记录ID</th>
+              <th>设计师</th>
+              <th>订单</th>
+              <th>作品</th>
+              <th>销售额</th>
+              <th>分成比例</th>
+              <th>分成金额</th>
+              <th>结算状态</th>
+              <th>结算时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="commissionRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="/admin-assets/admin.js"></script>
+  </body>
+</html>

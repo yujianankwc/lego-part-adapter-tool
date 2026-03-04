@@ -1,0 +1,162 @@
+.hero {
+  background: linear-gradient(140deg, #0e2f86, #2f66de);
+  color: #ffffff;
+}
+
+.name {
+  font-size: 38rpx;
+  font-weight: 800;
+}
+
+.meta {
+  margin-top: 8rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.kpi-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.kpi {
+  width: 49%;
+  background: #f5f9ff;
+  border: 1rpx solid #dce5f8;
+  border-radius: 14rpx;
+  padding: 12rpx;
+}
+
+.kpi-value {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: var(--brand-blue);
+}
+
+.kpi-label {
+  font-size: 22rpx;
+  color: var(--muted-text);
+}
+
+.picker,
+.input,
+.textarea {
+  margin-top: 10rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid #dce5fb;
+  background: #f8fbff;
+  padding: 14rpx;
+  font-size: 28rpx;
+}
+
+.textarea {
+  min-height: 160rpx;
+  width: auto;
+}
+
+.small-textarea {
+  min-height: 120rpx;
+}
+
+.primary-btn {
+  margin-top: 12rpx;
+}
+
+.secondary-btn {
+  margin-top: 10rpx;
+}
+
+.profile-avatar-row {
+  margin-top: 10rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.profile-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  border: 1rpx solid #d6e2ff;
+  background: #eef3ff;
+  flex-shrink: 0;
+}
+
+.profile-avatar.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2a4f9a;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.avatar-btn {
+  margin-top: 0;
+  width: auto;
+  min-width: 176rpx;
+  flex-shrink: 0;
+}
+
+.work-item,
+.order-item,
+.update-item {
+  margin-top: 12rpx;
+  border: 1rpx solid #dce5fa;
+  background: #f9fbff;
+  border-radius: 12rpx;
+  padding: 12rpx;
+}
+
+.work-head,
+.order-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.work-head text:first-child,
+.order-id {
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
+
+.order-id {
+  font-weight: 700;
+  color: var(--brand-blue);
+}
+
+.status {
+  font-size: 22rpx;
+  color: #0a66c2;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.update-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--brand-blue);
+  margin-bottom: 6rpx;
+}
+
+.update-content {
+  line-height: 1.7;
+  margin: 6rpx 0;
+  word-break: break-word;
+}
+
+.comment-reply-block {
+  margin-top: 8rpx;
+  border: 1rpx solid #d6e4ff;
+  background: #edf3ff;
+  border-radius: 10rpx;
+  padding: 10rpx;
+}
+
+.empty {
+  color: var(--muted-text);
+}

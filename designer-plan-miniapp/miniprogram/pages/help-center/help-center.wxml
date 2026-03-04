@@ -1,0 +1,12 @@
+<view class="container">
+  <view class="card hero">
+    <view class="title">帮助中心</view>
+    <view class="muted white">常见问题与使用说明，覆盖下单、众筹、投稿、退款等流程。</view>
+    <button class="secondary-btn contact-btn" bindtap="handleContact">联系人工客服</button>
+  </view>
+
+  <view class="card faq-card" wx:for="{{faqs}}" wx:key="q">
+    <view class="q">{{item.q}}</view>
+    <view class="a">{{item.a}}</view>
+  </view>
+</view>

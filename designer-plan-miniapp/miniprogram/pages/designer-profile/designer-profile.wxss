@@ -1,0 +1,74 @@
+.head {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-bottom: 10rpx;
+}
+
+.avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  border: 1rpx solid #d6e2ff;
+  background: #eef3ff;
+  flex-shrink: 0;
+}
+
+.avatar.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2a4f9a;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.head-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: 38rpx;
+  font-weight: 800;
+  color: var(--brand-blue);
+  word-break: break-word;
+}
+
+.bio {
+  margin-top: 12rpx;
+  line-height: 1.8;
+  word-break: break-word;
+}
+
+.assignment-item {
+  margin-top: 12rpx;
+  border: 1rpx solid #dce5fa;
+  background: #f9fbff;
+  border-radius: 12rpx;
+  padding: 12rpx;
+}
+
+.assignment-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10rpx;
+}
+
+.assignment-name {
+  font-weight: 700;
+  color: var(--brand-blue);
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.assignment-share {
+  font-size: 24rpx;
+  color: #1d4da2;
+}
+
+.empty {
+  color: var(--muted-text);
+}

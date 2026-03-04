@@ -1,0 +1,64 @@
+<view class="container">
+  <view class="hero card">
+    <image wx:if="{{heroImage}}" class="hero-cover" src="{{heroImage}}" mode="aspectFill" />
+    <view class="hero-tag">联合首发 · {{workSaleModeText}}</view>
+    <view class="hero-title">{{program.title}}</view>
+    <view class="hero-subtitle">{{work.name}} · {{work.subtitle}}</view>
+    <view class="hero-gallery" wx:if="{{galleryPreview.length > 0}}">
+      <image class="hero-gallery-item" wx:for="{{galleryPreview}}" wx:key="*this" src="{{item}}" mode="aspectFill" />
+    </view>
+
+    <view class="countdown-wrap" wx:if="{{!isCrowdfundingMode}}">
+      <view class="count-label">距离预售开启</view>
+      <view class="count-value">{{countdown.days}}天 {{countdown.hours}}时 {{countdown.minutes}}分</view>
+    </view>
+    <view class="countdown-wrap" wx:if="{{isCrowdfundingMode}}">
+      <view class="count-label">众筹进度</view>
+      <view class="count-value">¥{{work.funding.fundedAmount}} / ¥{{work.funding.goalAmount}}</view>
+      <view class="progress-track">
+        <view class="progress-fill" style="width: {{work.funding.progressPercent}}%;"></view>
+      </view>
+      <view class="crowd-metrics">
+        <view class="metric">
+          <view class="metric-num">{{work.funding.supportersCount}}</view>
+          <view class="metric-label">支持人数</view>
+        </view>
+        <view class="metric">
+          <view class="metric-num">{{work.funding.progressPercent}}%</view>
+          <view class="metric-label">完成进度</view>
+        </view>
+        <view class="metric">
+          <view class="metric-num">{{countdown.days}}天</view>
+          <view class="metric-label">剩余时间</view>
+        </view>
+      </view>
+      <view class="count-state">状态：{{work.crowdfundingStatusText}}</view>
+    </view>
+
+    <view class="hero-actions">
+      <button class="primary-btn" bindtap="handleReserve">{{reserved ? '已预约提醒' : '立即预约'}}</button>
+      <button class="secondary-btn" bindtap="handleViewWork">查看作品</button>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">首发作品</view>
+    <view class="section-desc">{{work.story}}</view>
+    <view class="chips">
+      <view class="highlight-chip" wx:for="{{work.highlights}}" wx:key="*this">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">设计师计划</view>
+    <view class="section-desc">{{program.intro}}</view>
+
+    <view class="sub-title">支持内容</view>
+    <view class="line-item" wx:for="{{program.support}}" wx:key="*this">{{index + 1}}. {{item}}</view>
+
+    <view class="sub-title">合作流程</view>
+    <view class="line-item" wx:for="{{program.process}}" wx:key="*this">{{index + 1}}. {{item}}</view>
+
+    <button class="primary-btn apply-btn" bindtap="handleGoApply">我要投稿</button>
+  </view>
+</view>

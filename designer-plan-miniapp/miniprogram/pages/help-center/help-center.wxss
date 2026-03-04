@@ -1,0 +1,39 @@
+.hero {
+  background: linear-gradient(145deg, #11377f, #1b5ebd);
+  color: #fff;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 800;
+  margin-bottom: 8rpx;
+}
+
+.white {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.contact-btn {
+  margin-top: 14rpx;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.faq-card {
+  border-left: 6rpx solid #194699;
+}
+
+.q {
+  font-size: 29rpx;
+  font-weight: 700;
+  color: #153b86;
+  margin-bottom: 8rpx;
+  line-height: 1.45;
+}
+
+.a {
+  color: #49577c;
+  line-height: 1.75;
+  word-break: break-word;
+}

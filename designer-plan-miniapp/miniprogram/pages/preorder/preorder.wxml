@@ -1,0 +1,80 @@
+<view class="container">
+  <view class="card">
+    <image wx:if="{{work.coverImage}}" class="project-cover" src="{{work.coverImage}}" mode="aspectFill" />
+    <view class="title-row">
+      <view class="section-title">{{work.name}}</view>
+      <view class="mode-badge">{{isCrowdfundingMode ? '众筹支持' : '预售下单'}}</view>
+    </view>
+    <view class="section-desc" wx:if="{{!isCrowdfundingMode}}">选择版本并支付定金，开售后按规则补尾款。</view>
+    <view class="section-desc" wx:if="{{isCrowdfundingMode}}">选择版本并支付全额支持，达成目标后按计划交付。</view>
+
+    <view class="funding-block" wx:if="{{isCrowdfundingMode}}">
+      <view class="funding-main">已筹 ￥{{work.funding.fundedAmount}} / ￥{{work.funding.goalAmount}}</view>
+      <view class="funding-metrics">
+        <view class="funding-metric">
+          <view class="funding-metric-value">{{work.funding.supportersCount}}</view>
+          <view class="funding-metric-label">支持人数</view>
+        </view>
+        <view class="funding-metric">
+          <view class="funding-metric-value">{{work.funding.progressPercent}}%</view>
+          <view class="funding-metric-label">筹款进度</view>
+        </view>
+      </view>
+      <view class="muted">状态：{{work.crowdfundingStatusText}}</view>
+      <view class="muted" wx:if="{{work.crowdfundingDeadline}}">截止：{{work.crowdfundingDeadline}}</view>
+      <view class="warn-text" wx:if="{{isOrderDisabled}}">{{disableReason}}</view>
+    </view>
+
+    <view class="reserve-row">
+      <view class="reserve-status">预约状态：{{reserved ? '已预约' : '未预约'}}</view>
+      <button class="secondary-btn reserve-btn" bindtap="handleReserve">{{reserved ? '已预约' : '先预约提醒'}}</button>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="sub-title">选择版本</view>
+    <view
+      class="sku-option {{selectedSkuId === item.id ? 'sku-option-active' : ''}}"
+      wx:for="{{work.skuList}}"
+      wx:key="id"
+      data-sku-id="{{item.id}}"
+      bindtap="handleSelectSku"
+    >
+      <view>
+        <view class="sku-name">{{item.name}}</view>
+        <view class="muted" wx:if="{{!isCrowdfundingMode}}">定金 ￥{{item.deposit}} · 总价 ￥{{item.price}} · 库存 {{item.stock}}</view>
+        <view class="muted" wx:if="{{isCrowdfundingMode}}">支持金额 ￥{{item.price}} · 库存 {{item.stock}}</view>
+      </view>
+      <view class="choose-mark">{{selectedSkuId === item.id ? '已选' : '选择'}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="sub-title">数量</view>
+    <view class="qty-row">
+      <button class="qty-btn" bindtap="handleReduceQty">-</button>
+      <view class="qty-text">{{quantity}}</view>
+      <button class="qty-btn" bindtap="handleAddQty">+</button>
+    </view>
+
+    <view class="pay-panel">
+      <view class="pay-title">支付方式</view>
+      <view class="pay-row">
+        <text>微信支付</text>
+        <text class="pay-tag">支持 JSAPI</text>
+      </view>
+      <view class="muted">当前环境默认走开发联调支付，后续可直接切换正式微信商户参数。</view>
+    </view>
+
+    <checkbox-group bindchange="handleAgreeChange">
+      <label class="agreement">
+        <checkbox value="agree" color="#0e2f86" />
+        <text>{{agreementText}}</text>
+      </label>
+    </checkbox-group>
+
+    <button class="primary-btn submit-btn" bindtap="handleSubmitOrder" disabled="{{isOrderDisabled || submitting}}">
+      {{paying ? '支付处理中...' : submitButtonText}}
+    </button>
+  </view>
+</view>

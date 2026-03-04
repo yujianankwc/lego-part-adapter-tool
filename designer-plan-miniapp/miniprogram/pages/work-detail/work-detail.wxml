@@ -1,0 +1,136 @@
+<view class="container">
+  <view class="card head-card">
+    <image wx:if="{{work.coverImage}}" class="head-cover" src="{{work.coverImage}}" mode="aspectFill" />
+    <view class="title-row">
+      <view>
+        <view class="work-name">{{work.name}}</view>
+        <view class="work-sub">{{work.subtitle}}</view>
+      </view>
+      <view class="badge">首发款 · {{modeTag}}</view>
+    </view>
+    <view class="section-desc">{{work.story}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">设计师介绍</view>
+    <view class="empty" wx:if="{{!work.designers || work.designers.length === 0}}">暂未公布设计师信息。</view>
+    <view
+      class="designer-item"
+      wx:for="{{work.designers}}"
+      wx:key="designerId"
+      data-designer-id="{{item.designerId}}"
+      bindtap="handleOpenDesignerProfile"
+    >
+      <view class="designer-head">
+        <image class="designer-avatar" wx:if="{{item.avatarUrl}}" src="{{item.avatarUrl}}" mode="aspectFill" />
+        <view class="designer-avatar placeholder" wx:else>师</view>
+        <view class="designer-meta">
+          <text class="designer-name">{{item.displayName || ('设计师' + item.designerId)}}</text>
+          <text class="designer-share">{{item.sharePercent || 0}}% 分成</text>
+        </view>
+      </view>
+      <view class="designer-bio">{{item.bio || '点击查看设计师介绍'}}</view>
+      <view class="muted">点击查看详情</view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{isCrowdfundingMode}}">
+    <view class="section-title">众筹进度（摩点风格）</view>
+    <view class="funding-main">¥{{work.funding.fundedAmount}} / ¥{{work.funding.goalAmount}}</view>
+    <view class="funding-track">
+      <view class="funding-fill" style="width: {{work.funding.progressPercent}}%;"></view>
+    </view>
+    <view class="crowd-data-grid">
+      <view class="crowd-data-item">
+        <view class="crowd-data-value">{{work.funding.supportersCount}}</view>
+        <view class="crowd-data-label">支持人数</view>
+      </view>
+      <view class="crowd-data-item">
+        <view class="crowd-data-value">{{work.funding.progressPercent}}%</view>
+        <view class="crowd-data-label">筹款进度</view>
+      </view>
+    </view>
+    <view class="muted">状态：{{work.crowdfundingStatusText}}</view>
+    <view class="muted" wx:if="{{work.crowdfundingDeadline}}">截止时间：{{work.crowdfundingDeadline}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">项目图集</view>
+    <swiper class="visual-swiper" indicator-dots="true" autoplay="true" interval="4200" duration="500" wx:if="{{previewGallery.length > 0}}">
+      <swiper-item wx:for="{{previewGallery}}" wx:key="*this">
+        <image class="visual-image" src="{{item}}" mode="aspectFill" />
+      </swiper-item>
+    </swiper>
+    <view wx:if="{{previewGallery.length === 0}}">
+      <swiper class="visual-swiper" indicator-dots="true" autoplay="true" interval="4200" duration="500">
+        <swiper-item wx:for="{{visualPanels}}" wx:key="title">
+          <view class="visual-panel">
+            <view class="visual-title">{{item.title}}</view>
+            <view class="visual-desc">{{item.desc}}</view>
+          </view>
+        </swiper-item>
+      </swiper>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">参数信息</view>
+    <view class="spec-row" wx:for="{{work.specs}}" wx:key="label">
+      <text class="spec-label">{{item.label}}</text>
+      <text class="spec-value">{{item.value}}</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">设计师动态</view>
+    <view class="empty" wx:if="{{updates.length === 0}}">暂无动态更新。</view>
+    <view class="update-item" wx:for="{{updates}}" wx:key="update_id">
+      <view class="update-title">{{item.title}}</view>
+      <view class="update-content">{{item.content}}</view>
+      <view class="update-meta">{{item.designer_name}} · {{item.created_at}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">玩家评论</view>
+    <textarea
+      class="comment-input"
+      placeholder="说说你的看法或建议（最多300字）"
+      maxlength="300"
+      value="{{commentInput}}"
+      bindinput="handleCommentInput"
+    />
+    <button class="primary-btn comment-submit-btn" bindtap="handleSubmitComment" disabled="{{commentSubmitting}}">
+      {{commentSubmitting ? '提交中...' : '发布评论'}}
+    </button>
+    <view class="empty" wx:if="{{comments.length === 0}}">还没有评论，欢迎第一个发言。</view>
+    <view class="comment-item" wx:for="{{comments}}" wx:key="comment_id">
+      <view class="comment-head">
+        <text class="comment-user">{{item.user_nickname}}</text>
+        <text class="muted">{{item.created_at}}</text>
+      </view>
+      <view class="comment-content">{{item.content}}</view>
+      <view class="comment-reply" wx:if="{{item.designer_reply}}">
+        <view class="reply-title">设计师 {{item.reply_designer_name || ''}} 回复</view>
+        <view class="reply-content">{{item.designer_reply}}</view>
+        <view class="muted">{{item.reply_at}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">版本与权益</view>
+    <view class="sku-card" wx:for="{{work.skuList}}" wx:key="id">
+      <view class="sku-head">
+        <text class="sku-name">{{item.name}}</text>
+        <text class="sku-price">￥{{item.price}}</text>
+      </view>
+      <view class="sku-item" wx:for="{{item.perks}}" wx:key="*this">- {{item}}</view>
+    </view>
+  </view>
+
+  <view class="action-fixed">
+    <button class="secondary-btn" bindtap="handleReserve">{{reserved ? '已预约' : '预约提醒'}}</button>
+    <button class="primary-btn" bindtap="handlePreorder" disabled="{{actionDisabled}}">{{actionText}}</button>
+  </view>
+</view>

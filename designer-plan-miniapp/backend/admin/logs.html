@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>原创设计师计划后台 · 操作日志</title>
+    <link rel="stylesheet" href="/admin-assets/admin.css" />
+  </head>
+  <body>
+    <div class="wrap" id="adminPageRoot" data-admin-module="log" data-single-module="1">
+      <h1>原创设计师计划运营后台</h1>
+      <div class="card row">
+        <input id="baseUrl" value="http://127.0.0.1:8002" style="min-width: 260px" />
+        <input id="adminToken" value="kwc-admin-dev" style="min-width: 220px" />
+        <select id="adminRole" style="min-width: 140px" onchange="handleAdminRoleChange()">
+          <option value="superadmin">超级管理员</option>
+          <option value="operator">运营</option>
+          <option value="finance">财务</option>
+          <option value="reviewer">审核</option>
+        </select>
+        <input id="adminOperator" value="运营同学" style="min-width: 160px" />
+        <button onclick="loadAll()">刷新数据</button>
+        <span id="status" class="muted"></span>
+      </div>
+
+      <div class="card module-nav">
+        <button class="module-btn" data-module-btn="overview" onclick="setAdminModule('overview')">总览</button>
+        <button class="module-btn" data-module-btn="project" onclick="setAdminModule('project')">项目管理</button>
+        <button class="module-btn" data-module-btn="order" onclick="setAdminModule('order')">订单管理</button>
+        <button class="module-btn" data-module-btn="user" onclick="setAdminModule('user')">用户管理</button>
+        <button class="module-btn" data-module-btn="submission" onclick="setAdminModule('submission')">投稿审核</button>
+        <button class="module-btn" data-module-btn="designer" onclick="setAdminModule('designer')">设计师分成</button>
+        <button class="module-btn" data-module-btn="feedback" onclick="setAdminModule('feedback')">反馈中心</button>
+        
+        <button class="module-btn" data-module-btn="setting" onclick="setAdminModule('setting')">设置中心</button>
+      </div>
+
+      <div class="card module-card" data-modules="log">
+        <h3>后台操作日志</h3>
+        <div class="row">
+          <input id="actionActor" placeholder="操作人（模糊）" style="min-width: 140px" />
+          <input id="actionType" placeholder="动作类型（如 order_note_update）" style="min-width: 220px" />
+          <select id="actionTargetType">
+            <option value="">全部目标类型</option>
+            <option value="order">订单</option>
+            <option value="commission">分成</option>
+            <option value="user">用户</option>
+            <option value="submission">投稿</option>
+            <option value="work">作品</option>
+          </select>
+          <input id="actionTargetId" placeholder="目标ID（模糊）" style="min-width: 180px" />
+          <input id="actionRelatedUserId" type="number" min="1" placeholder="关联用户ID" style="width: 130px" />
+          <input id="actionCreatedFrom" placeholder="开始 YYYY-MM-DD" style="min-width: 170px" />
+          <input id="actionCreatedTo" placeholder="结束 YYYY-MM-DD" style="min-width: 170px" />
+          <select id="actionLogLimit" onchange="changeActionLogLimit()">
+            <option value="50">每页 50 条</option>
+            <option value="100" selected>每页 100 条</option>
+            <option value="200">每页 200 条</option>
+          </select>
+          <button onclick="applyActionLogFilters()">筛选日志</button>
+          <button onclick="resetActionLogFilters()">重置筛选</button>
+          <a id="actionLogExportLink" class="btn-link" href="#" target="_blank">导出审计CSV</a>
+        </div>
+        <div class="muted" id="actionLogSummary"></div>
+        <div class="row">
+          <button id="actionLogFirstBtn" class="btn-small" onclick="goFirstActionLogPage()">首页</button>
+          <button id="actionLogPrevBtn" class="btn-small" onclick="changeActionLogPage(-1)">上一页</button>
+          <button id="actionLogNextBtn" class="btn-small" onclick="changeActionLogPage(1)">下一页</button>
+          <button id="actionLogLastBtn" class="btn-small" onclick="goLastActionLogPage()">末页</button>
+          <input
+            id="actionLogJumpPage"
+            type="number"
+            min="1"
+            value="1"
+            style="width: 90px"
+            placeholder="页码"
+            onkeydown="handleActionLogJumpKey(event)"
+          />
+          <button class="btn-small" onclick="jumpActionLogPage()">跳转</button>
+          <span id="actionLogPaging" class="muted"></span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>
+                <button id="actionSortCreatedAt" class="th-sort-btn" onclick="toggleActionLogSort('created_at')">时间</button>
+              </th>
+              <th>
+                <button id="actionSortActor" class="th-sort-btn" onclick="toggleActionLogSort('actor')">操作人</button>
+              </th>
+              <th>
+                <button id="actionSortActionType" class="th-sort-btn" onclick="toggleActionLogSort('action_type')">动作类型</button>
+              </th>
+              <th>目标</th>
+              <th>关联用户ID</th>
+              <th>详情</th>
+            </tr>
+          </thead>
+          <tbody id="actionLogRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="/admin-assets/admin.js"></script>
+  </body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>原创设计师计划后台 · 项目管理</title>
+    <link rel="stylesheet" href="/admin-assets/admin.css" />
+  </head>
+  <body>
+    <div class="wrap" id="adminPageRoot" data-admin-module="project" data-single-module="1">
+      <h1>原创设计师计划运营后台</h1>
+      <div class="card row">
+        <input id="baseUrl" value="http://127.0.0.1:8002" style="min-width: 260px" />
+        <input id="adminToken" value="kwc-admin-dev" style="min-width: 220px" />
+        <select id="adminRole" style="min-width: 140px" onchange="handleAdminRoleChange()">
+          <option value="superadmin">超级管理员</option>
+          <option value="operator">运营</option>
+          <option value="finance">财务</option>
+          <option value="reviewer">审核</option>
+        </select>
+        <input id="adminOperator" value="运营同学" style="min-width: 160px" />
+        <button onclick="loadAll()">刷新数据</button>
+        <span id="status" class="muted"></span>
+      </div>
+
+      <div class="card module-nav">
+        <button class="module-btn" data-module-btn="overview" onclick="setAdminModule('overview')">总览</button>
+        <button class="module-btn" data-module-btn="project" onclick="setAdminModule('project')">项目管理</button>
+        <button class="module-btn" data-module-btn="order" onclick="setAdminModule('order')">订单管理</button>
+        <button class="module-btn" data-module-btn="user" onclick="setAdminModule('user')">用户管理</button>
+        <button class="module-btn" data-module-btn="submission" onclick="setAdminModule('submission')">投稿审核</button>
+        <button class="module-btn" data-module-btn="designer" onclick="setAdminModule('designer')">设计师分成</button>
+        <button class="module-btn" data-module-btn="feedback" onclick="setAdminModule('feedback')">反馈中心</button>
+        
+        <button class="module-btn" data-module-btn="setting" onclick="setAdminModule('setting')">设置中心</button>
+      </div>
+
+      <div class="card module-card" data-modules="project">
+        <h3>项目创建 / 编辑</h3>
+        <div class="row">
+          <input id="projectWorkId" placeholder="项目ID（如 POJIANZHE-001）" style="min-width: 240px" />
+          <input id="projectName" placeholder="项目名称" style="min-width: 220px" />
+          <input id="projectSubtitle" placeholder="项目副标题" style="min-width: 240px" />
+          <select id="projectSaleMode">
+            <option value="preorder">预售</option>
+            <option value="crowdfunding">众筹</option>
+          </select>
+          <input id="projectGoal" type="number" min="0" step="1" placeholder="众筹目标金额" style="width: 150px" />
+          <input id="projectDeadline" placeholder="众筹截止 YYYY-MM-DD" style="min-width: 180px" />
+          <input id="projectCoverImage" placeholder="主图URL（可上传后自动填入）" style="min-width: 300px" />
+          <input id="projectCoverFile" type="file" accept="image/*" style="min-width: 220px" />
+          <button type="button" onclick="uploadProjectCoverImage()">上传主图</button>
+          <select id="projectDesignerOpenid" style="min-width: 320px" onchange="handleProjectDesignerChange()">
+            <option value="">请选择绑定设计师（创建时必填）</option>
+          </select>
+          <input id="projectDesignerShare" type="number" min="0.01" max="1" step="0.01" value="0.15" style="width: 120px" />
+          <label class="muted"><input id="projectSetCurrent" type="checkbox" /> 设为当前项目</label>
+          <button id="projectSaveBtn" onclick="saveProject()">创建项目</button>
+          <button onclick="resetProjectForm()">清空表单</button>
+        </div>
+        <div class="row">
+          <span id="projectCoverUploadHint" class="muted"></span>
+        </div>
+        <div class="row">
+          <textarea
+            id="projectGalleryImages"
+            placeholder="项目图集URL（每行一条，可填3-8张）"
+            style="min-width: 720px; min-height: 96px"
+          ></textarea>
+        </div>
+        <div class="row">
+          <textarea
+            id="projectStory"
+            placeholder="项目故事（会展示在首页/详情页）"
+            style="min-width: 720px; min-height: 96px"
+          ></textarea>
+        </div>
+        <div class="row">
+          <textarea
+            id="projectHighlightsText"
+            placeholder="项目亮点（每行一条）"
+            style="min-width: 360px; min-height: 96px"
+          ></textarea>
+          <textarea
+            id="projectSpecsText"
+            placeholder="参数信息（每行：参数名|参数值）&#10;示例：零件数|约980 pcs"
+            style="min-width: 360px; min-height: 96px"
+          ></textarea>
+        </div>
+        <div class="row">
+          <textarea
+            id="projectSkuText"
+            placeholder="版本与权益（每行：sku_id|名称|价格|定金|库存|权益1/权益2）&#10;示例：standard|标准版|499|99|120|基础彩盒/电子说明书"
+            style="min-width: 720px; min-height: 120px"
+          ></textarea>
+        </div>
+        <div class="row">
+          <input id="projectGalleryFiles" type="file" accept="image/*" multiple style="min-width: 260px" />
+          <button type="button" onclick="uploadProjectGalleryImages()">批量上传图集</button>
+          <span id="projectGalleryUploadHint" class="muted"></span>
+        </div>
+        <div class="muted">说明：当前项目会同步给小程序首页和下单流程；预售/众筹模式在项目维度管理。</div>
+      </div>
+
+      <div class="card module-card" data-modules="project">
+        <h3>项目列表</h3>
+        <div class="row">
+          <input id="projectKeyword" placeholder="搜索项目ID / 名称 / 副标题" style="min-width: 260px" />
+          <select id="projectModeFilter">
+            <option value="">全部模式</option>
+            <option value="preorder">预售</option>
+            <option value="crowdfunding">众筹</option>
+          </select>
+          <select id="projectCurrentFilter">
+            <option value="">全部状态</option>
+            <option value="1">仅当前项目</option>
+            <option value="0">仅非当前项目</option>
+          </select>
+          <button onclick="loadProjects()">筛选</button>
+        </div>
+        <div id="projectSummary" class="muted"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>状态</th>
+              <th>项目ID</th>
+              <th>项目信息</th>
+              <th>模式</th>
+              <th>经营数据</th>
+              <th>更新时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="projectRows"></tbody>
+        </table>
+      </div>
+
+      <div class="card module-card" data-modules="project">
+        <h3>项目预约情况</h3>
+        <div class="row">
+          <input id="projectReservationWorkId" placeholder="按项目ID筛选（可空）" style="min-width: 220px" />
+          <button onclick="loadProjectReservations()">刷新预约数据</button>
+        </div>
+        <div id="projectReservationSummary" class="muted"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>项目ID</th>
+              <th>预约人</th>
+              <th>昵称</th>
+              <th>预约时间</th>
+            </tr>
+          </thead>
+          <tbody id="projectReservationRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="/admin-assets/admin.js"></script>
+  </body>
+</html>

@@ -1,0 +1,4115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>乐高零件适配工具</title>
+    <link rel="stylesheet" href="/admin-assets/admin.css" />
+    <style>
+      :root {
+        --pa-bg: #eef3fb;
+        --pa-surface: rgba(255, 255, 255, 0.94);
+        --pa-border: #d9e3f6;
+        --pa-text: #20304d;
+        --pa-subtle: #66758f;
+        --pa-primary: #173b86;
+        --pa-primary-strong: #0f2f78;
+        --pa-accent: #d7e5ff;
+        --pa-shadow: 0 18px 44px rgba(21, 49, 108, 0.08);
+      }
+
+      body {
+        margin: 0;
+        color: var(--pa-text);
+        background:
+          radial-gradient(circle at top right, rgba(66, 122, 219, 0.12), transparent 28%),
+          linear-gradient(180deg, #f5f8fe 0%, var(--pa-bg) 100%);
+      }
+
+      .wrap {
+        max-width: 1680px;
+        margin: 0 auto;
+        padding: 22px 18px 52px;
+      }
+
+      h1 {
+        margin: 0 0 18px;
+        font-size: 30px;
+        line-height: 1.15;
+        letter-spacing: 0.02em;
+        color: #12294f;
+      }
+
+      .card {
+        border-radius: 18px;
+        border: 1px solid var(--pa-border);
+        background: var(--pa-surface);
+        box-shadow: var(--pa-shadow);
+      }
+
+      .product-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.65fr);
+        gap: 14px;
+        align-items: stretch;
+      }
+
+      .product-copy {
+        padding: 20px;
+        border-radius: 18px;
+        border: 1px solid rgba(23, 59, 134, 0.08);
+        background:
+          radial-gradient(circle at top right, rgba(77, 126, 220, 0.1), transparent 28%),
+          linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #31579f;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #173b86;
+      }
+
+      .product-copy h1 {
+        margin: 0 0 12px;
+        font-size: 34px;
+        line-height: 1.08;
+      }
+
+      .product-copy p {
+        margin: 0;
+        color: #54657f;
+        line-height: 1.8;
+        font-size: 14px;
+      }
+
+      .settings-shell {
+        padding: 12px 14px;
+      }
+
+      .site-footer {
+        margin-top: 28px;
+        padding: 18px 20px;
+        border-radius: 18px;
+        border: 1px solid #dbe4f8;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(246, 249, 255, 0.96) 100%);
+      }
+
+      .site-footer strong {
+        color: #173b86;
+      }
+
+      .global-status-banner {
+        position: sticky;
+        top: 10px;
+        z-index: 30;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin: 12px 0 0;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid #d9e5fb;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(244, 248, 255, 0.98) 100%);
+        box-shadow: 0 14px 32px rgba(20, 46, 98, 0.08);
+      }
+
+      .global-status-banner.visible {
+        display: flex;
+      }
+
+      .global-status-main {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .global-status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex: 0 0 auto;
+        background: #6f87b5;
+        box-shadow: 0 0 0 5px rgba(111, 135, 181, 0.14);
+      }
+
+      .global-status-banner.is-loading .global-status-dot {
+        background: #173b86;
+        box-shadow: 0 0 0 5px rgba(23, 59, 134, 0.14);
+        animation: paPulse 1.2s ease-in-out infinite;
+      }
+
+      .global-status-banner.is-success .global-status-dot {
+        background: #15803d;
+        box-shadow: 0 0 0 5px rgba(21, 128, 61, 0.14);
+      }
+
+      .global-status-banner.is-error .global-status-dot {
+        background: #b91c1c;
+        box-shadow: 0 0 0 5px rgba(185, 28, 28, 0.14);
+      }
+
+      .global-status-copy {
+        min-width: 0;
+      }
+
+      .global-status-label {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #5e7195;
+      }
+
+      .global-status-text {
+        margin-top: 2px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1d3158;
+        line-height: 1.45;
+        word-break: break-word;
+      }
+
+      .global-status-meta {
+        font-size: 12px;
+        color: #70819e;
+        white-space: nowrap;
+      }
+
+      @keyframes paPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.15);
+          opacity: 0.72;
+        }
+      }
+
+      .mode-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid #d8e4fb;
+        background: #f7faff;
+        font-size: 12px;
+        font-weight: 700;
+        color: #23478f;
+      }
+
+      .advanced-hidden {
+        display: none !important;
+      }
+
+      .public-hidden {
+        display: none !important;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 10px;
+        z-index: 20;
+        backdrop-filter: blur(12px);
+        background: rgba(255, 255, 255, 0.92);
+        justify-content: space-between;
+      }
+
+      .module-nav {
+        display: none;
+        gap: 10px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: thin;
+      }
+
+      .hero {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: 1.45fr 0.95fr;
+        align-items: stretch;
+      }
+
+      .hero-panel {
+        border-radius: 18px;
+        padding: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background:
+          radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 28%),
+          linear-gradient(150deg, #0f2f78, #173e8f 62%, #2456a8);
+        color: #fff;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      .hero-panel h2 {
+        margin: 0 0 10px;
+        font-size: 22px;
+      }
+
+      .hero-panel p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.86);
+        line-height: 1.65;
+        font-size: 13px;
+      }
+
+      .hero-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric-box {
+        border-radius: 16px;
+        border: 1px solid #dbe4f8;
+        padding: 12px 14px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .metric-box .label {
+        font-size: 13px;
+        color: #66708a;
+      }
+
+      .metric-box .value {
+        margin-top: 6px;
+        font-size: 22px;
+        font-weight: 700;
+        color: #173b86;
+      }
+
+      .row-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .workspace-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.58fr) minmax(280px, 0.42fr);
+        gap: 14px;
+        align-items: start;
+      }
+
+      .primary-stack,
+      .secondary-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .lane-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 4px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #4263a8;
+      }
+
+      .lane-head::before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(180deg, #5f8fff 0%, #173b86 100%);
+        box-shadow: 0 0 0 4px rgba(95, 143, 255, 0.12);
+      }
+
+      .lane-head-secondary {
+        color: #5f708d;
+      }
+
+      .lane-head-secondary::before {
+        background: linear-gradient(180deg, #b7c7e8 0%, #7f94bd 100%);
+        box-shadow: 0 0 0 4px rgba(183, 199, 232, 0.14);
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .field-label {
+        margin-bottom: 6px;
+        display: block;
+        font-size: 13px;
+        color: #5f6d86;
+        font-weight: 600;
+      }
+
+      textarea.code {
+        width: 100%;
+        min-height: 220px;
+        border-radius: 16px;
+        border: 1px solid #d5def4;
+        padding: 14px;
+        resize: vertical;
+        font: 13px/1.7 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color: #1f2a44;
+        background: #fbfcff;
+        box-sizing: border-box;
+        box-shadow: inset 0 1px 2px rgba(16, 40, 84, 0.04);
+      }
+
+      .pill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid #dbe5fb;
+        background: #eef4ff;
+        color: #1c4594;
+      }
+
+      .hero .pill {
+        background: rgba(255, 255, 255, 0.14);
+        border-color: rgba(255, 255, 255, 0.16);
+        color: #fff;
+      }
+
+      .risk-pill-a,
+      .risk-pill-b,
+      .risk-pill-c,
+      .risk-pill-d {
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .risk-pill-a {
+        background: #e8f7ee;
+        color: #0c7a3f;
+      }
+
+      .risk-pill-b {
+        background: #fff7df;
+        color: #916000;
+      }
+
+      .risk-pill-c {
+        background: #ffe9d9;
+        color: #b45309;
+      }
+
+      .risk-pill-d {
+        background: #ffe3e3;
+        color: #b91c1c;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border-radius: 16px;
+        border: 1px solid #dfe7f8;
+        background: #fff;
+      }
+
+      .table-wrap > h3 {
+        margin: 0;
+        padding: 14px 16px 2px;
+      }
+
+      .table-wrap > .toolbar,
+      .table-wrap > .pager-bar {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .table-wrap table td,
+      .table-wrap table th {
+        white-space: nowrap;
+        padding: 10px 12px;
+        font-size: 12px;
+        line-height: 1.5;
+        vertical-align: top;
+      }
+
+      .table-wrap table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+
+      .table-wrap thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f5f8ff;
+        color: #35507f;
+      }
+
+      .table-wrap tbody tr:nth-child(even) {
+        background: #fbfdff;
+      }
+
+      .table-wrap tbody tr:hover {
+        background: #f2f7ff;
+      }
+
+      .table-wrap table td:last-child,
+      .table-wrap table th:last-child {
+        white-space: normal;
+        min-width: 280px;
+        max-width: 560px;
+      }
+
+      .table-wrap table td:first-child,
+      .table-wrap table th:first-child,
+      .table-wrap table td:nth-child(4),
+      .table-wrap table th:nth-child(4) {
+        white-space: normal;
+      }
+
+      .hint {
+        color: var(--pa-subtle);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .muted-strong {
+        color: #4f6284;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .quick-guide {
+        padding: 14px 16px;
+      }
+
+      .quick-guide-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 10px;
+      }
+
+      .quick-guide-head h3 {
+        margin: 0;
+      }
+
+      .step-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .step-card {
+        border-radius: 16px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+        padding: 12px;
+      }
+
+      .step-no {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 999px;
+        background: #173b86;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .step-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #173b86;
+        margin-bottom: 4px;
+      }
+
+      .step-desc {
+        font-size: 12px;
+        color: #66758f;
+        line-height: 1.6;
+      }
+
+      .core-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .core-actions button {
+        min-width: 132px;
+      }
+
+      .section-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .section-title-row h3 {
+        margin: 0;
+      }
+
+      .section-tip {
+        font-size: 12px;
+        color: #72819b;
+      }
+
+      .compact-card {
+        padding: 14px;
+      }
+
+      .low-priority summary .fold-summary-copy h3::after {
+        content: '（低频）';
+        margin-left: 6px;
+        font-size: 12px;
+        color: #7b89a3;
+        font-weight: 600;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .toolbar input,
+      .toolbar select {
+        min-width: 140px;
+        min-height: 42px;
+        border-radius: 12px;
+        border: 1px solid #d5def4;
+        background: #fff;
+        padding: 0 12px;
+        box-sizing: border-box;
+      }
+
+      button {
+        min-height: 42px;
+        padding: 0 16px;
+        border-radius: 12px;
+        border: 1px solid #c8d7f5;
+        background: linear-gradient(180deg, #ffffff 0%, #eef4ff 100%);
+        color: var(--pa-primary);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button:hover {
+        border-color: #a6bceb;
+        background: linear-gradient(180deg, #ffffff 0%, #e8f0ff 100%);
+      }
+
+      .review-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .review-actions button {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      .subtle-card {
+        border: 1px dashed #cfdaf5;
+        background: linear-gradient(180deg, #f9fbff 0%, #f4f8ff 100%);
+        border-radius: 18px;
+        padding: 16px;
+      }
+
+      .link-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border: 1px solid #c4d4f3;
+        border-radius: 999px;
+        background: #fff;
+        color: #183c87;
+        text-decoration: none;
+        font-weight: 600;
+        flex: 0 0 auto;
+      }
+
+      .link-btn:hover {
+        background: #eef4ff;
+      }
+
+      .feature-card {
+        background:
+          radial-gradient(circle at top right, rgba(45, 107, 207, 0.08), transparent 24%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 255, 0.96) 100%);
+      }
+
+      .split-section {
+        display: grid;
+        grid-template-columns: minmax(280px, 0.95fr) minmax(340px, 1.05fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .section-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #31579f;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .section-kicker::before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(180deg, #5b8cff 0%, #173b86 100%);
+        box-shadow: 0 0 0 4px rgba(91, 140, 255, 0.12);
+      }
+
+      .status-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid #dfe7f8;
+        background: #f8fbff;
+      }
+
+      .part-cell {
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        min-width: 220px;
+      }
+
+      .part-thumb {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid #d8e4fb;
+        background: linear-gradient(180deg, #ffffff 0%, #edf4ff 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: #35507f;
+        font-size: 11px;
+        font-weight: 800;
+        text-align: center;
+        line-height: 1.15;
+      }
+
+      .part-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .part-main {
+        min-width: 0;
+      }
+
+      .part-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #20304d;
+        line-height: 1.45;
+        word-break: break-word;
+      }
+
+      .part-sub {
+        margin-top: 4px;
+        font-size: 11px;
+        color: #70819e;
+        line-height: 1.5;
+        word-break: break-word;
+      }
+
+      .meta-badges {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .mini-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 0 8px;
+        border-radius: 999px;
+        border: 1px solid #d7e4fa;
+        background: #f6f9ff;
+        color: #35507f;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .color-swatch {
+        width: 44px;
+        height: 22px;
+        border-radius: 999px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+      }
+
+      .color-swatch-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .color-swatch-code {
+        font-size: 12px;
+        color: #70819e;
+      }
+
+      .color-cell {
+        display: grid;
+        gap: 6px;
+        min-width: 120px;
+      }
+
+      .color-name-en {
+        font-size: 11px;
+        color: #7b8aa4;
+        line-height: 1.4;
+      }
+
+      .compact-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 12px;
+      }
+
+      .gap-item {
+        border: 1px solid #dbe5f8;
+        border-radius: 16px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        padding: 14px;
+      }
+
+      .gap-topline {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .gap-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #20304d;
+        line-height: 1.45;
+      }
+
+      .gap-meta {
+        margin-top: 10px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .compact-empty {
+        padding: 14px;
+        border: 1px dashed #d5def4;
+        border-radius: 14px;
+        color: #70819e;
+        background: #f8fbff;
+      }
+
+      .fold-card {
+        display: grid;
+        gap: 12px;
+      }
+
+      .fold-card summary {
+        list-style: none;
+      }
+
+      .fold-card summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .fold-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+      }
+
+      .fold-summary-copy {
+        min-width: 0;
+      }
+
+      .fold-summary-copy h3 {
+        margin: 0;
+      }
+
+      .fold-toggle {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid #d7e4fa;
+        background: #f6f9ff;
+        color: #35507f;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .fold-card[open] .fold-toggle::before {
+        content: '收起';
+      }
+
+      .fold-card:not([open]) .fold-toggle::before {
+        content: '展开';
+      }
+
+      .fold-body {
+        display: grid;
+        gap: 12px;
+      }
+
+      .note-block {
+        display: grid;
+        gap: 8px;
+        line-height: 1.6;
+      }
+
+      .note-primary {
+        color: #30425f;
+        font-size: 12px;
+        word-break: break-word;
+      }
+
+      .note-muted {
+        color: #74829c;
+        font-size: 11px;
+        word-break: break-word;
+      }
+
+      .note-expand {
+        display: grid;
+        gap: 8px;
+      }
+
+      .note-expand summary {
+        list-style: none;
+        cursor: pointer;
+        color: #2b5db6;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .note-expand summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .note-expand summary::before {
+        content: '展开详情';
+      }
+
+      .note-expand[open] summary::before {
+        content: '收起详情';
+      }
+
+      .review-inline {
+        display: inline-grid;
+        gap: 8px;
+      }
+
+      .review-inline summary {
+        list-style: none;
+        cursor: pointer;
+      }
+
+      .review-inline summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .review-trigger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #c8d7f5;
+        background: linear-gradient(180deg, #ffffff 0%, #eef4ff 100%);
+        color: var(--pa-primary);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .pager-bar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin: 12px 0;
+      }
+
+      .pager-actions {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .page-number-btn {
+        min-width: 34px;
+        min-height: 34px;
+        padding: 0 10px;
+      }
+
+      .page-number-btn.is-active {
+        border-color: #173b86;
+        background: linear-gradient(180deg, #173b86 0%, #0f2f78 100%);
+        color: #fff;
+      }
+
+      .detail-link {
+        margin-top: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0;
+        min-height: auto;
+        border: 0;
+        background: transparent;
+        color: #2b5db6;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .detail-link:hover {
+        background: transparent;
+        border: 0;
+        color: #173b86;
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(12, 24, 48, 0.45);
+        backdrop-filter: blur(6px);
+      }
+
+      .modal-backdrop.open {
+        display: flex;
+      }
+
+      .modal-card {
+        width: min(720px, 100%);
+        border-radius: 22px;
+        border: 1px solid #d7e4fa;
+        background: #fff;
+        box-shadow: 0 24px 60px rgba(14, 33, 72, 0.18);
+        overflow: hidden;
+      }
+
+      .modal-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        padding: 18px 20px;
+        border-bottom: 1px solid #e5ecfa;
+        background: linear-gradient(180deg, #f8fbff 0%, #f2f7ff 100%);
+      }
+
+      .modal-title {
+        margin: 0;
+        font-size: 18px;
+        color: #173b86;
+      }
+
+      .modal-close {
+        min-height: 36px;
+        min-width: 36px;
+        padding: 0;
+        border-radius: 10px;
+      }
+
+      .modal-body {
+        padding: 18px 20px 20px;
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .detail-item {
+        border: 1px solid #e2eaf9;
+        border-radius: 14px;
+        padding: 12px;
+        background: #fbfdff;
+      }
+
+      .detail-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: #6d7d9b;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .detail-value {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #243756;
+        line-height: 1.55;
+        word-break: break-word;
+      }
+
+      @media (max-width: 980px) {
+        .product-head,
+        .hero,
+        .row-grid,
+        .split-section,
+        .workspace-grid,
+        .step-strip {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          position: static;
+        }
+
+        .wrap {
+          padding: 18px 14px 44px;
+        }
+
+        h1,
+        .product-copy h1 {
+          font-size: 25px;
+        }
+
+        .table-wrap table td:last-child,
+        .table-wrap table th:last-child {
+          min-width: 220px;
+        }
+
+        .part-cell {
+          min-width: 210px;
+          grid-template-columns: 44px minmax(0, 1fr);
+          gap: 10px;
+        }
+
+        .part-thumb {
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+        }
+
+        .detail-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="product-head">
+        <div class="product-copy card">
+          <div class="eyebrow">Designer Tool</div>
+          <h1>乐高零件适配工具</h1>
+          <p>
+            面向 MOC 设计师的乐高到高砖转换工具。先导入 Studio 清单，再直连高砖判断，最后把缺色、缺件、印刷件和可替换建议清晰展示出来，
+            让设计师只关注需要修改的部分，而不是被大量底层规则打断。
+          </p>
+          <div class="hint" style="margin-top: 12px">
+            设计制作：<strong>酷玩潮</strong>。本工具提供零件适配参考与整理建议，最终替换方案仍建议由设计师或审核人员结合结构与外观要求确认。
+          </div>
+        </div>
+        <div class="card topbar settings-shell">
+          <details class="fold-card">
+            <summary class="fold-summary">
+              <div class="fold-summary-copy">
+                <h3>工具设置</h3>
+                <div class="hint">默认收起。用于接口地址、访问凭证和刷新控制。</div>
+              </div>
+              <span class="fold-toggle"></span>
+            </summary>
+            <div class="fold-body">
+              <div class="toolbar">
+                <input id="baseUrl" value="http://127.0.0.1:8002" style="min-width: 220px" />
+                <input id="adminToken" value="" placeholder="访问凭证（如需）" autocomplete="off" style="min-width: 180px" />
+                <select id="adminRole" style="min-width: 140px">
+                  <option value="superadmin">超级管理员</option>
+                  <option value="operator">运营</option>
+                  <option value="finance">财务</option>
+                  <option value="reviewer">审核</option>
+                </select>
+                <input id="adminOperator" value="零件适配" style="min-width: 160px" />
+                <button onclick="reloadAll()">刷新数据</button>
+              </div>
+              <div class="hint" id="status" style="margin-top: 10px">等待加载</div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card module-nav">
+        <a class="link-btn" href="/admin/overview">总览</a>
+        <a class="link-btn" href="/admin/projects">项目管理</a>
+        <a class="link-btn" href="/admin/orders">订单管理</a>
+        <a class="link-btn" href="/admin/users">用户管理</a>
+        <a class="link-btn" href="/admin/submissions">投稿审核</a>
+        <a class="link-btn" href="/admin/designers">设计师分成</a>
+        <a class="link-btn" href="/admin/feedback">反馈中心</a>
+        <a class="link-btn" href="/admin/logs">操作日志</a>
+        <a class="link-btn" href="/admin/settings">设置中心</a>
+        <a class="link-btn" href="/admin/part-adapter" style="background:#173b86;color:#fff;border-color:#173b86;">零件适配</a>
+      </div>
+
+      <div class="card hero">
+        <div class="hero-panel">
+          <h2>像工具一样用，像平台一样积累</h2>
+          <p>
+            这个页面已经按独立工具方式运行：高频操作放前，低频配置收后。你后面单独挂公网时，直接保留这个交互结构即可，
+            当前所有适配规则、分析记录、导出都走独立接口和独立存储，不改原有业务表。
+          </p>
+        </div>
+        <div class="hero-metrics" id="topMetrics">
+          <div class="metric-box">
+            <div class="label">总零件种类</div>
+            <div class="value" id="metricTypes">0</div>
+          </div>
+          <div class="metric-box">
+            <div class="label">总零件数量</div>
+            <div class="value" id="metricQty">0</div>
+          </div>
+          <div class="metric-box">
+            <div class="label">自动适配率</div>
+            <div class="value" id="metricAutoRate">0%</div>
+          </div>
+          <div class="metric-box">
+            <div class="label">可生产率</div>
+            <div class="value" id="metricProdRate">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card quick-guide">
+        <div class="quick-guide-head">
+          <div>
+            <h3>快速使用</h3>
+            <div class="muted-strong">先完成导入和转换，再看自动替换结果；规则、同步、喂料都放到低频区，避免打断主流程。</div>
+          </div>
+          <div class="core-actions">
+            <label class="mode-toggle"><input id="simpleMode" type="checkbox" checked /> 简版模式</label>
+            <button onclick="importBomFile()">1. 导入文件</button>
+            <button onclick="convertWithGobricks()">2. 直连高砖</button>
+            <button onclick="runAdapter()">3. 运行适配</button>
+            <button onclick="downloadCsv()">4. 导出生产 BOM</button>
+          </div>
+        </div>
+        <div class="step-strip">
+          <div class="step-card">
+            <div class="step-no">1</div>
+            <div class="step-title">导入原始清单</div>
+            <div class="step-desc">上传 Studio 导出的 CSV / XLSX，系统先做本地识别和标准化。</div>
+          </div>
+          <div class="step-card">
+            <div class="step-no">2</div>
+            <div class="step-title">直连高砖判断</div>
+            <div class="step-desc">拿到高砖原始结果后，再由本地规则做纠偏和补充建议。</div>
+          </div>
+          <div class="step-card">
+            <div class="step-no">3</div>
+            <div class="step-title">看最终建议</div>
+            <div class="step-desc">重点看自动替换结果、异常审核队列和图片缺口清单。</div>
+          </div>
+          <div class="step-card">
+            <div class="step-no">4</div>
+            <div class="step-title">需要时再进阶</div>
+            <div class="step-desc">颜色参考、全局喂料、规则维护都保留，但默认不干扰主流程。</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="globalStatusBanner" class="global-status-banner" aria-live="polite">
+        <div class="global-status-main">
+          <span class="global-status-dot"></span>
+          <div class="global-status-copy">
+            <div class="global-status-label" id="globalStatusLabel">状态</div>
+            <div class="global-status-text" id="globalStatusText">等待操作</div>
+          </div>
+        </div>
+        <div class="global-status-meta" id="globalStatusMeta">空闲</div>
+      </div>
+
+      <div class="card feature-card low-priority" data-advanced-block>
+        <details class="fold-card">
+          <summary class="fold-summary">
+            <div class="fold-summary-copy">
+              <h3>高级数据源与同步</h3>
+              <div class="hint">只有维护主库、同步高砖变更、导入 Rebrickable 基础数据时才需要展开。</div>
+            </div>
+            <span class="fold-toggle"></span>
+          </summary>
+          <div class="fold-body">
+            <div class="section-kicker">Data Bridge</div>
+            <div class="hint">
+              这里的高砖 token 只保存在当前浏览器本地，不会写进代码或服务器文件。同步只调用只读查询接口，用于拉取高砖变更库存与上下架数据。
+            </div>
+            <div class="toolbar" style="margin-top: 12px">
+              <input id="gobricksApiBaseUrl" value="https://api.gobricks.cn" style="min-width: 220px" />
+              <input id="gobricksAuthToken" type="password" placeholder="高砖 auth_token" style="min-width: 320px" />
+              <button onclick="saveGobricksLocalConfig()">保存到本机浏览器</button>
+            </div>
+            <div class="toolbar" style="margin-top: 12px">
+              <input id="gobricksSyncStart" placeholder="开始时间 YYYY-MM-DD HH:mm:ss" style="min-width: 220px" />
+              <input id="gobricksSyncEnd" placeholder="结束时间 YYYY-MM-DD HH:mm:ss" style="min-width: 220px" />
+              <label><input id="gobricksNeedDetail" type="checkbox" checked /> 拉详情（推荐）</label>
+              <button onclick="syncGobricksItems()">同步高砖变更</button>
+              <span class="hint" id="gobricksSyncHint">等待同步。</span>
+            </div>
+            <div class="toolbar" style="margin-top: 12px; flex-wrap: wrap">
+              <input id="gobricksCatalogInput" type="file" accept=".xlsx" style="min-width: 220px" />
+              <button onclick="importGobricksCatalog()">导入 GDS 零件表</button>
+              <input id="gobricksCategoriesInput" type="file" accept=".json" style="min-width: 220px" />
+              <button onclick="importGobricksCategories()">导入零件分类</button>
+              <span class="hint" id="gobricksMasterHint">可导入高砖主库 xlsx（支持官方 items 表），补全高砖名称、库存、上下架和真实零件图；若后端设置 `REBRICKABLE_API_KEY`，原乐高件也会自动补图。</span>
+            </div>
+            <div class="toolbar" style="margin-top: 12px; flex-wrap: wrap">
+              <input id="rebrickableRelationInput" type="file" accept=".csv,.txt" style="min-width: 260px" />
+              <button onclick="importRebrickableRelationships()">导入 Rebrickable 零件关系</button>
+              <span class="hint" id="rebrickableRelationHint">用于批量导入旧号/新号、同模具别名（推荐使用 Rebrickable `part_relationships.csv` 中的 M / A 关系）。</span>
+            </div>
+            <div class="toolbar" style="margin-top: 12px; flex-wrap: wrap">
+              <input id="rebrickablePartsInput" type="file" accept=".csv,.txt" style="min-width: 220px" />
+              <button onclick="importRebrickableParts()">导入 Rebrickable 零件主表</button>
+              <input id="rebrickablePartCategoriesInput" type="file" accept=".csv,.txt" style="min-width: 220px" />
+              <button onclick="importRebrickablePartCategories()">导入 Rebrickable 零件分类</button>
+              <input id="rebrickableColorsInput" type="file" accept=".csv,.txt" style="min-width: 220px" />
+              <button onclick="importRebrickableColors()">导入 Rebrickable 颜色表</button>
+              <input id="rebrickableElementsInput" type="file" accept=".csv,.txt" style="min-width: 220px" />
+              <button onclick="importRebrickableElements()">导入 Rebrickable 元素表</button>
+              <span class="hint" id="rebrickableDataHint">导入后可补全零件名称、颜色英文名/色值，以及 element_id -> part_num 映射。</span>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="workspace-grid">
+        <div class="primary-stack">
+      <div class="lane-head">主流程</div>
+
+      <div class="card feature-card split-section compact-card">
+        <div class="stack">
+          <input id="projectName" type="hidden" value="山海灵鹤" />
+          <input id="designerName" type="hidden" value="原创设计师 A" />
+          <input id="sourceName" type="hidden" value="shan-hai-ling-he-bom.txt" />
+          <div class="section-kicker">Current File</div>
+          <div class="subtle-card">
+            <div class="field-label">当前文件</div>
+            <div id="sourceNameDisplay" class="muted-strong">shan-hai-ling-he-bom.txt</div>
+            <div class="hint" style="margin-top: 6px">项目名称和设计师默认隐藏，直接导入文件即可开始处理。</div>
+          </div>
+          <div class="subtle-card">
+            <div class="field-label">当前策略</div>
+            <div class="pill-list">
+              <span class="pill" id="modePill">颜色策略：平衡</span>
+              <span class="pill" id="displayPill">展示件替代：开启</span>
+              <span class="pill" id="structurePill">结构件替代：关闭</span>
+              <span class="pill" id="jobPill">当前记录：未生成</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="section-kicker">Strategy</div>
+          <div>
+            <label class="field-label" for="colorMode">颜色策略</label>
+            <select id="colorMode">
+              <option value="safe">保守</option>
+              <option value="balanced" selected>平衡</option>
+              <option value="aggressive">激进</option>
+            </select>
+          </div>
+          <label><input id="allowDisplaySub" type="checkbox" checked /> 允许展示件相似替换</label>
+          <label><input id="allowStructuralSub" type="checkbox" /> 允许结构件相似替换</label>
+          <div class="toolbar">
+            <button onclick="runAdapter()">运行适配</button>
+            <button onclick="loadDemoBom()">载入示例 BOM</button>
+            <button onclick="downloadCsv()">导出生产 BOM</button>
+            <button onclick="loadJobs()">刷新记录</button>
+          </div>
+          <div class="toolbar">
+            <input id="bomFileInput" type="file" accept=".csv,.txt,.tsv,.xlsx" style="min-width: 220px" />
+            <button onclick="importBomFile()">导入文件</button>
+            <button onclick="convertWithGobricks()">直连高砖转换</button>
+            <span class="hint" id="bomImportHint">支持 csv / txt / tsv / xlsx。</span>
+          </div>
+          <div class="hint">BOM 格式：每行 `乐高编号|颜色编号|数量|名称|标签`，标签可填 `printed` / `structural` / `display`。</div>
+        </div>
+      </div>
+
+      <div class="card compact-card">
+        <div class="section-title-row">
+          <h3>1. BOM 导入</h3>
+          <span class="section-tip">高频操作：这里是整个工具的起点</span>
+        </div>
+        <div class="hint" style="margin-bottom: 10px">优先使用文件导入；只有临时调整时，再手工修改下面的 BOM 文本。</div>
+        <textarea id="bomInput" class="code"></textarea>
+      </div>
+
+      <div class="card compact-card">
+        <div class="section-title-row">
+          <h3>2. 适配结果总览</h3>
+          <span class="section-tip">先看这行摘要，再决定是否进入长表</span>
+        </div>
+        <div class="status-strip">
+          <div class="pill-list" id="stagePills"></div>
+          <span class="hint" id="projectSummaryLine">等待运行适配。</span>
+        </div>
+      </div>
+
+      <div class="card" id="convertSectionCard">
+        <details class="fold-card" id="convertSectionFold">
+          <summary class="fold-summary">
+            <div class="fold-summary-copy">
+              <h3>2.1 高砖直连增强结果</h3>
+              <div class="hint">默认收起。这里用于查看高砖接口原始返回与本地纠偏结果。</div>
+            </div>
+            <span class="fold-toggle"></span>
+          </summary>
+          <div class="fold-body">
+            <div class="hint" id="convertSummaryLine">等待直连转换。</div>
+            <div class="toolbar">
+              <label class="mode-toggle"><input id="designerExportActionableOnly" type="checkbox" checked /> 仅导出需修改项</label>
+              <label class="field-label" for="convertFilter" style="margin-bottom: 0">筛选</label>
+              <select id="convertFilter" style="min-width: 160px">
+                <option value="all">全部</option>
+                <option value="actionable">只看需修改项</option>
+                <option value="success">只看可直接使用</option>
+                <option value="color">只看缺颜色/库存</option>
+                <option value="part">只看缺零件/不售卖/限购</option>
+                <option value="printed">只看印刷件</option>
+              </select>
+              <label class="field-label" for="convertSort" style="margin-bottom: 0">排序</label>
+              <select id="convertSort" style="min-width: 160px">
+                <option value="default">默认顺序</option>
+                <option value="qty_desc">数量从高到低</option>
+                <option value="qty_asc">数量从低到高</option>
+                <option value="status">按结果类别</option>
+              </select>
+              <label class="field-label" for="convertPageSize" style="margin-bottom: 0">每页</label>
+              <select id="convertPageSize" style="min-width: 100px">
+                <option value="20">20</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+              </select>
+              <button type="button" onclick="exportDesignerPdf()">导出设计师版 PDF</button>
+              <button type="button" onclick="exportDesignerXls()">导出设计师版 CSV</button>
+              <span class="hint" id="designerExportHint">基于当前直连结果导出，仅保留设计师调整所需信息。</span>
+            </div>
+            <div class="pager-bar">
+              <div class="pager-actions">
+                <span class="hint" id="convertPageSummary">等待直连转换。</span>
+              </div>
+              <div class="pager-actions">
+                <button type="button" onclick="changeConvertPage(-1)">上一页</button>
+                <span id="convertPageNumbers" class="pager-actions"></span>
+                <button type="button" onclick="changeConvertPage(1)">下一页</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>原零件</th>
+                    <th>原色</th>
+                    <th>数量</th>
+                    <th>结果类别</th>
+                    <th>建议高砖件</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody id="convertRows">
+                  <tr><td colspan="6" class="muted">尚未执行高砖直连转换。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="card table-wrap">
+        <div class="section-title-row" style="padding: 14px 16px 2px; margin-bottom: 0">
+          <h3>3. 自动替换结果</h3>
+          <span class="section-tip">核心工作区：优先查看这里</span>
+        </div>
+        <div class="toolbar" style="margin: 12px 0">
+          <label class="field-label" for="resultImageFilter">图片状态筛选</label>
+          <select id="resultImageFilter" style="min-width: 180px">
+            <option value="all">全部</option>
+            <option value="placeholder">只看无图占位</option>
+            <option value="printed_missing">只看无图且印刷件</option>
+            <option value="rebrickable_exact">只看精确图</option>
+            <option value="rebrickable_base">只看基础模具图</option>
+          </select>
+          <span class="hint" id="resultImageFilterHint">用于快速找出还没有准确原零件图的条目。</span>
+        </div>
+        <div class="pager-bar">
+          <div class="pager-actions">
+            <label class="field-label" for="resultPageSize">每页显示</label>
+            <select id="resultPageSize" style="min-width: 100px">
+              <option value="30">30</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+          <div class="pager-actions">
+            <span class="hint" id="resultPageSummary">等待运行适配。</span>
+            <button type="button" onclick="changeResultPage(-1)">上一页</button>
+            <button type="button" onclick="changeResultPage(1)">下一页</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>原零件</th>
+              <th>原色</th>
+              <th>数量</th>
+              <th>替换后零件</th>
+              <th>替换后颜色</th>
+              <th>阶段</th>
+              <th>风险</th>
+              <th>审核</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody id="resultRows">
+            <tr><td colspan="9" class="muted">运行适配后显示结果。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card table-wrap">
+        <div class="section-title-row" style="padding: 14px 16px 2px; margin-bottom: 0">
+          <h3>4. 异常审核队列</h3>
+          <span class="section-tip">只看需要人工确认的条目</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>原零件</th>
+              <th>系统建议</th>
+              <th>风险</th>
+              <th>原因</th>
+              <th>审核状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="reviewRows">
+            <tr><td colspan="6" class="muted">暂无待审核项目。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+        </div>
+        <div class="secondary-stack">
+      <div class="lane-head lane-head-secondary">辅助面板</div>
+
+      <div class="card">
+        <div class="section-title-row" style="padding: 14px 16px 0; margin-bottom: 0">
+          <h3>4.1 图片缺口清单</h3>
+          <span class="section-tip">优先补最影响判断的无图项</span>
+        </div>
+        <div class="hint" id="imageGapSummaryLine">等待运行适配后统计无图条目。</div>
+        <div id="imageGapList" class="compact-grid" style="margin-top: 12px">
+          <div class="compact-empty">运行适配后，这里会优先列出仍然没有准确图片的零件，方便集中补图或人工校验。</div>
+        </div>
+      </div>
+
+      <div class="card low-priority" data-advanced-block>
+        <details class="fold-card">
+          <summary class="fold-summary">
+            <div class="fold-summary-copy">
+              <h3>5 / 6. 导出预览与历史记录</h3>
+              <div class="hint">默认收起。需要看导出预览或载入旧记录时再展开。</div>
+            </div>
+            <span class="fold-toggle"></span>
+          </summary>
+          <div class="fold-body">
+            <div class="row-grid">
+              <div class="stack">
+                <h3>5. 可生产 BOM 导出预览</h3>
+                <textarea id="exportOutput" class="code" style="min-height: 180px" readonly></textarea>
+              </div>
+              <div class="stack">
+                <h3>6. 最近分析记录</h3>
+                <div class="hint" id="jobSummaryLine">暂无记录。</div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>时间</th>
+                        <th>项目</th>
+                        <th>自动率</th>
+                        <th>待审核</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody id="jobsRows">
+                      <tr><td colspan="5" class="muted">等待加载。</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="card low-priority" data-advanced-block>
+        <details class="fold-card">
+          <summary class="fold-summary">
+            <div class="fold-summary-copy">
+              <h3>7. 历史结果导入</h3>
+              <div class="hint">默认收起。只有用项目结果反哺全局库时才需要。</div>
+            </div>
+            <span class="fold-toggle"></span>
+          </summary>
+          <div class="fold-body">
+            <div class="hint">
+              把高砖官网导出的“格式转换列表”或“缺货表”导入这里，系统会自动把结果沉淀为全局映射库。以后新作品进来，会先命中这套全局库。
+            </div>
+            <div class="toolbar" style="margin-top: 12px">
+              <input id="gobricksResultInput" type="file" accept=".csv,.txt" style="min-width: 280px" />
+              <button onclick="importGobricksResult()">导入高砖结果表</button>
+              <span class="hint" id="gobricksImportHint">支持高砖“格式转换列表.csv”与“缺货表.csv”。</span>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="card" data-advanced-block>
+        <details class="fold-card">
+          <summary class="fold-summary">
+            <div class="fold-summary-copy">
+              <h3>8. 高砖颜色对照</h3>
+              <div class="hint">默认收起。需要查色号对应关系时再展开。</div>
+            </div>
+            <span class="fold-toggle"></span>
+          </summary>
+          <div class="fold-body">
+            <div class="hint">
+              这张表以高砖色号为主轴，基于你已沉淀的历史转换结果自动整理，方便快速判断哪些高砖色号经常对应哪些 LEGO 颜色。
+              官方参考页：
+              <a href="https://gobricks.cn/help?id=37" target="_blank" rel="noopener noreferrer">高砖颜色对照表</a>
+            </div>
+            <div class="toolbar">
+              <input
+                id="gobricksColorSearch"
+                type="text"
+                placeholder="按高砖色号 / LEGO 色号 / 颜色名搜索"
+                style="min-width: 260px"
+              />
+              <select id="gobricksColorFinishFilter" style="min-width: 160px">
+                <option value="all">全部表面</option>
+                <option value="solid">普通</option>
+                <option value="transparent">透明</option>
+                <option value="pearlescent">珠光</option>
+                <option value="metallic">金属</option>
+              </select>
+              <span class="hint" id="gobricksColorFilterHint">输入色号或颜色名可快速缩小范围。</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>参考色块</th>
+                    <th>高砖色号</th>
+                    <th>映射次数</th>
+                    <th>表面</th>
+                    <th>常见 LEGO 对应色</th>
+                  </tr>
+                </thead>
+                <tbody id="gobricksColorRows">
+                  <tr><td colspan="4" class="muted">等待加载。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="card" data-advanced-block>
+        <details class="fold-card">
+          <summary class="fold-summary">
+            <div class="fold-summary-copy">
+              <h3>9. 高级规则设置</h3>
+              <div class="hint">默认收起。只有维护规则时才需要展开。</div>
+            </div>
+            <span class="fold-toggle"></span>
+          </summary>
+          <div class="fold-body">
+            <div class="hint" id="ruleStatusLine">等待加载规则。</div>
+            <div class="row-grid">
+              <div class="stack">
+                <label class="field-label" for="exactPartMapInput">编号映射（JSON）</label>
+                <textarea id="exactPartMapInput" class="code" style="min-height: 180px"></textarea>
+              </div>
+              <div class="stack">
+                <label class="field-label" for="partMetaInput">零件元信息（JSON）</label>
+                <textarea id="partMetaInput" class="code" style="min-height: 180px"></textarea>
+              </div>
+            </div>
+            <div class="row-grid">
+              <div class="stack">
+                <label class="field-label" for="colorRulesInput">颜色规则（JSON）</label>
+                <textarea id="colorRulesInput" class="code" style="min-height: 220px"></textarea>
+              </div>
+              <div class="stack">
+                <label class="field-label" for="substitutionsInput">相似件规则（JSON）</label>
+                <textarea id="substitutionsInput" class="code" style="min-height: 220px"></textarea>
+              </div>
+            </div>
+            <div class="toolbar">
+              <button onclick="saveRules()">保存规则</button>
+              <button onclick="loadRules()">重新加载规则</button>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="card" data-advanced-block>
+        <h3>10. 参考资料</h3>
+        <div class="hint">已写入独立规则源，供后续人工核对与扩展；高砖如果你有内部主库导出，后面直接接入会更准。</div>
+        <div class="table-wrap" style="margin-top: 12px">
+          <table>
+            <thead>
+              <tr>
+                <th>来源</th>
+                <th>类型</th>
+                <th>用途</th>
+              </tr>
+            </thead>
+            <tbody id="sourceRows">
+              <tr><td colspan="3" class="muted">等待加载。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+        </div>
+      </div>
+
+      <div class="site-footer">
+        <div class="hint"><strong>设计制作：酷玩潮</strong></div>
+        <div class="hint" style="margin-top: 8px">
+          使用说明：本工具用于乐高设计稿到高砖零件库的适配辅助，仅提供识别、映射、近色和替代建议，不构成最终生产结论。
+          对于结构件、印刷件、特殊色、稀有件，请在实际生产前进行人工复核。
+        </div>
+        <div class="hint" style="margin-top: 8px">
+          版权声明：页面中的第三方零件名称、编号、图片与颜色信息仅用于零件识别与兼容性参考，相关商标、图片与资料权利归各自权利人所有。
+        </div>
+      </div>
+
+      <div id="detailModal" class="modal-backdrop" onclick="closeDetailModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+          <div class="modal-head">
+            <div>
+              <h3 class="modal-title" id="detailModalTitle">高砖主库详情</h3>
+              <div class="hint" id="detailModalSubtitle">点击结果行中的“查看详情”查看主库信息。</div>
+            </div>
+            <button class="modal-close" onclick="closeDetailModal()">关闭</button>
+          </div>
+          <div class="modal-body">
+            <div class="detail-grid" id="detailModalGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const demoBom = [
+        '3001|21|12|Brick 2x4|structural',
+        '3020|194|18|Plate 2x4|display',
+        '3068b|24|6|Tile 2x2|display',
+        '3039|1|4|Slope 45 2x2|display',
+        '2431|297|2|Clip Bar|structural',
+        '973pb001|21|1|Printed Torso|printed'
+      ].join('\n')
+
+      const stageNames = {
+        exact_combo_match: '全局映射命中',
+        exact_match: '精确替换',
+        near_color: '近色替换',
+        smart_color_match: '智能近色推荐',
+        indexed_candidate: '高砖候选替代',
+        substitute: '相似件替换',
+        printed_fallback: '印刷件降级',
+        manual_color: '缺颜色',
+        blocked_by_policy: '策略拦截',
+        manual_required: '人工处理'
+      }
+
+      let currentJob = null
+      let currentDetailMeta = null
+      let currentGobricksColorReference = []
+      let currentGobricksColorCatalog = {}
+      let currentLegoColorCatalog = {}
+      let currentResultPage = 1
+      let currentConvertPage = 1
+      let currentConvertReport = null
+      let pendingBomAction = ''
+      const GOBRICKS_CFG_KEY = 'kwc_part_adapter_gobricks_cfg_v1'
+      let statusBannerTimer = null
+
+      function getCfg() {
+        const baseUrl = String(document.getElementById('baseUrl').value || '').trim().replace(/\/$/, '')
+        return {
+          baseUrl: baseUrl || 'http://127.0.0.1:8002',
+          adminToken: String(document.getElementById('adminToken').value || '').trim(),
+          adminRole: String(document.getElementById('adminRole').value || 'superadmin').trim() || 'superadmin',
+          adminOperator: encodeURIComponent(String(document.getElementById('adminOperator').value || '零件适配').trim() || '零件适配')
+        }
+      }
+
+      function buildHeaders(withJson = false) {
+        const cfg = getCfg()
+        const headers = {}
+        if (cfg.adminToken) {
+          headers['X-Admin-Token'] = cfg.adminToken
+        }
+        if (cfg.adminRole) {
+          headers['X-Admin-Role'] = cfg.adminRole
+        }
+        if (cfg.adminOperator) {
+          headers['X-Admin-Operator'] = cfg.adminOperator
+        }
+        if (withJson) {
+          headers['Content-Type'] = 'application/json'
+        }
+        return headers
+      }
+
+      function requestBomFileSelection(action) {
+        const input = document.getElementById('bomFileInput')
+        if (!input) {
+          return
+        }
+        pendingBomAction = String(action || '').trim()
+        input.click()
+      }
+
+      async function handleBomFilePicked() {
+        const input = document.getElementById('bomFileInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          pendingBomAction = ''
+          return
+        }
+        document.getElementById('bomImportHint').textContent = `已选择 ${file.name}，${pendingBomAction === 'convert' ? '将继续执行直连高砖转换。' : '将继续执行导入。'}`
+        const action = pendingBomAction
+        pendingBomAction = ''
+        if (action === 'convert') {
+          await convertWithGobricks()
+          return
+        }
+        if (action === 'import') {
+          await importBomFile()
+        }
+      }
+
+      async function apiGet(path) {
+        const cfg = getCfg()
+        const res = await fetch(cfg.baseUrl + path, { headers: buildHeaders(false) })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '请求失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '请求失败')
+        }
+        return body
+      }
+
+      async function apiPost(path, payload) {
+        const cfg = getCfg()
+        const res = await fetch(cfg.baseUrl + path, {
+          method: 'POST',
+          headers: buildHeaders(true),
+          body: JSON.stringify(payload || {})
+        })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '请求失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '请求失败')
+        }
+        return body
+      }
+
+      async function apiPut(path, payload) {
+        const cfg = getCfg()
+        const res = await fetch(cfg.baseUrl + path, {
+          method: 'PUT',
+          headers: buildHeaders(true),
+          body: JSON.stringify(payload || {})
+        })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '请求失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '请求失败')
+        }
+        return body
+      }
+
+      async function fetchWithTimeout(url, options, timeoutMs, timeoutLabel) {
+        const controller = new AbortController()
+        const timer = window.setTimeout(() => controller.abort(), Math.max(1000, Number(timeoutMs || 0)))
+        try {
+          return await fetch(url, {
+            ...(options || {}),
+            signal: controller.signal
+          })
+        } catch (err) {
+          if (err && err.name === 'AbortError') {
+            throw new Error(`${timeoutLabel || '请求'}超时，请稍后重试`)
+          }
+          throw err
+        } finally {
+          window.clearTimeout(timer)
+        }
+      }
+
+      async function apiUploadBom(file) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetchWithTimeout(`${cfg.baseUrl}/api/admin/part-adapter/import-bom`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        }, 15000, '导入文件')
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '上传失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '上传失败')
+        }
+        return body
+      }
+
+      async function apiUploadGobricksResult(file) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetch(`${cfg.baseUrl}/api/admin/part-adapter/import-gobricks-result`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '上传失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '上传失败')
+        }
+        return body
+      }
+
+      async function apiUploadGobricksCatalog(file) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetch(`${cfg.baseUrl}/api/admin/part-adapter/import-gobricks-catalog`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '上传失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '上传失败')
+        }
+        return body
+      }
+
+      async function apiUploadGobricksCategories(file) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetch(`${cfg.baseUrl}/api/admin/part-adapter/import-gobricks-categories`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '上传失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '上传失败')
+        }
+        return body
+      }
+
+      async function apiUploadRebrickableRelationships(file) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetch(`${cfg.baseUrl}/api/admin/part-adapter/import-rebrickable-relationships`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '上传失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '上传失败')
+        }
+        return body
+      }
+
+      async function apiUploadRebrickableParts(file) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetch(`${cfg.baseUrl}/api/admin/part-adapter/import-rebrickable-parts`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '上传失败' }
+        }
+        if (!res.ok) throw new Error(body.detail || '上传失败')
+        return body
+      }
+
+      async function apiUploadRebrickablePartCategories(file) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetch(`${cfg.baseUrl}/api/admin/part-adapter/import-rebrickable-part-categories`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '上传失败' }
+        }
+        if (!res.ok) throw new Error(body.detail || '上传失败')
+        return body
+      }
+
+      async function apiUploadRebrickableColors(file) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetch(`${cfg.baseUrl}/api/admin/part-adapter/import-rebrickable-colors`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '上传失败' }
+        }
+        if (!res.ok) throw new Error(body.detail || '上传失败')
+        return body
+      }
+
+      async function apiUploadRebrickableElements(file) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetch(`${cfg.baseUrl}/api/admin/part-adapter/import-rebrickable-elements`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '上传失败' }
+        }
+        if (!res.ok) throw new Error(body.detail || '上传失败')
+        return body
+      }
+
+      async function apiConvertWithGobricks(file, authToken, baseUrl) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        form.append('auth_token', authToken)
+        form.append('base_url', baseUrl)
+        const res = await fetchWithTimeout(`${cfg.baseUrl}/api/admin/part-adapter/convert-gobricks`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        }, 45000, '高砖直连转换')
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '转换失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '转换失败')
+        }
+        return body
+      }
+
+      async function apiSyncGobricksItems(payload) {
+        return apiPost('/api/admin/part-adapter/sync-gobricks-items', payload)
+      }
+
+      function inferStatusKind(message) {
+        const text = String(message || '')
+        if (!text) return 'idle'
+        if (text.includes('失败') || text.includes('超时') || text.includes('错误')) {
+          return 'error'
+        }
+        if (
+          text.includes('完成') ||
+          text.includes('已导入') ||
+          text.includes('已同步') ||
+          text.includes('已保存') ||
+          text.includes('已刷新') ||
+          text.includes('已更新') ||
+          text.includes('已载入') ||
+          text.includes('已导出')
+        ) {
+          return 'success'
+        }
+        if (
+          text.includes('中...') ||
+          text.includes('加载中') ||
+          text.includes('处理中') ||
+          text.includes('请选择') ||
+          text.includes('等待')
+        ) {
+          return 'loading'
+        }
+        return 'info'
+      }
+
+      function renderGlobalStatus(message, kind) {
+        const banner = document.getElementById('globalStatusBanner')
+        const label = document.getElementById('globalStatusLabel')
+        const text = document.getElementById('globalStatusText')
+        const meta = document.getElementById('globalStatusMeta')
+        if (!banner || !label || !text || !meta) {
+          return
+        }
+        const safeKind = String(kind || 'info').trim() || 'info'
+        banner.classList.add('visible')
+        banner.classList.remove('is-loading', 'is-success', 'is-error')
+        if (safeKind === 'loading') {
+          banner.classList.add('is-loading')
+          label.textContent = '处理中'
+          meta.textContent = '请稍候'
+        } else if (safeKind === 'success') {
+          banner.classList.add('is-success')
+          label.textContent = '已完成'
+          meta.textContent = '可以继续下一步'
+        } else if (safeKind === 'error') {
+          banner.classList.add('is-error')
+          label.textContent = '处理失败'
+          meta.textContent = '请检查后重试'
+        } else {
+          label.textContent = '状态更新'
+          meta.textContent = '已记录'
+        }
+        text.textContent = String(message || '').trim() || '等待操作'
+      }
+
+      function setStatus(message, kind) {
+        const text = String(message || '').trim()
+        document.getElementById('status').textContent = text
+        if (statusBannerTimer) {
+          window.clearTimeout(statusBannerTimer)
+          statusBannerTimer = null
+        }
+        const finalKind = kind || inferStatusKind(text)
+        renderGlobalStatus(text || '等待操作', finalKind)
+        if (finalKind === 'success' || finalKind === 'info') {
+          statusBannerTimer = window.setTimeout(() => {
+            const banner = document.getElementById('globalStatusBanner')
+            if (banner) {
+              banner.classList.remove('visible', 'is-loading', 'is-success', 'is-error')
+            }
+            statusBannerTimer = null
+          }, 2600)
+        }
+      }
+
+      function isPublicToolMode() {
+        return window.location.pathname === '/tools/part-adapter'
+      }
+
+      function applyPublicMode() {
+        const enabled = isPublicToolMode()
+        document.querySelectorAll('[data-public-block]').forEach((node) => {
+          node.classList.toggle('public-hidden', enabled)
+        })
+        if (enabled) {
+          const workspaceGrid = document.querySelector('.workspace-grid')
+          if (workspaceGrid) {
+            workspaceGrid.style.gridTemplateColumns = '1fr'
+          }
+          const secondaryStack = document.querySelector('.secondary-stack')
+          if (secondaryStack) {
+            secondaryStack.classList.add('public-hidden')
+          }
+          const productHead = document.querySelector('.product-head')
+          if (productHead) {
+            productHead.style.gridTemplateColumns = '1fr'
+          }
+          const settingsShell = document.querySelector('.settings-shell')
+          if (settingsShell) {
+            settingsShell.classList.add('public-hidden')
+          }
+          const simpleModeInput = document.getElementById('simpleMode')
+          if (simpleModeInput) {
+            simpleModeInput.checked = true
+            simpleModeInput.disabled = true
+          }
+          const baseUrlInput = document.getElementById('baseUrl')
+          if (baseUrlInput) {
+            baseUrlInput.value = window.location.origin
+          }
+        } else {
+          const workspaceGrid = document.querySelector('.workspace-grid')
+          if (workspaceGrid) {
+            workspaceGrid.style.gridTemplateColumns = ''
+          }
+          const secondaryStack = document.querySelector('.secondary-stack')
+          if (secondaryStack) {
+            secondaryStack.classList.remove('public-hidden')
+          }
+          const productHead = document.querySelector('.product-head')
+          if (productHead) {
+            productHead.style.gridTemplateColumns = ''
+          }
+          const settingsShell = document.querySelector('.settings-shell')
+          if (settingsShell) {
+            settingsShell.classList.remove('public-hidden')
+          }
+          const simpleModeInput = document.getElementById('simpleMode')
+          if (simpleModeInput) {
+            simpleModeInput.disabled = false
+          }
+        }
+        applySimpleMode()
+      }
+
+      function applySimpleMode() {
+        const enabled = document.getElementById('simpleMode') ? document.getElementById('simpleMode').checked : true
+        document.querySelectorAll('[data-advanced-block]').forEach((node) => {
+          node.classList.toggle('advanced-hidden', enabled)
+        })
+      }
+
+      function setMetric(id, value) {
+        document.getElementById(id).textContent = String(value)
+      }
+
+      function focusConvertSection() {
+        const fold = document.getElementById('convertSectionFold')
+        const card = document.getElementById('convertSectionCard')
+        if (fold && !fold.open) {
+          fold.open = true
+        }
+        if (card) {
+          window.setTimeout(() => {
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }, 80)
+        }
+      }
+
+      function loadGobricksLocalConfig() {
+        try {
+          const raw = localStorage.getItem(GOBRICKS_CFG_KEY)
+          if (!raw) {
+            return
+          }
+          const parsed = JSON.parse(raw)
+          if (!parsed || typeof parsed !== 'object') {
+            return
+          }
+          document.getElementById('gobricksApiBaseUrl').value = String(parsed.base_url || 'https://api.gobricks.cn')
+          document.getElementById('gobricksAuthToken').value = String(parsed.auth_token || '')
+          document.getElementById('gobricksNeedDetail').checked =
+            parsed.need_detail_info === undefined ? true : Boolean(parsed.need_detail_info)
+        } catch (err) {
+          // ignore
+        }
+      }
+
+      function saveGobricksLocalConfig() {
+        try {
+          const payload = {
+            base_url: String(document.getElementById('gobricksApiBaseUrl').value || '').trim() || 'https://api.gobricks.cn',
+            auth_token: String(document.getElementById('gobricksAuthToken').value || '').trim(),
+            need_detail_info: document.getElementById('gobricksNeedDetail').checked
+          }
+          localStorage.setItem(GOBRICKS_CFG_KEY, JSON.stringify(payload))
+          document.getElementById('gobricksSyncHint').textContent = `高砖配置已保存到本机浏览器；同步模式：${payload.need_detail_info ? '拉详情' : '轻量同步'}。`
+          setStatus('高砖配置已保存')
+        } catch (err) {
+          alert('高砖配置保存失败')
+        }
+      }
+
+      function loadDemoBom() {
+        document.getElementById('bomInput').value = demoBom
+      }
+
+      function syncStrategyPills() {
+        const colorMode = document.getElementById('colorMode').value
+        const modeMap = {
+          safe: '保守',
+          balanced: '平衡',
+          aggressive: '激进'
+        }
+        document.getElementById('modePill').textContent = `颜色策略：${modeMap[colorMode] || '平衡'}`
+        document.getElementById('displayPill').textContent = `展示件替代：${document.getElementById('allowDisplaySub').checked ? '开启' : '关闭'}`
+        document.getElementById('structurePill').textContent = `结构件替代：${document.getElementById('allowStructuralSub').checked ? '开启' : '关闭'}`
+        document.getElementById('jobPill').textContent = `当前记录：${currentJob ? currentJob.job_id : '未生成'}`
+        syncSourceDisplay()
+      }
+
+      function syncSourceDisplay() {
+        const sourceInput = document.getElementById('sourceName')
+        const sourceDisplay = document.getElementById('sourceNameDisplay')
+        if (!sourceInput || !sourceDisplay) {
+          return
+        }
+        const value = String(sourceInput.value || '').trim()
+        sourceDisplay.textContent = value || '尚未导入文件'
+      }
+
+      function riskBadge(risk) {
+        const safe = String(risk || 'D').toUpperCase()
+        return `<span class="risk-pill-${safe.toLowerCase()}">${safe}</span>`
+      }
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;')
+      }
+
+      function buildThumb(imageUrl, fallbackText, fallbackUrls = []) {
+        const rawText = String(fallbackText || '-').slice(0, 8)
+        const safeText = escapeHtml(rawText)
+        const fallbackJs = JSON.stringify(rawText)
+        const safeFallbackUrls = Array.isArray(fallbackUrls)
+          ? fallbackUrls.map((item) => String(item || '').trim()).filter(Boolean)
+          : []
+        const fallbackChain = escapeHtml(safeFallbackUrls.join('|'))
+        if (imageUrl) {
+          return `<div class="part-thumb"><img src="${escapeHtml(imageUrl)}" alt="${safeText}" loading="lazy" data-fallbacks="${fallbackChain}" onerror="const queue=(this.dataset.fallbacks||'').split('|').filter(Boolean); if(queue.length){this.dataset.fallbacks=queue.slice(1).join('|'); this.src=queue[0]; return;} this.onerror=null; this.remove(); this.parentElement.textContent=${fallbackJs}" /></div>`
+        }
+        return `<div class="part-thumb">${safeText}</div>`
+      }
+
+      function deriveSwatchHex(meta) {
+        const safe = meta && typeof meta === 'object' ? meta : {}
+        const directHex = String(safe.rgb_hex || '').trim()
+        if (/^#?[0-9a-fA-F]{6}$/.test(directHex)) {
+          return directHex.startsWith('#') ? directHex : `#${directHex}`
+        }
+        const family = String(safe.family || 'neutral').trim().toLowerCase()
+        const finish = String(safe.finish || 'solid').trim().toLowerCase()
+        const baseMap = {
+          neutral: [148, 150, 154],
+          gray: [142, 148, 154],
+          white: [235, 237, 240],
+          black: [42, 44, 48],
+          red: [182, 58, 56],
+          yellow: [218, 188, 68],
+          blue: [74, 124, 188],
+          green: [82, 152, 92],
+          brown: [126, 84, 58],
+          tan: [190, 164, 118],
+          orange: [202, 126, 58],
+          purple: [130, 98, 170]
+        }
+        let [red, green, blue] = baseMap[family] || baseMap.neutral
+        const brightness = Math.max(0, Math.min(100, Number(safe.brightness || 60)))
+        const warmth = Math.max(0, Math.min(100, Number(safe.warmth || 50)))
+        const balance = (brightness - 50) / 50
+        if (balance >= 0) {
+          red = Math.round(red + (255 - red) * balance * 0.65)
+          green = Math.round(green + (255 - green) * balance * 0.65)
+          blue = Math.round(blue + (255 - blue) * balance * 0.65)
+        } else {
+          const ratio = 1 + balance * 0.7
+          red = Math.round(red * ratio)
+          green = Math.round(green * ratio)
+          blue = Math.round(blue * ratio)
+        }
+        const warmShift = (warmth - 50) / 50
+        red = Math.max(0, Math.min(255, Math.round(red + 18 * warmShift)))
+        blue = Math.max(0, Math.min(255, Math.round(blue - 18 * warmShift)))
+        if (finish === 'transparent') {
+          red = Math.round(red + (255 - red) * 0.24)
+          green = Math.round(green + (255 - green) * 0.24)
+          blue = Math.round(blue + (255 - blue) * 0.24)
+        } else if (finish === 'metallic') {
+          red = Math.round(red * 0.9 + 24)
+          green = Math.round(green * 0.9 + 24)
+          blue = Math.round(blue * 0.9 + 24)
+        } else if (finish === 'pearlescent') {
+          red = Math.round(red + (255 - red) * 0.14)
+          green = Math.round(green + (255 - green) * 0.14)
+          blue = Math.round(blue + (255 - blue) * 0.14)
+        }
+        const toHex = (value) => Math.max(0, Math.min(255, value)).toString(16).padStart(2, '0')
+        return `#${toHex(red)}${toHex(green)}${toHex(blue)}`
+      }
+
+      function getGobricksColorRefMap() {
+        const list = Array.isArray(currentGobricksColorReference) ? currentGobricksColorReference : []
+        const mapped = {}
+        list.forEach((item) => {
+          const key = String(item.gobricks_color_no || '').trim()
+          if (key) {
+            mapped[key] = item
+          }
+        })
+        return mapped
+      }
+
+      function buildColorCell(colorNo, mode = 'lego', explicitLabel = '') {
+        const code = String(colorNo || '').trim()
+        const explicit = String(explicitLabel || '').trim()
+        if (!code) {
+          return explicit ? escapeHtml(explicit) : '-'
+        }
+        if (mode === 'gobricks') {
+          if (code === '0') {
+            return `<div class="color-cell">
+            <div class="color-swatch-wrap">
+              <span class="color-swatch" style="background:#d7dce4"></span>
+              <span class="color-swatch-code">${escapeHtml(code)}</span>
+            </div>
+            <div>${escapeHtml(explicit || '未指定高砖颜色')}</div>
+          </div>`
+          }
+          const gobricksMap = getGobricksColorRefMap()
+          const catalogMeta = currentGobricksColorCatalog && typeof currentGobricksColorCatalog === 'object' ? currentGobricksColorCatalog[code] || {} : {}
+          const refMeta = gobricksMap[code] || {}
+          const swatch = String(catalogMeta.swatch_hex || refMeta.swatch_hex || '').trim() || '#d7dce4'
+          const name = String(catalogMeta.name || refMeta.gobricks_color_name || '').trim()
+          const nameEn = String(catalogMeta.name_en || refMeta.gobricks_color_name_en || '').trim()
+          const finalName = name || nameEn || explicit || `高砖色 ${code}`
+          const sourceLabel = !name && String(refMeta.name_source || '').trim() === 'mapped_inference' ? '（参考名）' : ''
+          return `<div class="color-cell">
+            <div class="color-swatch-wrap">
+              <span class="color-swatch" style="background:${escapeHtml(swatch)}"></span>
+              <span class="color-swatch-code">${escapeHtml(code)}</span>
+            </div>
+            <div>${escapeHtml(finalName)}${escapeHtml(sourceLabel)}</div>
+            ${nameEn ? `<div class="color-name-en">${escapeHtml(nameEn)}</div>` : ''}
+          </div>`
+        }
+        if (code === '0') {
+          return `<div class="color-cell">
+          <div class="color-swatch-wrap">
+            <span class="color-swatch" style="background:#d7dce4"></span>
+            <span class="color-swatch-code">${escapeHtml(code)}</span>
+          </div>
+          <div>${escapeHtml(explicit || '未指定颜色')}</div>
+        </div>`
+        }
+        const meta = currentLegoColorCatalog && typeof currentLegoColorCatalog === 'object' ? currentLegoColorCatalog[code] || {} : {}
+        const swatch = deriveSwatchHex(meta)
+        const name = String(meta.name || '').trim()
+        const nameEn = String(meta.name_en || '').trim()
+        const finalName = name || explicit || nameEn || `LEGO Color ${code}`
+        return `<div class="color-cell">
+          <div class="color-swatch-wrap">
+            <span class="color-swatch" style="background:${escapeHtml(swatch)}"></span>
+            <span class="color-swatch-code">${escapeHtml(code)}</span>
+          </div>
+          <div>${escapeHtml(finalName)}</div>
+          ${nameEn ? `<div class="color-name-en">${escapeHtml(nameEn)}</div>` : ''}
+        </div>`
+      }
+
+      function getColorDisplayText(colorNo, mode = 'lego', explicitLabel = '') {
+        const code = String(colorNo || '').trim()
+        const explicit = String(explicitLabel || '').trim()
+        if (!code) {
+          return explicit || '-'
+        }
+        if (mode === 'gobricks') {
+          if (code === '0') {
+            return explicit || '未指定高砖颜色'
+          }
+          const gobricksMap = getGobricksColorRefMap()
+          const catalogMeta = currentGobricksColorCatalog && typeof currentGobricksColorCatalog === 'object' ? currentGobricksColorCatalog[code] || {} : {}
+          const refMeta = gobricksMap[code] || {}
+          const zh = String(catalogMeta.name || refMeta.gobricks_color_name || '').trim()
+          const en = String(catalogMeta.name_en || refMeta.gobricks_color_name_en || '').trim()
+          return [code, zh || en || `高砖色 ${code}`].filter(Boolean).join(' ')
+        }
+        if (code === '0') {
+          return explicit || '未指定颜色'
+        }
+        const meta = currentLegoColorCatalog && typeof currentLegoColorCatalog === 'object' ? currentLegoColorCatalog[code] || {} : {}
+        const zh = String(meta.name || '').trim()
+        const en = String(meta.name_en || '').trim()
+        return [code, zh || explicit || en || `LEGO Color ${code}`].filter(Boolean).join(' ')
+      }
+
+      function getDesignerAction(item) {
+        const status = String(item && (item.status_text || item.category) || '').trim()
+        if (status === '高砖接口成功') return '可直接使用，不需要修改'
+        if (status === '缺颜色') return '保留模具，改用相近可用颜色'
+        if (status === '库存不足') return '优先换近色或拆分替代，避免直接用缺货色'
+        if (status.indexOf('印刷件') >= 0) return '优先改为空白件，必要时改贴纸/重绘'
+        if (status === '缺零件') return '需要改模具或改结构，优先找同功能替代'
+        if (status === '不售卖') return '建议更换成在售同功能件'
+        if (status === '限购') return '建议换方案，避免受限购影响'
+        return '请按建议件与说明调整'
+      }
+
+      function getDesignerExportRows() {
+        const report = currentConvertReport && typeof currentConvertReport === 'object' ? currentConvertReport : null
+        const items = report && Array.isArray(report.items) ? orderDisplayItems(report.items) : []
+        return items.map((item, index) => ({
+          index: index + 1,
+          image_url: String(item.source_image_url || '').trim(),
+          image_fallbacks: Array.isArray(item.source_image_fallbacks) ? item.source_image_fallbacks : [],
+          source_name: String(item.name || item.part_no || '-').trim(),
+          source_part: String(item.part_no || '-').trim(),
+          source_color: getColorDisplayText(item.color_no, 'lego', item.color_name || ''),
+          qty: Number(item.qty || 0),
+          status_text: String(item.status_text || item.category || '-').trim(),
+          suggested_part: String(item.resolved_part_no || '-').trim() || '-',
+          suggested_color: getColorDisplayText(item.resolved_color_no, 'gobricks'),
+          suggested_image_url: String(item.resolved_meta && item.resolved_meta.image_url || '').trim(),
+          suggested_image_kind: String(item.resolved_meta && item.resolved_meta.image_kind || '').trim(),
+          action_text: getDesignerAction(item),
+          note_text: String(item.detail || '').trim() || String(item.note || '').trim() || '',
+          tag: String(item.tag || '').trim().toLowerCase(),
+        }))
+      }
+
+      function isDesignerPrinted(item) {
+        const safe = item && typeof item === 'object' ? item : {}
+        const partNo = String(safe.source_part || '').toLowerCase()
+        const status = String(safe.status_text || '')
+        const note = String(safe.note_text || '')
+        const tag = String(safe.tag || '').toLowerCase()
+        return (
+          tag === 'printed'
+          || /(?:pb|pr|stk|pat)/.test(partNo)
+          || status.indexOf('印刷') >= 0
+          || note.indexOf('印刷') >= 0
+          || note.indexOf('贴纸') >= 0
+        )
+      }
+
+      function getDesignerActionableRows() {
+        return getDesignerExportRows()
+          .filter((item) => {
+            const status = String(item.status_text || '').trim()
+            return !!status && status !== '高砖接口成功' && status !== '可直接使用'
+          })
+          .map((item, index) => ({
+            ...item,
+            index: index + 1,
+          }))
+      }
+
+      function getDesignerSelectedRows() {
+        const actionableOnly = document.getElementById('designerExportActionableOnly')
+          ? document.getElementById('designerExportActionableOnly').checked
+          : true
+        return actionableOnly ? getDesignerActionableRows() : getDesignerExportRows()
+      }
+
+      function getDesignerSummary(rows) {
+        const summary = {
+          total: rows.length,
+          color_issue: 0,
+          part_issue: 0,
+          print_issue: 0,
+          other_issue: 0,
+        }
+        rows.forEach((item) => {
+          const status = String(item.status_text || '')
+          if (isDesignerPrinted(item)) {
+            summary.print_issue += 1
+          }
+          if (isDesignerPrinted(item)) {
+            // 印刷件单独统计，但主问题仍按实际缺色/缺件归类
+          }
+          if (status.indexOf('缺颜色') >= 0 || status.indexOf('库存不足') >= 0) {
+            summary.color_issue += 1
+          } else if (status.indexOf('缺零件') >= 0 || status.indexOf('不售卖') >= 0 || status.indexOf('限购') >= 0) {
+            summary.part_issue += 1
+          } else {
+            summary.other_issue += 1
+          }
+        })
+        return summary
+      }
+
+      function getDesignerIssueLabel(item) {
+        const status = String(item.status_text || '').trim()
+        if (isDesignerPrinted(item)) {
+          if (status.indexOf('缺颜色') >= 0) return '印刷件缺颜色：优先空白件/近色'
+          if (status.indexOf('缺零件') >= 0) return '印刷件缺零件：优先空白件替代'
+          return '印刷件：优先空白件/贴纸'
+        }
+        if (status.indexOf('缺颜色') >= 0) return '缺颜色：优先换近色'
+        if (status.indexOf('库存不足') >= 0) return '库存不足：换近色或拆分'
+        if (status.indexOf('缺零件') >= 0) return '缺零件：需换模具'
+        if (status.indexOf('不售卖') >= 0) return '不售卖：需换方案'
+        if (status.indexOf('限购') >= 0) return '限购：建议换方案'
+        if (status.indexOf('印刷') >= 0) return '印刷件：优先空白件/贴纸'
+        return status || '需人工调整'
+      }
+
+      function buildDesignerShortNote(item) {
+        const note = String(item.note_text || '').replace(/\s+/g, ' ').trim()
+        const printedPrefix = isDesignerPrinted(item) ? '印刷件：优先改为空白件，必要时改贴纸。' : ''
+        if (!note) {
+          return printedPrefix || '按建议件调整即可。'
+        }
+        const compact = note
+          .replace(/高砖接口返回缺零件，但本地已识别到同模具，按缺颜色处理/g, '同模具已识别，按缺颜色处理')
+          .replace(/历史高砖结果显示缺颜色，已按同模具候选继续处理，需人工确认/g, '历史记录显示缺颜色，已给出同模具候选')
+          .replace(/已识别同模具，但当前策略下没有足够接近的可用颜色/g, '同模具已识别，但当前没有合适近色')
+        const finalText = printedPrefix ? `${printedPrefix} ${compact}` : compact
+        if (finalText.length <= 72) {
+          return finalText
+        }
+        return `${finalText.slice(0, 72)}...`
+      }
+
+      function getDesignerGroupKey(item) {
+        const status = String(item.status_text || '')
+        const suggestedPart = String(item.suggested_part || '').trim()
+        if (!suggestedPart || suggestedPart === '-') return 'no_suggestion'
+        if (isDesignerPrinted(item)) return 'print'
+        if (status.indexOf('缺颜色') >= 0 || status.indexOf('库存不足') >= 0) return 'color'
+        if (status.indexOf('缺零件') >= 0 || status.indexOf('不售卖') >= 0 || status.indexOf('限购') >= 0) return 'part'
+        return 'other'
+      }
+
+      function buildDesignerSectionTable(rows) {
+        if (!rows.length) {
+          return ''
+        }
+        const bodyRows = rows
+          .map((item) => {
+            const imgHtml = item.image_url
+              ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.source_part)}" style="width:52px;height:52px;border-radius:10px;border:1px solid #d7e4fa;object-fit:cover;" onerror="const q='${escapeHtml((item.image_fallbacks || []).join('|'))}'.split('|').filter(Boolean); if(q.length){this.src=q[0]; return;} this.style.display='none';" />`
+              : `<div style="width:52px;height:52px;border-radius:10px;border:1px solid #d7e4fa;display:flex;align-items:center;justify-content:center;color:#35507f;font-size:11px;font-weight:700;">${escapeHtml(item.source_part.slice(0, 6))}</div>`
+            const suggestedImgHtml = item.suggested_image_url
+              ? `<img src="${escapeHtml(item.suggested_image_url)}" alt="${escapeHtml(item.suggested_part)}" style="width:44px;height:44px;border-radius:10px;border:1px solid #d7e4fa;object-fit:cover;display:block;margin-bottom:6px;" onerror="this.style.display='none';" />`
+              : ''
+            const printedBadge = isDesignerPrinted(item)
+              ? `<div style="margin-top:4px;display:inline-block;padding:2px 8px;border-radius:999px;background:#fff1f1;border:1px solid #f3c9c9;color:#b33b3b;font-size:11px;font-weight:600;">印刷件</div>`
+              : ''
+            return `<tr>
+              <td style="padding:8px 10px;border:1px solid #dbe5f8;text-align:center;">${item.index}</td>
+              <td style="padding:8px 10px;border:1px solid #dbe5f8;text-align:center;">${imgHtml}</td>
+              <td style="padding:8px 10px;border:1px solid #dbe5f8;">${escapeHtml(item.source_name)}${printedBadge}<br><span style="color:#70819e;">${escapeHtml(item.source_part)}</span></td>
+              <td style="padding:8px 10px;border:1px solid #dbe5f8;">${escapeHtml(item.source_color)}</td>
+              <td style="padding:8px 10px;border:1px solid #dbe5f8;text-align:center;">${escapeHtml(item.qty)}</td>
+              <td style="padding:8px 10px;border:1px solid #dbe5f8;">${escapeHtml(getDesignerIssueLabel(item))}</td>
+              <td style="padding:8px 10px;border:1px solid #dbe5f8;">${suggestedImgHtml}${escapeHtml(item.suggested_part)}<br><span style="color:#70819e;">${escapeHtml(item.suggested_color)}</span></td>
+              <td style="padding:8px 10px;border:1px solid #dbe5f8;">${escapeHtml(item.action_text)}</td>
+              <td style="padding:8px 10px;border:1px solid #dbe5f8;">${escapeHtml(buildDesignerShortNote(item))}</td>
+            </tr>`
+          })
+          .join('')
+        return `<table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:18px;">
+      <thead>
+        <tr style="background:#f5f8ff;">
+          <th style="padding:8px 10px;border:1px solid #dbe5f8;">序号</th>
+          <th style="padding:8px 10px;border:1px solid #dbe5f8;">原件图</th>
+          <th style="padding:8px 10px;border:1px solid #dbe5f8;">原零件</th>
+          <th style="padding:8px 10px;border:1px solid #dbe5f8;">原颜色</th>
+          <th style="padding:8px 10px;border:1px solid #dbe5f8;">数量</th>
+          <th style="padding:8px 10px;border:1px solid #dbe5f8;">问题</th>
+          <th style="padding:8px 10px;border:1px solid #dbe5f8;">建议高砖件</th>
+          <th style="padding:8px 10px;border:1px solid #dbe5f8;">建议动作</th>
+          <th style="padding:8px 10px;border:1px solid #dbe5f8;">调整提示</th>
+        </tr>
+      </thead>
+      <tbody>${bodyRows}</tbody>
+    </table>`
+      }
+
+      function buildDesignerExportHtml(rows, title) {
+        const safeTitle = escapeHtml(title || '设计师调整清单')
+        const summary = getDesignerSummary(rows)
+        const grouped = {
+          color: [],
+          part: [],
+          print: [],
+          other: [],
+          no_suggestion: [],
+        }
+        rows.forEach((item) => {
+          grouped[getDesignerGroupKey(item)].push(item)
+        })
+        let runningIndex = 1
+        ;['color', 'part', 'print', 'other', 'no_suggestion'].forEach((key) => {
+          grouped[key] = grouped[key].map((item) => ({
+            ...item,
+            index: runningIndex++,
+          }))
+        })
+        const sections = [
+          { key: 'color', title: 'A. 缺颜色 / 库存不足', desc: '优先保留模具，改用近色或拆分替代。' },
+          { key: 'part', title: 'B. 缺零件 / 不售卖 / 限购', desc: '需要改模具、改结构，或改用其他在售方案。' },
+          { key: 'print', title: 'C. 印刷件相关', desc: '优先改为空白件；必要时改贴纸、重绘或改版。' },
+          { key: 'other', title: 'D. 其他待确认项', desc: '这类条目建议逐项确认后再调整。' },
+          { key: 'no_suggestion', title: 'E. 暂无建议方案', desc: '系统暂未给出可直接替代件，需要设计师或人工逐项改稿。' },
+        ]
+        const sectionsHtml = sections
+          .filter((section) => grouped[section.key].length)
+          .map((section) => {
+            const count = grouped[section.key].length
+            const extraHint =
+              section.key === 'print'
+                ? `<div style="margin:8px 0 10px;padding:8px 10px;border-radius:10px;background:#fff7f7;border:1px solid #f3d7d7;font-size:12px;color:#8d3b3b;">印刷件处理建议：先确认图案是否必须保留。可优先改为空白件；如果图案重要，再考虑贴纸、UV 或改版替代。</div>`
+                : ''
+            return `<section style="margin:0 0 22px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:0 0 8px;gap:12px;">
+        <div>
+          <h3 style="margin:0;font-size:15px;">${escapeHtml(section.title)}</h3>
+          <div style="font-size:12px;color:#70819e;margin-top:2px;">${escapeHtml(section.desc)}</div>
+        </div>
+        <div style="flex:none;padding:5px 10px;border-radius:999px;background:#eef4ff;border:1px solid #dbe5f8;font-size:12px;color:#35507f;">${count} 条</div>
+      </div>
+      ${extraHint}
+      ${buildDesignerSectionTable(grouped[section.key])}
+    </section>`
+          })
+          .join('')
+        return `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>${safeTitle}</title>
+  </head>
+  <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:24px;color:#20304d;">
+    <h2 style="margin:0 0 8px;">${safeTitle}</h2>
+    <div style="margin:0 0 18px;padding:14px 16px;border:1px solid #dbe5f8;border-radius:14px;background:#f7faff;">
+      <div style="font-size:13px;color:#4b6288;margin-bottom:8px;">仅导出需要设计师处理的条目。已可直接使用的零件已自动排除。</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;">
+        <span><strong>${summary.total}</strong> 条需处理</span>
+        <span><strong>${summary.color_issue}</strong> 条缺颜色/库存不足</span>
+        <span><strong>${summary.part_issue}</strong> 条缺零件/不售卖/限购</span>
+        <span><strong>${summary.print_issue}</strong> 条印刷件相关</span>
+      </div>
+    </div>
+    ${sectionsHtml}
+  </body>
+</html>`
+      }
+
+      function buildDesignerExportCsv(rows) {
+        const header = ['序号', '原零件名称', '原零件编号', '原颜色', '数量', '当前判断', '建议高砖件', '建议高砖颜色', '建议动作', '备注', '图片链接']
+        const csvRows = rows.map((item) => {
+          const imageUrl = [item.image_url].concat(Array.isArray(item.image_fallbacks) ? item.image_fallbacks : []).find(Boolean) || ''
+          return [
+            item.index,
+            item.source_name,
+            item.source_part,
+            item.source_color,
+            item.qty,
+            item.status_text,
+            item.suggested_part,
+            item.suggested_color,
+            item.action_text,
+            item.note_text || '',
+            imageUrl,
+          ]
+        })
+        const allRows = [header].concat(csvRows)
+        return allRows
+          .map((row) =>
+            row
+              .map((value) => {
+                const text = String(value == null ? '' : value).replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+                return `"${text.replace(/"/g, '""')}"`
+              })
+              .join(',')
+          )
+          .join('\r\n')
+      }
+
+      function exportDesignerPdf() {
+        const rows = getDesignerSelectedRows()
+        if (!rows.length) {
+          alert('当前没有需要设计师处理的条目。请先执行高砖直连转换，或检查是否全部已可直接使用。')
+          return
+        }
+        const html = buildDesignerExportHtml(rows, '设计师调整清单（PDF打印版）')
+        const win = window.open('', '_blank')
+        if (!win) {
+          alert('浏览器拦截了新窗口，请允许弹窗后重试。')
+          return
+        }
+        win.document.open()
+        win.document.write(html)
+        win.document.close()
+        document.getElementById('designerExportHint').textContent = `已生成设计师版 PDF 打印页，共 ${rows.length} 条。可在打印对话框中选择“存储为 PDF”。`
+        setTimeout(() => {
+          win.focus()
+          win.print()
+        }, 300)
+      }
+
+      function exportDesignerXls() {
+        const rows = getDesignerSelectedRows()
+        if (!rows.length) {
+          alert('请先执行高砖直连转换，再导出设计师版 CSV。')
+          return
+        }
+        const csv = buildDesignerExportCsv(rows)
+        const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `designer-adjustment-${new Date().toISOString().slice(0, 10)}.csv`
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(url)
+        document.getElementById('designerExportHint').textContent = `已导出设计师版 CSV，共 ${rows.length} 条。Excel 可直接打开；图片列为可点击链接，如需内嵌图片排版请使用 PDF 导出。`
+        setStatus('设计师版 CSV 已导出')
+      }
+
+      function formatPrice(value) {
+        const num = Number(value || 0)
+        if (!Number.isFinite(num) || num <= 0) {
+          return ''
+        }
+        return `¥${num.toFixed(2)}`
+      }
+
+      function buildSourceCell(item) {
+        const fallback = (item.part_no || '-').replace(/[^A-Za-z0-9]/g, '').slice(0, 6) || '-'
+        const subtitle = [item.part_no || '-', item.color_no ? `色 ${item.color_no}` : '', item.qty ? `x${item.qty}` : '']
+          .filter(Boolean)
+          .join(' · ')
+        const badges = []
+        const sourceCatalogMeta = item.source_catalog_meta && typeof item.source_catalog_meta === 'object' ? item.source_catalog_meta : {}
+        if (item.source_image_kind === 'rebrickable_exact') {
+          badges.push('<span class="mini-badge">精确图 Rebrickable</span>')
+        } else if (item.source_image_kind === 'rebrickable_base') {
+          badges.push('<span class="mini-badge">基础模具图</span>')
+        } else if (item.source_image_kind === 'bricklink_exact') {
+          badges.push('<span class="mini-badge">精确图 BrickLink</span>')
+        } else if (item.source_image_kind === 'bricklink_base') {
+          badges.push('<span class="mini-badge">基础模具图 BrickLink</span>')
+        } else {
+          badges.push('<span class="mini-badge">无图占位</span>')
+        }
+        if (item.tag === 'printed') {
+          badges.push('<span class="mini-badge">印刷件</span>')
+        }
+        if (sourceCatalogMeta.part_cat_name) {
+          badges.push(`<span class="mini-badge">${escapeHtml(sourceCatalogMeta.part_cat_name)}</span>`)
+        }
+        if (sourceCatalogMeta.part_material) {
+          badges.push(`<span class="mini-badge">${escapeHtml(sourceCatalogMeta.part_material)}</span>`)
+        }
+        return `<div class="part-cell">
+          ${buildThumb(item.source_image_url || '', fallback, item.source_image_fallbacks || [])}
+          <div class="part-main">
+            <div class="part-title">${escapeHtml(item.name || item.part_no || '-')}</div>
+            <div class="part-sub">${escapeHtml(subtitle)}</div>
+            <div class="meta-badges">${badges.join('')}</div>
+          </div>
+        </div>`
+      }
+
+      function buildResolvedCell(item) {
+        const meta = item.resolved_meta || {}
+        const partNo = item.resolved_part_no || '-'
+        const colorNo = item.resolved_color_no || '-'
+        const fallback = String(partNo || '-').replace(/[^A-Za-z0-9]/g, '').slice(0, 6) || '-'
+        const title = meta.caption || partNo || '-'
+        const sub = [partNo, colorNo && colorNo !== '-' ? `色 ${colorNo}` : ''].filter(Boolean).join(' · ')
+        const badges = []
+        if (meta.category_name) badges.push(`<span class="mini-badge">${escapeHtml(meta.category_name)}</span>`)
+        if (meta.status) badges.push(`<span class="mini-badge">${escapeHtml(meta.status)}</span>`)
+        if (Number(meta.inventory || 0) > 0) badges.push(`<span class="mini-badge">库存 ${escapeHtml(meta.inventory)}</span>`)
+        const priceText = formatPrice(meta.price)
+        if (priceText) badges.push(`<span class="mini-badge">${escapeHtml(priceText)}</span>`)
+        if (meta.image_url) badges.push(`<span class="mini-badge">高砖实图</span>`)
+        if (meta.category_icon_url) badges.push(`<span class="mini-badge">分类图标</span>`)
+        const canOpen = meta && Object.keys(meta).length
+        return `<div class="part-cell">
+          ${buildThumb(meta.image_url || '', fallback)}
+          <div class="part-main">
+            <div class="part-title">${escapeHtml(title)}</div>
+            <div class="part-sub">${escapeHtml(sub)}</div>
+            ${badges.length ? `<div class="meta-badges">${badges.join('')}</div>` : ''}
+            ${canOpen ? `<button class="detail-link" onclick='openDetailModal(${JSON.stringify(meta).replace(/'/g, '&#39;')})'>查看详情</button>` : ''}
+          </div>
+        </div>`
+      }
+
+      function buildNoteCell(primaryText, secondaryText = '') {
+        const primary = String(primaryText || '-').trim() || '-'
+        const secondary = String(secondaryText || '').trim()
+        const combined = [primary, secondary].filter(Boolean).join('；')
+        const shortText = combined.length > 72 ? `${combined.slice(0, 72)}...` : combined
+        if (combined.length <= 72) {
+          return `<div class="note-block">
+            <div class="note-primary">${escapeHtml(primary)}</div>
+            ${secondary ? `<div class="note-muted">${escapeHtml(secondary)}</div>` : ''}
+          </div>`
+        }
+        return `<div class="note-block">
+          <div class="note-primary">${escapeHtml(shortText)}</div>
+          <details class="note-expand">
+            <summary></summary>
+            <div class="note-primary">${escapeHtml(primary)}</div>
+            ${secondary ? `<div class="note-muted">${escapeHtml(secondary)}</div>` : ''}
+          </details>
+        </div>`
+      }
+
+      function openDetailModal(meta) {
+        currentDetailMeta = meta || {}
+        const safe = currentDetailMeta || {}
+        document.getElementById('detailModalTitle').textContent = safe.caption || safe.item_id || '高砖主库详情'
+        document.getElementById('detailModalSubtitle').textContent = `${safe.item_id || '-'}${safe.category_name ? ` · ${safe.category_name}` : ''}`
+        const rows = [
+          ['主库 ID', safe.item_id || '-'],
+          ['名称', safe.caption || '-'],
+          ['库存', safe.inventory || 0],
+          ['价格', formatPrice(safe.price) || '-'],
+          ['状态', safe.status || '-'],
+          ['分类', safe.category_name || '-'],
+          ['分类路径', safe.category_path || '-'],
+          ['图片状态', safe.image_kind === 'part' ? '真实零件图' : safe.category_icon_url ? '仅有分类图标，不作为零件图展示' : '无图片'],
+        ]
+        document.getElementById('detailModalGrid').innerHTML = rows
+          .map(
+            ([label, value]) => `<div class="detail-item">
+              <div class="detail-label">${escapeHtml(label)}</div>
+              <div class="detail-value">${escapeHtml(value)}</div>
+            </div>`
+          )
+          .join('')
+        document.getElementById('detailModal').classList.add('open')
+      }
+
+      function closeDetailModal(event) {
+        if (event && event.target && event.target.id && event.target.id !== 'detailModal') {
+          return
+        }
+        document.getElementById('detailModal').classList.remove('open')
+      }
+
+      function orderDisplayItems(items) {
+        const list = Array.isArray(items) ? items : []
+        return list
+          .map((item, index) => ({ item, index }))
+          .sort((a, b) => {
+            const groupA = Number(a.item && a.item.display_group !== undefined ? a.item.display_group : 0)
+            const groupB = Number(b.item && b.item.display_group !== undefined ? b.item.display_group : 0)
+            if (groupA !== groupB) {
+              return groupA - groupB
+            }
+            return a.index - b.index
+          })
+          .map((entry) => entry.item)
+      }
+
+      function filterByImageKind(items) {
+        const mode = String(document.getElementById('resultImageFilter')?.value || 'all')
+        const list = Array.isArray(items) ? items : []
+        if (mode === 'all') {
+          return list
+        }
+        if (mode === 'printed_missing') {
+          return list.filter(
+            (item) =>
+              String(item.source_image_kind || 'placeholder') === 'placeholder' &&
+              String(item.tag || '') === 'printed'
+          )
+        }
+        if (mode === 'rebrickable_exact') {
+          return list.filter((item) => ['rebrickable_exact', 'bricklink_exact'].includes(String(item.source_image_kind || '')))
+        }
+        if (mode === 'rebrickable_base') {
+          return list.filter((item) => ['rebrickable_base', 'bricklink_base'].includes(String(item.source_image_kind || '')))
+        }
+        return list.filter((item) => String(item.source_image_kind || 'placeholder') === mode)
+      }
+
+      function filterGobricksColorReference(items) {
+        const list = Array.isArray(items) ? items : []
+        const keyword = String(document.getElementById('gobricksColorSearch')?.value || '')
+          .trim()
+          .toLowerCase()
+        const finish = String(document.getElementById('gobricksColorFinishFilter')?.value || 'all')
+        return list.filter((item) => {
+          const finishText = String(item.finish || '').toLowerCase()
+          if (finish !== 'all' && finishText !== finish) {
+            return false
+          }
+          if (!keyword) {
+            return true
+          }
+          const legoColors = Array.isArray(item.lego_colors) ? item.lego_colors : []
+          const haystack = [
+            item.gobricks_color_no || '',
+            item.gobricks_color_name || '',
+            item.gobricks_color_name_en || '',
+            item.finish || '',
+            ...legoColors.map((entry) => `${entry.lego_color_no || ''} ${entry.lego_color_name || ''} ${entry.lego_color_name_en || ''}`)
+          ]
+            .join(' ')
+            .toLowerCase()
+          return haystack.includes(keyword)
+        })
+      }
+
+      function renderStageSummary(results) {
+        const counter = {}
+        ;(results || []).forEach((item) => {
+          const key = String(item.stage || '')
+          if (!key) {
+            return
+          }
+          counter[key] = (counter[key] || 0) + 1
+        })
+        document.getElementById('stagePills').innerHTML = Object.keys(counter)
+          .map((key) => `<span class="pill">${stageNames[key] || key} ${counter[key]}</span>`)
+          .join('')
+      }
+
+      function getResultPageSize() {
+        const raw = Number(document.getElementById('resultPageSize')?.value || 50)
+        if (!Number.isFinite(raw) || raw <= 0) {
+          return 50
+        }
+        return raw
+      }
+
+      function getConvertPageSize() {
+        const raw = Number(document.getElementById('convertPageSize')?.value || 50)
+        if (!Number.isFinite(raw) || raw <= 0) {
+          return 50
+        }
+        return raw
+      }
+
+      function filterConvertItems(items) {
+        const list = Array.isArray(items) ? items : []
+        const mode = String(document.getElementById('convertFilter')?.value || 'all')
+        if (mode === 'actionable') {
+          return list.filter((item) => {
+            const status = String(item && (item.status_text || item.category) || '').trim()
+            return !!status && status !== '高砖接口成功' && status !== '可直接使用'
+          })
+        }
+        if (mode === 'success') {
+          return list.filter((item) => {
+            const status = String(item && (item.status_text || item.category) || '').trim()
+            return status === '高砖接口成功' || status === '可直接使用'
+          })
+        }
+        if (mode === 'color') {
+          return list.filter((item) => {
+            const status = String(item && (item.status_text || item.category) || '').trim()
+            return status.includes('缺颜色') || status.includes('库存不足')
+          })
+        }
+        if (mode === 'part') {
+          return list.filter((item) => {
+            const status = String(item && (item.status_text || item.category) || '').trim()
+            return status.includes('缺零件') || status.includes('不售卖') || status.includes('限购')
+          })
+        }
+        if (mode === 'printed') {
+          return list.filter((item) => {
+            const tag = String(item && item.tag || '').trim().toLowerCase()
+            const status = String(item && (item.status_text || item.category) || '').trim()
+            return tag === 'printed' || status.includes('印刷')
+          })
+        }
+        return list
+      }
+
+      function sortConvertItems(items) {
+        const list = Array.isArray(items) ? [...items] : []
+        const mode = String(document.getElementById('convertSort')?.value || 'default')
+        if (mode === 'qty_desc') {
+          list.sort((a, b) => Number(b.qty || 0) - Number(a.qty || 0))
+        } else if (mode === 'qty_asc') {
+          list.sort((a, b) => Number(a.qty || 0) - Number(b.qty || 0))
+        } else if (mode === 'status') {
+          list.sort((a, b) => String(a.status_text || a.category || '').localeCompare(String(b.status_text || b.category || ''), 'zh-Hans-CN'))
+        }
+        return list
+      }
+
+      function renderConvertPager(totalCount, pageSize, page) {
+        const total = Number(totalCount || 0)
+        const size = Math.max(1, Number(pageSize || 50))
+        const totalPages = Math.max(1, Math.ceil(total / size))
+        const safePage = Math.max(1, Math.min(totalPages, Number(page || 1)))
+        const start = total ? (safePage - 1) * size + 1 : 0
+        const end = total ? Math.min(total, safePage * size) : 0
+        const pageNumbers = document.getElementById('convertPageNumbers')
+        document.getElementById('convertPageSummary').textContent =
+          total ? `第 ${safePage} / ${totalPages} 页，显示 ${start}-${end} / ${total} 条。` : '等待直连转换。'
+        if (!pageNumbers) {
+          return
+        }
+        if (!total) {
+          pageNumbers.innerHTML = ''
+          return
+        }
+        const pages = []
+        const addPage = (num) => {
+          if (!pages.includes(num)) {
+            pages.push(num)
+          }
+        }
+        addPage(1)
+        for (let i = safePage - 2; i <= safePage + 2; i += 1) {
+          if (i >= 1 && i <= totalPages) {
+            addPage(i)
+          }
+        }
+        addPage(totalPages)
+        pages.sort((a, b) => a - b)
+        const chunks = []
+        let previous = 0
+        pages.forEach((num) => {
+          if (previous && num - previous > 1) {
+            chunks.push('<span class="hint">...</span>')
+          }
+          chunks.push(
+            `<button type="button" class="page-number-btn${num === safePage ? ' is-active' : ''}" onclick="goToConvertPage(${num})">${num}</button>`
+          )
+          previous = num
+        })
+        pageNumbers.innerHTML = chunks.join('')
+      }
+
+      function goToConvertPage(page) {
+        const fullList = currentConvertReport && Array.isArray(currentConvertReport.items) ? currentConvertReport.items : []
+        const filtered = sortConvertItems(filterConvertItems(orderDisplayItems(fullList)))
+        const pageSize = getConvertPageSize()
+        const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+        currentConvertPage = Math.max(1, Math.min(totalPages, Number(page || 1)))
+        renderConvertReport(currentConvertReport)
+      }
+
+      function changeConvertPage(delta) {
+        const fullList = currentConvertReport && Array.isArray(currentConvertReport.items) ? currentConvertReport.items : []
+        const filtered = sortConvertItems(filterConvertItems(orderDisplayItems(fullList)))
+        const pageSize = getConvertPageSize()
+        const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+        currentConvertPage = Math.max(1, Math.min(totalPages, currentConvertPage + Number(delta || 0)))
+        renderConvertReport(currentConvertReport)
+      }
+
+      function renderResultPager(totalCount, pageSize, page) {
+        const total = Number(totalCount || 0)
+        const size = Math.max(1, Number(pageSize || 50))
+        const totalPages = Math.max(1, Math.ceil(total / size))
+        const safePage = Math.max(1, Math.min(totalPages, Number(page || 1)))
+        const start = total ? (safePage - 1) * size + 1 : 0
+        const end = total ? Math.min(total, safePage * size) : 0
+        document.getElementById('resultPageSummary').textContent =
+          total ? `第 ${safePage} / ${totalPages} 页，显示 ${start}-${end} / ${total} 条。` : '等待运行适配。'
+      }
+
+      function changeResultPage(delta) {
+        const fullList = currentJob && Array.isArray(currentJob.results) ? currentJob.results : []
+        const filtered = filterByImageKind(orderDisplayItems(fullList))
+        const pageSize = getResultPageSize()
+        const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+        currentResultPage = Math.max(1, Math.min(totalPages, currentResultPage + Number(delta || 0)))
+        renderResults(fullList)
+      }
+
+      function renderResults(results) {
+        const rows = document.getElementById('resultRows')
+        const fullList = orderDisplayItems(results)
+        const list = filterByImageKind(fullList)
+        const filterMode = String(document.getElementById('resultImageFilter')?.value || 'all')
+        const hint =
+          filterMode === 'all'
+            ? `显示全部 ${fullList.length} 条。`
+            : `筛选后显示 ${list.length} / ${fullList.length} 条。`
+        document.getElementById('resultImageFilterHint').textContent = hint
+        if (!fullList.length) {
+          currentResultPage = 1
+          renderResultPager(0, getResultPageSize(), 1)
+          rows.innerHTML = '<tr><td colspan="9" class="muted">未解析到有效 BOM。</td></tr>'
+          return
+        }
+        if (!list.length) {
+          currentResultPage = 1
+          renderResultPager(0, getResultPageSize(), 1)
+          rows.innerHTML = '<tr><td colspan="9" class="muted">当前筛选条件下没有匹配条目。</td></tr>'
+          return
+        }
+        const pageSize = getResultPageSize()
+        const totalPages = Math.max(1, Math.ceil(list.length / pageSize))
+        currentResultPage = Math.max(1, Math.min(totalPages, currentResultPage))
+        const startIndex = (currentResultPage - 1) * pageSize
+        const pagedList = list.slice(startIndex, startIndex + pageSize)
+        renderResultPager(list.length, pageSize, currentResultPage)
+        rows.innerHTML = pagedList
+          .map(
+            (item) => `<tr>
+              <td>${buildSourceCell(item)}</td>
+              <td>${buildColorCell(item.color_no, 'lego', item.color_name || '')}</td>
+              <td>${item.qty || 0}</td>
+              <td>${buildResolvedCell(item)}</td>
+              <td>${buildColorCell(item.resolved_color_no, 'gobricks')}</td>
+              <td>${stageNames[item.stage] || item.stage || '-'}</td>
+              <td>${riskBadge(item.risk)}</td>
+              <td>${item.review_status || '-'}</td>
+              <td>${buildNoteCell(item.note || '-', item.resolved_meta && item.resolved_meta.item_id ? `主库ID：${item.resolved_meta.item_id}` : '')}</td>
+            </tr>`
+          )
+          .join('')
+      }
+
+      function renderReviewQueue(results) {
+        const rows = document.getElementById('reviewRows')
+        const baseList = (results || []).filter((item) => String(item.risk || '').toUpperCase() !== 'A')
+        const list = orderDisplayItems(filterByImageKind(baseList))
+        if (!baseList.length) {
+          rows.innerHTML = '<tr><td colspan="6" class="muted">当前没有需要人工复核的条目。</td></tr>'
+          return
+        }
+        if (!list.length) {
+          rows.innerHTML = '<tr><td colspan="6" class="muted">当前筛选条件下没有待复核条目。</td></tr>'
+          return
+        }
+        rows.innerHTML = list
+          .map(
+            (item) => `<tr>
+              <td>${item.part_no || '-'} / ${item.color_no || '-'} / ${item.qty || 0}</td>
+              <td>${item.resolved_part_no || '-'} / ${item.resolved_color_no || '-'}</td>
+              <td>${riskBadge(item.risk)}</td>
+              <td>${buildNoteCell(item.note || '-')}</td>
+              <td>${item.review_status || '-'}</td>
+              <td>
+                <details class="review-inline">
+                  <summary><span class="review-trigger">处理</span></summary>
+                  <div class="review-actions">
+                    <button onclick="updateReviewStatus(${item.line_no}, 'approved')">通过</button>
+                    <button onclick="updateReviewStatus(${item.line_no}, 'hold')">挂起</button>
+                    <button onclick="updateReviewStatus(${item.line_no}, 'rejected')">退回</button>
+                  </div>
+                </details>
+              </td>
+            </tr>`
+          )
+          .join('')
+      }
+
+      function renderImageGaps(results) {
+        const summaryEl = document.getElementById('imageGapSummaryLine')
+        const listEl = document.getElementById('imageGapList')
+        const source = Array.isArray(results) ? results : []
+        if (!source.length) {
+          summaryEl.textContent = '等待运行适配后统计无图条目。'
+          listEl.innerHTML =
+            '<div class="compact-empty">运行适配后，这里会优先列出仍然没有准确图片的零件，方便集中补图或人工校验。</div>'
+          return
+        }
+        const missing = source.filter((item) => String(item.source_image_kind || 'placeholder') === 'placeholder')
+        const printed = missing.filter((item) => String(item.tag || '') === 'printed')
+        const regular = missing.filter((item) => String(item.tag || '') !== 'printed')
+        summaryEl.textContent =
+          missing.length
+            ? `当前共 ${missing.length} 条无图；其中印刷件 ${printed.length} 条，普通件 ${regular.length} 条。优先处理印刷件和高频数量件。`
+            : '当前结果里的原零件都已经命中图片。'
+        if (!missing.length) {
+          listEl.innerHTML = '<div class="compact-empty">当前结果里没有无图条目。</div>'
+          return
+        }
+        const topList = missing
+          .map((item, index) => ({ item, index }))
+          .sort((a, b) => {
+            const tagA = String(a.item.tag || '') === 'printed' ? 0 : 1
+            const tagB = String(b.item.tag || '') === 'printed' ? 0 : 1
+            if (tagA !== tagB) return tagA - tagB
+            const qtyA = Number(a.item.qty || 0)
+            const qtyB = Number(b.item.qty || 0)
+            if (qtyA !== qtyB) return qtyB - qtyA
+            return a.index - b.index
+          })
+          .slice(0, 12)
+          .map(({ item }) => item)
+        listEl.innerHTML = topList
+          .map((item) => {
+            const badges = []
+            badges.push(`<span class="mini-badge">数量 x${escapeHtml(item.qty || 0)}</span>`)
+            if (String(item.tag || '') === 'printed') {
+              badges.push('<span class="mini-badge">印刷件优先补图</span>')
+            } else {
+              badges.push('<span class="mini-badge">普通件</span>')
+            }
+            if (item.stage) {
+              badges.push(`<span class="mini-badge">${escapeHtml(stageNames[item.stage] || item.stage)}</span>`)
+            }
+            return `<div class="gap-item">
+              <div class="gap-topline">
+                <div class="part-cell" style="min-width: 0">
+                  ${buildThumb('', (item.part_no || '-').replace(/[^A-Za-z0-9]/g, '').slice(0, 6) || '-')}
+                  <div class="part-main">
+                    <div class="gap-title">${escapeHtml(item.name || item.part_no || '-')}</div>
+                    <div class="part-sub">${escapeHtml(item.part_no || '-')}</div>
+                  </div>
+                </div>
+                ${riskBadge(item.risk)}
+              </div>
+              <div class="gap-meta">
+                ${buildColorCell(item.color_no, 'lego', item.color_name || '')}
+                <div class="meta-badges">${badges.join('')}</div>
+                <div class="note-muted">${escapeHtml(item.note || '当前未命中精确图片，建议优先校验零件号、颜色号，必要时补充图源。')}</div>
+              </div>
+            </div>`
+          })
+          .join('')
+      }
+
+      function renderExport(results) {
+        const lines = ['gaozhuan_part_no,gaozhuan_color_no,qty,source_part_no,source_color_no,review_status']
+        ;(results || [])
+          .filter((item) => {
+            const partNo = String(item.resolved_part_no || '').trim()
+            return partNo && partNo !== '-'
+          })
+          .forEach((item) => {
+            lines.push(
+              [
+                item.resolved_part_no || '',
+                item.resolved_color_no || '',
+                item.qty || 0,
+                item.part_no || '',
+                item.color_no || '',
+                item.review_status || ''
+              ].join(',')
+            )
+          })
+        document.getElementById('exportOutput').value = lines.join('\n')
+      }
+
+      function updateMetrics(summary) {
+        const safe = summary || {}
+        setMetric('metricTypes', safe.total_types || 0)
+        setMetric('metricQty', safe.total_qty || 0)
+        setMetric('metricAutoRate', `${Number(safe.auto_match_rate || 0).toFixed(0)}%`)
+        setMetric('metricProdRate', `${Number(safe.producible_rate || 0).toFixed(0)}%`)
+        document.getElementById('projectSummaryLine').textContent =
+          `共 ${safe.total_types || 0} 种 / ${safe.total_qty || 0} 件；自动通过 ${safe.auto_qty || 0} 件；待审核 ${safe.review_qty || 0} 件；不可直接落地 ${safe.blocked_qty || 0} 件。`
+      }
+
+      function renderJob(job) {
+        currentJob = job || null
+        currentResultPage = 1
+        syncStrategyPills()
+        if (!currentJob) {
+          renderStageSummary([])
+          renderResults([])
+          renderReviewQueue([])
+          renderImageGaps([])
+          renderExport([])
+          updateMetrics({})
+          return
+        }
+        const project = currentJob.project || {}
+        const strategy = currentJob.strategy || {}
+        document.getElementById('projectName').value = project.project_name || ''
+        document.getElementById('designerName').value = project.designer_name || ''
+        document.getElementById('sourceName').value = project.source_name || ''
+        syncSourceDisplay()
+        document.getElementById('colorMode').value = strategy.color_mode || 'balanced'
+        document.getElementById('allowDisplaySub').checked = Boolean(strategy.allow_display_sub)
+        document.getElementById('allowStructuralSub').checked = Boolean(strategy.allow_structural_sub)
+        syncStrategyPills()
+        renderStageSummary(currentJob.results || [])
+        renderResults(currentJob.results || [])
+        renderReviewQueue(currentJob.results || [])
+        renderImageGaps(currentJob.results || [])
+        renderExport(currentJob.results || [])
+        updateMetrics(currentJob.summary || {})
+      }
+
+      function renderJobs(items, total) {
+        const rows = document.getElementById('jobsRows')
+        const list = Array.isArray(items) ? items : []
+        document.getElementById('jobSummaryLine').textContent = `共 ${total || 0} 条记录，显示最近 ${list.length} 条。`
+        if (!list.length) {
+          rows.innerHTML = '<tr><td colspan="5" class="muted">暂无分析记录。</td></tr>'
+          return
+        }
+        rows.innerHTML = list
+          .map(
+            (item) => `<tr>
+              <td>${item.created_at || '-'}</td>
+              <td>${item.project_name || '-'}<br /><span class="muted">${item.job_id || '-'}</span></td>
+              <td>${Number(item.auto_match_rate || 0).toFixed(0)}%</td>
+              <td>${item.review_qty || 0}</td>
+              <td><button onclick="loadJobDetail('${item.job_id}')">载入</button></td>
+            </tr>`
+          )
+          .join('')
+      }
+
+      function renderSources(items) {
+        const rows = document.getElementById('sourceRows')
+        const list = Array.isArray(items) ? items : []
+        if (!list.length) {
+          rows.innerHTML = '<tr><td colspan="3" class="muted">暂无公开来源。</td></tr>'
+          return
+        }
+        rows.innerHTML = list
+          .map(
+            (item) => `<tr>
+              <td><a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.name || item.domain || '-'}</a><br /><span class="muted">${item.domain || '-'}</span></td>
+              <td>${item.source_type || '-'}</td>
+              <td>${item.notes || '-'}</td>
+            </tr>`
+          )
+          .join('')
+      }
+
+      function renderGobricksColorReference(items) {
+        const rows = document.getElementById('gobricksColorRows')
+        currentGobricksColorReference = Array.isArray(items) ? items : currentGobricksColorReference
+        const fullList = Array.isArray(currentGobricksColorReference) ? currentGobricksColorReference : []
+        const list = filterGobricksColorReference(fullList)
+        const finish = String(document.getElementById('gobricksColorFinishFilter')?.value || 'all')
+        const keyword = String(document.getElementById('gobricksColorSearch')?.value || '').trim()
+        document.getElementById('gobricksColorFilterHint').textContent =
+          keyword || finish !== 'all'
+            ? `筛选后显示 ${list.length} / ${fullList.length} 条。`
+            : `当前共 ${fullList.length} 条高砖颜色参考。`
+        if (!fullList.length) {
+          rows.innerHTML = '<tr><td colspan="5" class="muted">当前还没有足够的历史映射数据。</td></tr>'
+          return
+        }
+        if (!list.length) {
+          rows.innerHTML = '<tr><td colspan="5" class="muted">当前筛选条件下没有匹配颜色。</td></tr>'
+          return
+        }
+        rows.innerHTML = list
+          .map((item) => {
+            const legoColors = Array.isArray(item.lego_colors) ? item.lego_colors : []
+            const badges = legoColors.length
+              ? legoColors
+                  .map(
+                    (entry) =>
+                      `<span class="mini-badge">LEGO ${escapeHtml(entry.lego_color_no || '-')} ${escapeHtml(entry.lego_color_name || '')}${entry.lego_color_name_en ? ` / ${escapeHtml(entry.lego_color_name_en || '')}` : ''}</span>`
+                  )
+                  .join('')
+              : '<span class="muted">暂无样本</span>'
+            return `<tr>
+              <td>
+                <div class="color-swatch-wrap">
+                  <span class="color-swatch" style="background:${escapeHtml(item.swatch_hex || '#d7dce4')}"></span>
+                  <span class="color-swatch-code">${escapeHtml(item.swatch_hex || '-')}</span>
+                </div>
+              </td>
+              <td>
+                <strong>${escapeHtml(item.gobricks_color_no || '-')}</strong><br />
+                <span class="muted">${escapeHtml(item.gobricks_color_name || item.gobricks_color_name_en || `高砖色 ${item.gobricks_color_no || '-'}`)}</span>
+                ${item.gobricks_color_name_en ? `<br /><span class="color-name-en">${escapeHtml(item.gobricks_color_name_en || '')}</span>` : ''}
+              </td>
+              <td>${escapeHtml(item.mapped_count || 0)}</td>
+              <td>${escapeHtml(item.finish || '-')}</td>
+              <td><div class="meta-badges">${badges}</div></td>
+            </tr>`
+          })
+          .join('')
+      }
+
+      function renderConvertReport(report) {
+        const summaryEl = document.getElementById('convertSummaryLine')
+        const rows = document.getElementById('convertRows')
+        const safe = report || {}
+        currentConvertReport = report || null
+        const fullList = orderDisplayItems(safe.items)
+        const sum = safe.summary || {}
+        if (!fullList.length) {
+          currentConvertPage = 1
+          summaryEl.textContent = '暂无高砖直连结果。'
+          document.getElementById('designerExportHint').textContent = '基于当前直连结果导出，仅保留设计师调整所需信息。'
+          renderConvertPager(0, getConvertPageSize(), 1)
+          rows.innerHTML = '<tr><td colspan="6" class="muted">尚未执行高砖直连转换。</td></tr>'
+          return
+        }
+        let list = sortConvertItems(filterConvertItems(fullList))
+        const suggestionText = sum.indexed_candidates ? `；补充候选建议 ${sum.indexed_candidates || 0}` : ''
+        const baseSummary =
+          `输入 ${sum.input_rows || 0} 行；本地缓存命中 ${sum.local_cached_hits || 0}；印刷件回退 ${sum.local_printed_fallbacks || 0}；高砖成功 ${sum.remote_success || 0}；缺颜色 ${sum.remote_color_deficiency || 0}；库存不足 ${sum.remote_inventory_deficiency || 0}；缺零件 ${sum.remote_miss || 0}${suggestionText}。`
+        if (!list.length) {
+          currentConvertPage = 1
+          summaryEl.textContent = `${baseSummary} 当前筛选条件下没有匹配条目。`
+          renderConvertPager(0, getConvertPageSize(), 1)
+          rows.innerHTML = '<tr><td colspan="6" class="muted">当前筛选条件下没有匹配条目。</td></tr>'
+          return
+        }
+        const pageSize = getConvertPageSize()
+        const totalPages = Math.max(1, Math.ceil(list.length / pageSize))
+        currentConvertPage = Math.max(1, Math.min(totalPages, currentConvertPage))
+        const startIndex = (currentConvertPage - 1) * pageSize
+        const pagedList = list.slice(startIndex, startIndex + pageSize)
+        summaryEl.textContent =
+          list.length === fullList.length ? baseSummary : `${baseSummary} 已筛选显示 ${list.length} / ${fullList.length} 条。`
+        renderConvertPager(list.length, pageSize, currentConvertPage)
+        rows.innerHTML = pagedList
+          .map(
+            (item) => `<tr>
+              <td>${buildSourceCell(item)}</td>
+              <td>${buildColorCell(item.color_no, 'lego', item.color_name || '')}</td>
+              <td>${item.qty || 0}</td>
+              <td>${item.status_text || item.category || '-'}</td>
+              <td>${buildResolvedCell(item)}</td>
+              <td>${buildNoteCell(item.detail || '-', item.resolved_meta && item.resolved_meta.item_id ? `主库ID：${item.resolved_meta.item_id}` : '')}</td>
+            </tr>`
+          )
+          .join('')
+      }
+
+      async function importGobricksResult() {
+        const input = document.getElementById('gobricksResultInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          alert('请先选择高砖结果文件。')
+          return
+        }
+        try {
+          setStatus('导入高砖结果中...')
+          const ret = await apiUploadGobricksResult(file)
+          const modeText = ret.mode === 'conversion' ? '格式转换列表' : '缺货表'
+          document.getElementById('gobricksImportHint').textContent =
+            `已导入 ${modeText}：${ret.filename}；本次新增 ${ret.imported || 0} 条；全局映射 ${ret.exact_combo_total || 0} 条；缺货规则 ${ret.shortage_combo_total || 0} 条。`
+          await loadRules()
+          setStatus('高砖结果已导入')
+        } catch (err) {
+          alert(err.message || '高砖结果导入失败')
+          setStatus(`高砖结果导入失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function importGobricksCatalog() {
+        const input = document.getElementById('gobricksCatalogInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          alert('请先选择 GDS 零件表 xlsx。')
+          return
+        }
+        try {
+          setStatus('导入 GDS 零件表中...')
+          const ret = await apiUploadGobricksCatalog(file)
+          document.getElementById('gobricksMasterHint').textContent =
+            `已导入 GDS 零件表：${ret.filename}；本次写入 ${ret.imported || 0} 条；高砖主库共 ${ret.total_indexed || 0} 条。`
+          await loadRules()
+          setStatus('GDS 零件表已导入')
+        } catch (err) {
+          alert(err.message || 'GDS 零件表导入失败')
+          setStatus(`GDS 零件表导入失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function importGobricksCategories() {
+        const input = document.getElementById('gobricksCategoriesInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          alert('请先选择零件分类 json。')
+          return
+        }
+        try {
+          setStatus('导入零件分类中...')
+          const ret = await apiUploadGobricksCategories(file)
+          document.getElementById('gobricksMasterHint').textContent =
+            `已导入零件分类：${ret.filename}；本次写入 ${ret.imported || 0} 条；分类字典共 ${ret.total_categories || 0} 条。`
+          await loadRules()
+          setStatus('零件分类已导入')
+        } catch (err) {
+          alert(err.message || '零件分类导入失败')
+          setStatus(`零件分类导入失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function importRebrickableRelationships() {
+        const input = document.getElementById('rebrickableRelationInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          alert('请先选择 Rebrickable part_relationships.csv。')
+          return
+        }
+        try {
+          setStatus('导入 Rebrickable 零件关系中...')
+          const ret = await apiUploadRebrickableRelationships(file)
+          document.getElementById('rebrickableRelationHint').textContent =
+            `已导入 Rebrickable 关系：${ret.filename}；本次写入 ${ret.imported || 0} 条；M关系 ${ret.rel_m_count || 0} 条；A关系 ${ret.rel_a_count || 0} 条；P关系 ${ret.rel_p_count || 0} 条；当前别名库 ${ret.total_aliases || 0} 条；印刷件基础模具 ${ret.total_print_relations || 0} 条。`
+          await loadRules()
+          setStatus('Rebrickable 零件关系已导入')
+        } catch (err) {
+          alert(err.message || 'Rebrickable 零件关系导入失败')
+          setStatus(`Rebrickable 零件关系导入失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function importRebrickableParts() {
+        const input = document.getElementById('rebrickablePartsInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          alert('请先选择 Rebrickable parts.csv。')
+          return
+        }
+        try {
+          setStatus('导入 Rebrickable 零件主表中...')
+          const ret = await apiUploadRebrickableParts(file)
+          document.getElementById('rebrickableDataHint').textContent =
+            `已导入 Rebrickable 零件主表：${ret.filename}；本次写入 ${ret.imported || 0} 条；零件主数据共 ${ret.total_parts || 0} 条。`
+          await loadRules()
+          setStatus('Rebrickable 零件主表已导入')
+        } catch (err) {
+          alert(err.message || 'Rebrickable 零件主表导入失败')
+          setStatus(`Rebrickable 零件主表导入失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function importRebrickablePartCategories() {
+        const input = document.getElementById('rebrickablePartCategoriesInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          alert('请先选择 Rebrickable part_categories.csv。')
+          return
+        }
+        try {
+          setStatus('导入 Rebrickable 零件分类中...')
+          const ret = await apiUploadRebrickablePartCategories(file)
+          document.getElementById('rebrickableDataHint').textContent =
+            `已导入 Rebrickable 零件分类：${ret.filename}；本次写入 ${ret.imported || 0} 条；零件分类共 ${ret.total_categories || 0} 条。`
+          await loadRules()
+          setStatus('Rebrickable 零件分类已导入')
+        } catch (err) {
+          alert(err.message || 'Rebrickable 零件分类导入失败')
+          setStatus(`Rebrickable 零件分类导入失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function importRebrickableColors() {
+        const input = document.getElementById('rebrickableColorsInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          alert('请先选择 Rebrickable colors.csv。')
+          return
+        }
+        try {
+          setStatus('导入 Rebrickable 颜色表中...')
+          const ret = await apiUploadRebrickableColors(file)
+          document.getElementById('rebrickableDataHint').textContent =
+            `已导入 Rebrickable 颜色表：${ret.filename}；本次写入 ${ret.imported || 0} 条；乐高颜色库共 ${ret.total_colors || 0} 条。`
+          await loadRules()
+          setStatus('Rebrickable 颜色表已导入')
+        } catch (err) {
+          alert(err.message || 'Rebrickable 颜色表导入失败')
+          setStatus(`Rebrickable 颜色表导入失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function importRebrickableElements() {
+        const input = document.getElementById('rebrickableElementsInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          alert('请先选择 Rebrickable elements.csv。')
+          return
+        }
+        try {
+          setStatus('导入 Rebrickable 元素表中...')
+          const ret = await apiUploadRebrickableElements(file)
+          document.getElementById('rebrickableDataHint').textContent =
+            `已导入 Rebrickable 元素表：${ret.filename}；本次写入 ${ret.imported || 0} 条；元素映射共 ${ret.total_elements || 0} 条。`
+          await loadRules()
+          setStatus('Rebrickable 元素表已导入')
+        } catch (err) {
+          alert(err.message || 'Rebrickable 元素表导入失败')
+          setStatus(`Rebrickable 元素表导入失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function syncGobricksItems() {
+        try {
+          const authToken = String(document.getElementById('gobricksAuthToken').value || '').trim()
+          if (!authToken) {
+            alert('请先填写高砖 auth_token。')
+            return
+          }
+          saveGobricksLocalConfig()
+          setStatus('同步高砖变更中...')
+          const payload = {
+            auth_token: authToken,
+            base_url: String(document.getElementById('gobricksApiBaseUrl').value || '').trim() || 'https://api.gobricks.cn',
+            start_time: String(document.getElementById('gobricksSyncStart').value || '').trim(),
+            end_time: String(document.getElementById('gobricksSyncEnd').value || '').trim(),
+            need_detail_info: document.getElementById('gobricksNeedDetail').checked
+          }
+          const ret = await apiSyncGobricksItems(payload)
+          const sync = ret.sync || {}
+          document.getElementById('gobricksSyncHint').textContent =
+            `同步完成：远端返回 ${ret.remote_count || 0} 条；本地索引 ${sync.total_indexed || 0} 条；本次更新 ${sync.updated || 0} 条；模式 ${payload.need_detail_info ? '拉详情' : '轻量同步'}。`
+          await loadRules()
+          setStatus('高砖变更已同步')
+        } catch (err) {
+          alert(err.message || '高砖同步失败')
+          setStatus(`高砖同步失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      function setJsonTextarea(id, value) {
+        document.getElementById(id).value = JSON.stringify(value || {}, null, 2)
+      }
+
+      function parseJsonTextarea(id, label) {
+        const raw = String(document.getElementById(id).value || '').trim()
+        if (!raw) {
+          return {}
+        }
+        try {
+          const parsed = JSON.parse(raw)
+          if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            throw new Error(`${label} 必须是 JSON 对象`)
+          }
+          return parsed
+        } catch (err) {
+          throw new Error(`${label} 不是有效 JSON：${err.message || '格式错误'}`)
+        }
+      }
+
+      async function loadRules() {
+        const ret = await apiGet('/api/admin/part-adapter/rules')
+        currentLegoColorCatalog = ret.lego_color_catalog || {}
+        setJsonTextarea('exactPartMapInput', ret.exact_part_map || {})
+        setJsonTextarea('partMetaInput', ret.part_meta || {})
+        setJsonTextarea('colorRulesInput', ret.color_rules || {})
+        setJsonTextarea('substitutionsInput', ret.substitutions || {})
+        const exactCount = Object.keys(ret.exact_part_map || {}).length
+        const colorCount = Object.keys(ret.color_rules || {}).length
+        const colorCatalogCount = Number(ret.lego_color_catalog_size || 0)
+        const gobricksColorCatalogCount = Number(ret.gobricks_color_catalog_size || 0)
+        currentGobricksColorCatalog = ret.gobricks_color_catalog || {}
+        const subCount = Object.keys(ret.substitutions || {}).length
+        const exactComboCount = Number(ret.exact_combo_map_size || 0)
+        const shortageComboCount = Number(ret.shortage_combo_map_size || 0)
+        const gobricksIndexSize = Number(ret.gobricks_item_index_size || 0)
+        const gobricksCategorySize = Number(ret.gobricks_category_index_size || 0)
+        const imageCacheSize = Number(ret.part_image_cache_size || 0)
+        const aliasCount = Number(ret.part_alias_map_size || 0)
+        const rbPartsCount = Number(ret.rebrickable_part_catalog_size || 0)
+        const rbPartCategoriesCount = Number(ret.rebrickable_part_category_catalog_size || 0)
+        const elementMapCount = Number(ret.element_part_map_size || 0)
+        const printPartMapCount = Number(ret.print_part_map_size || 0)
+        const externalPartMapCount = Number(ret.external_part_map_size || 0)
+        const syncMeta = ret.gobricks_sync_meta || {}
+        document.getElementById('ruleStatusLine').textContent =
+          `规则更新时间：${ret.updated_at || '-'}；全局映射 ${exactComboCount} 条；缺货规则 ${shortageComboCount} 条；高砖索引 ${gobricksIndexSize} 条；高砖分类 ${gobricksCategorySize} 条；高砖颜色库 ${gobricksColorCatalogCount} 条；乐高颜色库 ${colorCatalogCount} 条；RB零件 ${rbPartsCount} 条；RB分类 ${rbPartCategoriesCount} 条；元素映射 ${elementMapCount} 条；印刷件基础模具 ${printPartMapCount} 条；外部编号桥接 ${externalPartMapCount} 条；图片缓存 ${imageCacheSize} 条；编号映射 ${exactCount} 条；编号别名 ${aliasCount} 条；颜色规则 ${colorCount} 条；相似件规则 ${subCount} 条。`
+        if (syncMeta && (syncMeta.last_sync_at || syncMeta.last_sync_count)) {
+          document.getElementById('gobricksSyncHint').textContent =
+            `上次同步：${syncMeta.last_sync_at || '-'}；时间窗 ${syncMeta.last_sync_start_time || '-'} ~ ${syncMeta.last_sync_end_time || '-'}；更新 ${syncMeta.last_sync_count || 0} 条；模式 ${syncMeta.need_detail_info === false ? '轻量同步' : '拉详情'}。`
+          if (syncMeta.base_url) {
+            document.getElementById('gobricksApiBaseUrl').value = String(syncMeta.base_url)
+          }
+          document.getElementById('gobricksNeedDetail').checked = syncMeta.need_detail_info === false ? false : true
+        }
+        renderGobricksColorReference(ret.gobricks_color_reference || [])
+        renderSources(ret.source_refs || [])
+      }
+
+      async function saveRules() {
+        try {
+          setStatus('保存规则中...')
+          const payload = {
+            exact_part_map: parseJsonTextarea('exactPartMapInput', '编号映射'),
+            part_meta: parseJsonTextarea('partMetaInput', '零件元信息'),
+            color_rules: parseJsonTextarea('colorRulesInput', '颜色规则'),
+            substitutions: parseJsonTextarea('substitutionsInput', '相似件规则')
+          }
+          await apiPut('/api/admin/part-adapter/rules', payload)
+          await loadRules()
+          setStatus('规则已保存')
+        } catch (err) {
+          alert(err.message || '规则保存失败')
+          setStatus(`规则保存失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function importBomFile() {
+        const input = document.getElementById('bomFileInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          setStatus('请选择 BOM 文件...')
+          requestBomFileSelection('import')
+          return
+        }
+        try {
+          let waited = 0
+          setStatus('导入文件中... 0s')
+          const ticker = window.setInterval(() => {
+            waited += 1
+            setStatus(`导入文件中... ${waited}s`)
+          }, 1000)
+          window.__partAdapterTicker = ticker
+          const ret = await apiUploadBom(file)
+          window.clearInterval(ticker)
+          window.__partAdapterTicker = null
+          document.getElementById('bomInput').value = ret.bom_text || ''
+          document.getElementById('sourceName').value = ret.filename || file.name || ''
+          syncSourceDisplay()
+          document.getElementById('bomImportHint').textContent = `已导入 ${ret.filename || file.name}，解析 ${ret.row_count || 0} 行。`
+          setStatus('文件已导入')
+        } catch (err) {
+          const activeTicker = window.__partAdapterTicker
+          if (activeTicker) {
+            window.clearInterval(activeTicker)
+            window.__partAdapterTicker = null
+          }
+          alert(err.message || '文件导入失败')
+          setStatus(`文件导入失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function convertWithGobricks() {
+        const input = document.getElementById('bomFileInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          setStatus('请选择原始文件，选完后会自动继续高砖转换...')
+          requestBomFileSelection('convert')
+          return
+        }
+        const authToken = String(document.getElementById('gobricksAuthToken').value || '').trim()
+        if (!authToken) {
+          alert('请先填写高砖 auth_token。')
+          return
+        }
+        try {
+          saveGobricksLocalConfig()
+          let waited = 0
+          setStatus('调用高砖直连转换中... 0s')
+          const ticker = window.setInterval(() => {
+            waited += 1
+            setStatus(`调用高砖直连转换中... ${waited}s`)
+          }, 1000)
+          window.__partAdapterTicker = ticker
+          const baseUrl = String(document.getElementById('gobricksApiBaseUrl').value || '').trim() || 'https://api.gobricks.cn'
+          const ret = await apiConvertWithGobricks(file, authToken, baseUrl)
+          window.clearInterval(ticker)
+          window.__partAdapterTicker = null
+          const bom = ret.bom || {}
+          if (bom.bom_text) {
+            document.getElementById('bomInput').value = bom.bom_text
+            document.getElementById('sourceName').value = bom.filename || file.name || ''
+            syncSourceDisplay()
+            document.getElementById('bomImportHint').textContent = `已导入 ${bom.filename || file.name}，解析 ${bom.row_count || 0} 行。`
+          }
+          renderConvertReport(ret.report || null)
+          await loadRules()
+          if (isPublicToolMode()) {
+            focusConvertSection()
+          }
+          setStatus('高砖直连转换完成')
+        } catch (err) {
+          const activeTicker = window.__partAdapterTicker
+          if (activeTicker) {
+            window.clearInterval(activeTicker)
+            window.__partAdapterTicker = null
+          }
+          alert(err.message || '高砖直连转换失败')
+          setStatus(`高砖直连转换失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function runAdapter() {
+        try {
+          setStatus('运行适配中...')
+          syncStrategyPills()
+          const payload = {
+            project_name: document.getElementById('projectName').value.trim(),
+            designer_name: document.getElementById('designerName').value.trim(),
+            source_name: document.getElementById('sourceName').value.trim(),
+            bom_text: document.getElementById('bomInput').value,
+            color_mode: document.getElementById('colorMode').value,
+            allow_display_sub: document.getElementById('allowDisplaySub').checked,
+            allow_structural_sub: document.getElementById('allowStructuralSub').checked
+          }
+          const ret = await apiPost('/api/admin/part-adapter/analyze', payload)
+          renderJob(ret.job || null)
+          await loadJobs()
+          setStatus('适配完成')
+        } catch (err) {
+          alert(err.message || '适配失败')
+          setStatus(`适配失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function loadJobs() {
+        try {
+          const ret = await apiGet('/api/admin/part-adapter/jobs?limit=12')
+          renderJobs(ret.items || [], ret.total || 0)
+        } catch (err) {
+          document.getElementById('jobsRows').innerHTML = `<tr><td colspan="5" class="muted">${err.message || '记录加载失败'}</td></tr>`
+        }
+      }
+
+      async function loadJobDetail(jobId) {
+        try {
+          setStatus('加载记录中...')
+          const ret = await apiGet(`/api/admin/part-adapter/jobs/${encodeURIComponent(jobId)}`)
+          renderJob(ret.job || null)
+          setStatus('已载入记录')
+        } catch (err) {
+          alert(err.message || '记录加载失败')
+          setStatus(`记录加载失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function updateReviewStatus(lineNo, nextStatus) {
+        if (!currentJob || !currentJob.job_id) {
+          return
+        }
+        try {
+          setStatus('更新审核状态中...')
+          const ret = await apiPut(`/api/admin/part-adapter/jobs/${encodeURIComponent(currentJob.job_id)}/review`, {
+            line_no: lineNo,
+            review_status: nextStatus
+          })
+          renderJob(ret.job || null)
+          await loadJobs()
+          setStatus('审核状态已更新')
+        } catch (err) {
+          alert(err.message || '审核状态更新失败')
+          setStatus(`审核状态更新失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function downloadCsv() {
+        if (!currentJob || !currentJob.job_id) {
+          alert('请先运行适配，或先载入一条已有记录。')
+          return
+        }
+        try {
+          const cfg = getCfg()
+          const res = await fetch(`${cfg.baseUrl}/api/admin/part-adapter/jobs/${encodeURIComponent(currentJob.job_id)}/export.csv`, {
+            headers: buildHeaders(false)
+          })
+          if (!res.ok) {
+            const text = await res.text()
+            let body = {}
+            try {
+              body = text ? JSON.parse(text) : {}
+            } catch (err) {
+              body = { detail: text || '导出失败' }
+            }
+            throw new Error(body.detail || '导出失败')
+          }
+          const blob = await res.blob()
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `${currentJob.job_id}.csv`
+          document.body.appendChild(link)
+          link.click()
+          link.remove()
+          URL.revokeObjectURL(url)
+          setStatus('CSV 已导出')
+        } catch (err) {
+          alert(err.message || '导出失败')
+          setStatus(`导出失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      async function reloadAll() {
+        try {
+          setStatus('加载中...')
+          syncStrategyPills()
+          renderConvertReport(null)
+          await Promise.all([loadRules(), loadJobs()])
+          setStatus('已刷新')
+        } catch (err) {
+          setStatus(`加载失败：${err.message || '请求异常'}`)
+        }
+      }
+
+      document.getElementById('colorMode').addEventListener('change', syncStrategyPills)
+      document.getElementById('simpleMode').addEventListener('change', applySimpleMode)
+      document.getElementById('allowDisplaySub').addEventListener('change', syncStrategyPills)
+      document.getElementById('allowStructuralSub').addEventListener('change', syncStrategyPills)
+      document.getElementById('bomFileInput').addEventListener('change', () => {
+        const input = document.getElementById('bomFileInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          pendingBomAction = ''
+          return
+        }
+        if (!pendingBomAction) {
+          document.getElementById('bomImportHint').textContent = `已选择 ${file.name}，点击“导入文件”或“直连高砖转换”继续。`
+          return
+        }
+        void handleBomFilePicked()
+      })
+      document.getElementById('resultImageFilter').addEventListener('change', () => {
+        currentResultPage = 1
+        renderResults(currentJob && currentJob.results ? currentJob.results : [])
+        renderReviewQueue(currentJob && currentJob.results ? currentJob.results : [])
+      })
+      document.getElementById('convertFilter').addEventListener('change', () => {
+        currentConvertPage = 1
+        renderConvertReport(currentConvertReport)
+      })
+      document.getElementById('convertSort').addEventListener('change', () => {
+        currentConvertPage = 1
+        renderConvertReport(currentConvertReport)
+      })
+      document.getElementById('convertPageSize').addEventListener('change', () => {
+        currentConvertPage = 1
+        renderConvertReport(currentConvertReport)
+      })
+      document.getElementById('resultPageSize').addEventListener('change', () => {
+        currentResultPage = 1
+        renderResults(currentJob && currentJob.results ? currentJob.results : [])
+      })
+      document.getElementById('gobricksColorSearch').addEventListener('input', () => {
+        renderGobricksColorReference(currentGobricksColorReference)
+      })
+      document.getElementById('gobricksColorFinishFilter').addEventListener('change', () => {
+        renderGobricksColorReference(currentGobricksColorReference)
+      })
+
+      loadDemoBom()
+      loadGobricksLocalConfig()
+      applyPublicMode()
+      syncStrategyPills()
+      syncSourceDisplay()
+      applySimpleMode()
+      reloadAll()
+    </script>
+  </body>
+</html>

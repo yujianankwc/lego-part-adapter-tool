@@ -1,0 +1,20 @@
+<view class="container">
+  <view class="card">
+    <view class="section-title">消息设置</view>
+    <view class="row">
+      <text>订单状态提醒</text>
+      <switch checked="{{settings.orderNotify}}" bindchange="handleOrderNotifyChange" color="#113da8" />
+    </view>
+    <view class="row">
+      <text>活动与众筹进度提醒</text>
+      <switch checked="{{settings.activityNotify}}" bindchange="handleActivityNotifyChange" color="#113da8" />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">账号操作</view>
+    <button class="secondary-btn action-btn" bindtap="handleRefreshLogin">刷新微信登录</button>
+    <button class="secondary-btn action-btn" bindtap="handleClearCache">清理缓存</button>
+    <button class="danger-btn action-btn" bindtap="handleLogout">退出登录</button>
+  </view>
+</view>

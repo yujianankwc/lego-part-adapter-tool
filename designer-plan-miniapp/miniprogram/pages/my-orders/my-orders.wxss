@@ -1,0 +1,84 @@
+.order-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin: 12rpx 0;
+}
+
+.order-tab {
+  padding: 8rpx 18rpx;
+  border: 1rpx solid #cddaf5;
+  border-radius: 999rpx;
+  background: #f8fbff;
+  color: #4b5a81;
+  font-size: 24rpx;
+  white-space: nowrap;
+}
+
+.order-tab.active {
+  background: linear-gradient(135deg, #173f93, #12357d);
+  border-color: #173f93;
+  color: #fff;
+}
+
+.period-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-bottom: 12rpx;
+}
+
+.period-tab {
+  padding: 6rpx 16rpx;
+  border: 1rpx solid #d8e3f8;
+  border-radius: 999rpx;
+  background: #fcfdff;
+  color: #5a678d;
+  font-size: 22rpx;
+  white-space: nowrap;
+}
+
+.period-tab.active {
+  background: #eef4ff;
+  border-color: #a8bdea;
+  color: #173a95;
+}
+
+.order-item {
+  border: 1rpx solid #dce5fa;
+  border-radius: 16rpx;
+  padding: 16rpx;
+  margin-bottom: 12rpx;
+  background: linear-gradient(180deg, #fbfdff, #f6f9ff);
+}
+
+.order-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.order-id {
+  font-weight: 700;
+  color: var(--brand-blue);
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
+
+.status {
+  color: #0a66c2;
+  font-size: 24rpx;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.empty {
+  color: var(--muted-text);
+}
+
+.load-more-btn {
+  margin-top: 8rpx;
+}

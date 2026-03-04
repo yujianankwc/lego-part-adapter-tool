@@ -1,0 +1,49 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/preorder/preorder",
+    "pages/designer-apply/designer-apply",
+    "pages/profile/profile",
+    "pages/my-orders/my-orders",
+    "pages/account-center/account-center",
+    "pages/help-center/help-center",
+    "pages/feedback-center/feedback-center",
+    "pages/settings-center/settings-center",
+    "pages/designer-profile/designer-profile",
+    "pages/designer-center/designer-center",
+    "pages/work-detail/work-detail"
+  ],
+  "window": {
+    "navigationBarTitleText": "酷玩潮原创计划",
+    "navigationBarBackgroundColor": "#0e2f86",
+    "navigationBarTextStyle": "white",
+    "backgroundTextStyle": "light",
+    "backgroundColor": "#f4f7ff"
+  },
+  "tabBar": {
+    "color": "#6d7384",
+    "selectedColor": "#0e2f86",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/preorder/preorder",
+        "text": "预售"
+      },
+      {
+        "pagePath": "pages/designer-apply/designer-apply",
+        "text": "投稿"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

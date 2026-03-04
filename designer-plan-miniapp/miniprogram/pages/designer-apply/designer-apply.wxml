@@ -1,0 +1,49 @@
+<view class="container">
+  <view class="card">
+    <view class="section-title">设计师计划投稿入口</view>
+    <view class="section-desc">{{program.intro}}</view>
+  </view>
+
+  <view class="card">
+    <view class="form-title">基本信息</view>
+    <view class="form-item">
+      <text class="label">设计师名 *</text>
+      <input class="input" placeholder="请输入姓名或工作室名" data-field="designerName" bindinput="handleInput" value="{{form.designerName}}" />
+    </view>
+    <view class="form-item">
+      <text class="label">联系方式 *</text>
+      <input class="input" placeholder="微信/手机号/邮箱" data-field="contact" bindinput="handleInput" value="{{form.contact}}" />
+    </view>
+    <view class="form-item">
+      <text class="label">作品名称 *</text>
+      <input class="input" placeholder="例如：破茧者·山海版" data-field="workName" bindinput="handleInput" value="{{form.workName}}" />
+    </view>
+    <view class="form-item">
+      <text class="label">作品分类</text>
+      <picker mode="selector" range="{{categoryOptions}}" value="{{categoryIndex}}" bindchange="handleCategoryChange">
+        <view class="picker">{{categoryOptions[categoryIndex]}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="label">预计零件数 *</text>
+      <input class="input" type="number" placeholder="例如：850" data-field="estimatedPieces" bindinput="handleInput" value="{{form.estimatedPieces}}" />
+    </view>
+    <view class="form-item">
+      <text class="label">作品简介 *</text>
+      <textarea class="textarea" placeholder="请描述创作灵感、结构亮点与目标用户（至少30字）" data-field="intro" bindinput="handleInput" value="{{form.intro}}" maxlength="500" />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="form-title">作品图片（最多 6 张）*</view>
+    <view class="image-grid">
+      <view class="image-box" wx:for="{{imageList}}" wx:key="*this">
+        <image class="preview" src="{{item}}" mode="aspectFill" />
+        <view class="remove" data-index="{{index}}" bindtap="handleDeleteImage">删除</view>
+      </view>
+      <view class="image-upload" bindtap="handleChooseImage" wx:if="{{imageList.length < 6}}">+ 上传</view>
+    </view>
+
+    <button class="primary-btn submit-btn" bindtap="handleSubmit">提交投稿</button>
+  </view>
+</view>

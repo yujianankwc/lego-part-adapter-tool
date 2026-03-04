@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>原创设计师计划后台 · 设置中心</title>
+    <link rel="stylesheet" href="/admin-assets/admin.css" />
+  </head>
+  <body>
+    <div class="wrap" id="adminPageRoot" data-admin-module="setting" data-single-module="1">
+      <h1>原创设计师计划运营后台</h1>
+      <div class="card row">
+        <input id="baseUrl" value="http://127.0.0.1:8002" style="min-width: 260px" />
+        <input id="adminToken" value="kwc-admin-dev" placeholder="兼容模式 Token（可选）" style="min-width: 260px" />
+        <select id="adminRole" style="min-width: 140px" onchange="handleAdminRoleChange()">
+          <option value="superadmin">超级管理员</option>
+          <option value="operator">运营</option>
+          <option value="finance">财务</option>
+          <option value="reviewer">审核</option>
+        </select>
+        <input id="adminOperator" value="运营同学" style="min-width: 160px" />
+        <button onclick="loadAll()">刷新数据</button>
+        <span id="status" class="muted"></span>
+      </div>
+
+      <div class="card module-nav">
+        <button class="module-btn" data-module-btn="overview" onclick="setAdminModule('overview')">总览</button>
+        <button class="module-btn" data-module-btn="project" onclick="setAdminModule('project')">项目管理</button>
+        <button class="module-btn" data-module-btn="order" onclick="setAdminModule('order')">订单管理</button>
+        <button class="module-btn" data-module-btn="user" onclick="setAdminModule('user')">用户管理</button>
+        <button class="module-btn" data-module-btn="submission" onclick="setAdminModule('submission')">投稿审核</button>
+        <button class="module-btn" data-module-btn="designer" onclick="setAdminModule('designer')">设计师分成</button>
+        <button class="module-btn" data-module-btn="feedback" onclick="setAdminModule('feedback')">反馈中心</button>
+        <button class="module-btn" data-module-btn="log" onclick="setAdminModule('log')">操作日志</button>
+        <button class="module-btn" data-module-btn="setting" onclick="setAdminModule('setting')">设置中心</button>
+      </div>
+
+      <div class="card module-card" data-modules="setting">
+        <h3>后台登录</h3>
+        <div class="row">
+          <input id="adminUsername" placeholder="用户名" style="min-width: 180px" />
+          <input id="adminPassword" type="password" placeholder="密码" style="min-width: 180px" />
+          <button id="adminLoginBtn" onclick="adminLogin()">用户名密码登录</button>
+          <button id="adminLogoutBtn" onclick="adminLogout()">退出登录</button>
+          <span id="adminAuthState" class="muted"></span>
+        </div>
+        <div class="muted" id="adminRoleHint"></div>
+        <div class="muted" id="adminLegacyTip"></div>
+      </div>
+
+      <div class="card module-card" data-modules="setting">
+        <h3>通用设置</h3>
+        <div class="row">
+          <input id="settingSiteName" placeholder="站点名称" style="min-width: 260px" />
+          <input id="settingSiteSubtitle" placeholder="站点副标题" style="min-width: 320px" />
+          <input id="settingContactEmail" placeholder="联系邮箱" style="min-width: 220px" />
+          <input id="settingContactWechat" placeholder="客服微信" style="min-width: 220px" />
+        </div>
+        <div class="row">
+          <textarea id="settingAnnouncement" placeholder="全局公告（展示在前台）" style="min-width: 820px; min-height: 96px"></textarea>
+        </div>
+      </div>
+
+      <div class="card module-card" data-modules="setting">
+        <h3>接口设置</h3>
+        <div class="row">
+          <input id="settingApiBaseUrl" placeholder="API 基础地址" style="min-width: 320px" />
+          <input id="settingMediaBaseUrl" placeholder="媒体基础地址" style="min-width: 320px" />
+          <select id="settingWechatLoginEnabled">
+            <option value="1">开启微信登录</option>
+            <option value="0">关闭微信登录</option>
+          </select>
+          <select id="settingPaymentMode">
+            <option value="mock">mock</option>
+            <option value="wechat">wechat</option>
+          </select>
+          <input id="settingRequestTimeout" type="number" min="1000" max="60000" step="100" placeholder="请求超时(ms)" style="width: 160px" />
+        </div>
+        <div class="row">
+          <button onclick="saveAdminSettings()">保存设置</button>
+          <span id="settingUpdatedAt" class="muted"></span>
+        </div>
+      </div>
+
+      <div class="card module-card" data-modules="setting">
+        <h3>岗位与权限管理</h3>
+        <div id="adminRoleSummary" class="muted"></div>
+        <div class="split-grid">
+          <div class="split-col">
+            <h4>新建岗位</h4>
+            <div class="row">
+              <input id="adminRoleCreateKey" placeholder="岗位标识，如 product_ops" style="min-width: 220px" />
+              <input id="adminRoleCreateName" placeholder="岗位名称，如 产品运营" style="min-width: 180px" />
+            </div>
+            <div id="adminRoleCreatePermissions" class="perm-grid"></div>
+            <div class="row">
+              <button onclick="createAdminRole()">创建岗位</button>
+            </div>
+          </div>
+          <div class="split-col">
+            <h4>编辑岗位</h4>
+            <div class="row">
+              <select id="adminRoleEditKey" style="min-width: 240px" onchange="handleAdminRoleEditChange()">
+                <option value="">请选择岗位</option>
+              </select>
+              <input id="adminRoleEditName" placeholder="岗位名称" style="min-width: 180px" />
+            </div>
+            <div id="adminRoleEditPermissions" class="perm-grid"></div>
+            <div id="adminRoleEditReadonlyTip" class="muted"></div>
+            <div class="row">
+              <button onclick="updateAdminRole()">保存岗位</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>岗位名称</th>
+                <th>岗位标识</th>
+                <th>权限</th>
+                <th>类型</th>
+                <th>更新时间</th>
+              </tr>
+            </thead>
+            <tbody id="adminRoleRows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card module-card" data-modules="setting">
+        <h3>管理员账号管理</h3>
+        <div id="adminUserSummary" class="muted"></div>
+        <div class="split-grid">
+          <div class="split-col">
+            <h4>新建管理员</h4>
+            <div class="row">
+              <input id="adminUserCreateUsername" placeholder="用户名" style="min-width: 160px" />
+              <input id="adminUserCreatePassword" type="password" placeholder="初始密码" style="min-width: 160px" />
+              <input id="adminUserCreateDisplayName" placeholder="显示名称" style="min-width: 160px" />
+            </div>
+            <div class="row">
+              <select id="adminUserCreateRole" style="min-width: 180px"></select>
+              <select id="adminUserCreateStatus" style="min-width: 120px">
+                <option value="active">启用</option>
+                <option value="disabled">停用</option>
+              </select>
+              <button onclick="createAdminUser()">创建账号</button>
+            </div>
+          </div>
+          <div class="split-col">
+            <h4>编辑管理员</h4>
+            <div class="row">
+              <input id="adminUserEditId" placeholder="管理员ID" readonly style="width: 120px" />
+              <input id="adminUserEditUsername" placeholder="用户名" readonly style="min-width: 160px" />
+              <input id="adminUserEditDisplayName" placeholder="显示名称" style="min-width: 160px" />
+            </div>
+            <div class="row">
+              <select id="adminUserEditRole" style="min-width: 180px"></select>
+              <select id="adminUserEditStatus" style="min-width: 120px">
+                <option value="active">启用</option>
+                <option value="disabled">停用</option>
+              </select>
+              <input id="adminUserEditPassword" type="password" placeholder="重置密码（留空不改）" style="min-width: 180px" />
+              <button onclick="updateAdminUser()">保存账号</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>显示名称</th>
+                <th>用户名</th>
+                <th>岗位</th>
+                <th>权限</th>
+                <th>状态</th>
+                <th>最近登录</th>
+                <th>更新时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="adminUserRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script src="/admin-assets/admin.js"></script>
+  </body>
+</html>

@@ -1,0 +1,156 @@
+<view class="container">
+  <view class="card hero" wx:if="{{profile}}">
+    <view class="name">{{profile.display_name || '设计师'}}</view>
+    <view class="meta">分成规则：作品销售额 × {{profile.default_share_percent}}%</view>
+    <view class="meta">状态：{{profile.status_text}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">我的设计师介绍</view>
+    <view class="profile-avatar-row">
+      <image class="profile-avatar" wx:if="{{profileDraft.avatarUrl}}" src="{{profileDraft.avatarUrl}}" mode="aspectFill" />
+      <view class="profile-avatar placeholder" wx:else>师</view>
+      <button class="secondary-btn avatar-btn" bindtap="handleChooseAvatar">上传头像</button>
+    </view>
+    <input class="input" placeholder="头像 URL（可手动修改）" data-field="avatarUrl" bindinput="handleProfileInput" value="{{profileDraft.avatarUrl}}" />
+    <input class="input" placeholder="设计师名称" data-field="displayName" bindinput="handleProfileInput" value="{{profileDraft.displayName}}" />
+    <textarea
+      class="textarea"
+      placeholder="个人介绍（展示在作品详情页）"
+      data-field="bio"
+      bindinput="handleProfileInput"
+      value="{{profileDraft.bio}}"
+      maxlength="1000"
+    />
+    <button class="primary-btn" bindtap="handleSaveProfile">{{profileSaving ? '保存中...' : '保存个人介绍'}}</button>
+  </view>
+
+  <view class="card">
+    <view class="section-title">销售与结算看板</view>
+    <view class="kpi-grid">
+      <view class="kpi">
+        <view class="kpi-value">{{sales.paid_orders_count}}</view>
+        <view class="kpi-label">已支付订单</view>
+      </view>
+      <view class="kpi">
+        <view class="kpi-value">{{sales.paid_units}}</view>
+        <view class="kpi-label">销量件数</view>
+      </view>
+      <view class="kpi">
+        <view class="kpi-value">￥{{sales.total_sales_amount}}</view>
+        <view class="kpi-label">销售额</view>
+      </view>
+      <view class="kpi">
+        <view class="kpi-value">￥{{sales.estimated_commission_amount}}</view>
+        <view class="kpi-label">预计分成</view>
+      </view>
+      <view class="kpi">
+        <view class="kpi-value">￥{{sales.pending_commission_amount}}</view>
+        <view class="kpi-label">未结算分成</view>
+      </view>
+      <view class="kpi">
+        <view class="kpi-value">￥{{sales.settled_commission_amount}}</view>
+        <view class="kpi-label">已结算分成</view>
+      </view>
+    </view>
+
+    <view class="work-item" wx:for="{{sales.by_work}}" wx:key="work_id">
+      <view class="work-head">
+        <text>{{item.work_name}}</text>
+        <text>{{item.share_percent}}%</text>
+      </view>
+      <view class="muted">订单 {{item.paid_orders}} · 销量 {{item.paid_units}} · 销售额 ￥{{item.total_sales_amount}}</view>
+      <view class="muted">未结算 ￥{{item.pending_commission_amount}} · 已结算 ￥{{item.settled_commission_amount}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">项目信息维护</view>
+    <picker mode="selector" range="{{assignments}}" range-key="work_name" bindchange="handleWorkChange" wx:if="{{assignments.length > 0}}">
+      <view class="picker">当前维护作品：{{projectDraft.workId || '请选择作品'}}</view>
+    </picker>
+    <view class="empty" wx:if="{{assignments.length === 0}}">你还没有绑定作品，请联系运营在后台绑定。</view>
+    <input class="input" placeholder="项目名称" data-field="name" bindinput="handleProjectInput" value="{{projectDraft.name}}" />
+    <input class="input" placeholder="项目副标题" data-field="subtitle" bindinput="handleProjectInput" value="{{projectDraft.subtitle}}" />
+    <input class="input" placeholder="主图 URL" data-field="coverImage" bindinput="handleProjectInput" value="{{projectDraft.coverImage}}" />
+    <textarea class="textarea" placeholder="项目故事" data-field="story" bindinput="handleProjectInput" value="{{projectDraft.story}}" maxlength="1200" />
+    <textarea
+      class="textarea small-textarea"
+      placeholder="图集 URL（每行一条，最多12条）"
+      data-field="galleryText"
+      bindinput="handleProjectInput"
+      value="{{projectDraft.galleryText}}"
+      maxlength="5000"
+    />
+    <textarea
+      class="textarea small-textarea"
+      placeholder="项目亮点（每行一条）"
+      data-field="highlightsText"
+      bindinput="handleProjectInput"
+      value="{{projectDraft.highlightsText}}"
+      maxlength="3000"
+    />
+    <button class="primary-btn" bindtap="handleSaveProject">{{projectSaving ? '保存中...' : '保存项目信息'}}</button>
+  </view>
+
+  <view class="card">
+    <view class="section-title">动态发布</view>
+    <picker mode="selector" range="{{assignments}}" range-key="work_name" bindchange="handleWorkChange" wx:if="{{assignments.length > 0}}">
+      <view class="picker">当前作品：{{draft.workId || '请选择作品'}}</view>
+    </picker>
+    <view class="empty" wx:if="{{assignments.length === 0}}">你还没有绑定作品，请联系运营在后台绑定。</view>
+    <input class="input" placeholder="动态标题" data-field="title" bindinput="handleInput" value="{{draft.title}}" />
+    <textarea class="textarea" placeholder="发布拼搭进度、发货通知、维护说明等" data-field="content" bindinput="handleInput" value="{{draft.content}}" maxlength="1000" />
+    <button class="primary-btn" bindtap="handlePublishUpdate">发布动态</button>
+
+    <view class="update-item" wx:for="{{updates}}" wx:key="update_id">
+      <view class="update-title">{{item.title}}</view>
+      <view class="muted">作品：{{item.work_name}}</view>
+      <view class="update-content">{{item.content}}</view>
+      <view class="muted">{{item.created_at}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">玩家评论互动</view>
+    <view class="empty" wx:if="{{comments.length === 0}}">当前作品还没有评论。</view>
+    <view class="update-item" wx:for="{{comments}}" wx:key="comment_id">
+      <view class="work-head">
+        <text>{{item.user_nickname}}</text>
+        <text class="muted">{{item.created_at}}</text>
+      </view>
+      <view class="update-content">{{item.content}}</view>
+      <view class="comment-reply-block" wx:if="{{item.designer_reply}}">
+        <view class="muted">已回复（{{item.reply_designer_name || '设计师'}} · {{item.reply_at}}）</view>
+        <view class="update-content">{{item.designer_reply}}</view>
+      </view>
+      <view wx:if="{{!item.designer_reply}}">
+        <textarea
+          class="textarea small-textarea"
+          placeholder="输入回复内容（最多500字）"
+          maxlength="500"
+          data-comment-id="{{item.comment_id}}"
+          bindinput="handleReplyInput"
+        />
+        <button class="secondary-btn" data-comment-id="{{item.comment_id}}" bindtap="handleReplyComment">
+          {{replyingCommentId === item.comment_id ? '回复中...' : '回复评论'}}
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">分成订单明细</view>
+    <view class="empty" wx:if="{{orders.length === 0}}">暂无已支付订单。</view>
+    <view class="order-item" wx:for="{{orders}}" wx:key="record_id">
+      <view class="order-top">
+        <text class="order-id">{{item.order_id}}</text>
+        <text class="status">{{item.settlement_status_text}}</text>
+      </view>
+      <view class="muted">{{item.work_name}} · {{item.sku_name}} x{{item.quantity}}</view>
+      <view class="muted">销售额 ￥{{item.total_amount}} · 分成 ￥{{item.commission_amount}}（{{item.share_percent}}%）</view>
+      <view class="muted">支付时间：{{item.paid_at || item.created_at}}</view>
+      <view class="muted" wx:if="{{item.settled_at}}">结算时间：{{item.settled_at}}</view>
+    </view>
+  </view>
+</view>

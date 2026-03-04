@@ -1,0 +1,92 @@
+.profile-head {
+  background: linear-gradient(145deg, #112e70 0%, #1a438f 52%, #2b5ca8 100%);
+  color: #ffffff;
+  box-shadow: 0 14rpx 32rpx rgba(14, 46, 112, 0.18);
+}
+
+.name {
+  font-size: 38rpx;
+  font-weight: 800;
+  letter-spacing: 0.5rpx;
+}
+
+.white {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.contact-btn {
+  margin-top: 18rpx;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+.entry-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.entry-btn {
+  width: 49%;
+  background: #f7faff;
+  border: 1rpx solid #d8e2f6;
+  color: #1b3e86;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  line-height: 1.35;
+  padding: 18rpx 10rpx;
+}
+
+.designer-entry .primary-btn,
+.designer-entry .secondary-btn {
+  margin-top: 14rpx;
+}
+
+.overview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 10rpx;
+}
+
+.overview-item {
+  width: 49%;
+  border: 1rpx solid #dde6f8;
+  border-radius: 16rpx;
+  padding: 16rpx;
+  background: linear-gradient(180deg, #fbfdff, #f5f9ff);
+}
+
+.overview-value {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: var(--brand-blue);
+}
+
+.submit-item {
+  border: 1rpx solid #dde6f8;
+  border-radius: 14rpx;
+  padding: 14rpx;
+  margin-bottom: 12rpx;
+  background: #f9fbff;
+}
+
+.submit-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.status {
+  color: #0a66c2;
+  font-size: 24rpx;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.empty {
+  color: var(--muted-text);
+}
