@@ -313,6 +313,13 @@ class PartAdapterGobricksSyncRequest(BaseModel):
     need_detail_info: bool = Field(default=True)
 
 
+def _resolve_gobricks_auth_token(provided: str = '') -> str:
+    direct = str(provided or '').strip()
+    if direct:
+        return direct
+    return str(os.environ.get('GOBRICKS_AUTH_TOKEN') or '').strip()
+
+
 def get_admin_token() -> str:
     return os.getenv('ADMIN_TOKEN', 'kwc-admin-dev').strip() or 'kwc-admin-dev'
 
@@ -2246,9 +2253,9 @@ def api_admin_part_adapter_sync_gobricks_items(
     admin: Dict[str, Any] = Depends(require_admin),
 ) -> Dict[str, Any]:
     _ = admin
-    auth_token = str(payload.auth_token or '').strip()
+    auth_token = _resolve_gobricks_auth_token(payload.auth_token)
     if not auth_token:
-        raise HTTPException(status_code=400, detail='请先提供高砖 auth_token')
+        raise HTTPException(status_code=400, detail='请先提供高砖 auth_token，或在服务端配置 GOBRICKS_AUTH_TOKEN')
     base_url = str(payload.base_url or 'https://api.gobricks.cn').strip().rstrip('/') or 'https://api.gobricks.cn'
     request_payload = {
         'auth_token': auth_token,
@@ -2307,9 +2314,9 @@ async def api_admin_part_adapter_convert_gobricks(
     admin: Dict[str, Any] = Depends(require_admin),
 ) -> Dict[str, Any]:
     _ = admin
-    safe_token = str(auth_token or '').strip()
+    safe_token = _resolve_gobricks_auth_token(auth_token)
     if not safe_token:
-        raise HTTPException(status_code=400, detail='请先提供高砖 auth_token')
+        raise HTTPException(status_code=400, detail='请先提供高砖 auth_token，或在服务端配置 GOBRICKS_AUTH_TOKEN')
     safe_base_url = str(base_url or 'https://api.gobricks.cn').strip().rstrip('/') or 'https://api.gobricks.cn'
     file_bytes = await file.read()
     try:

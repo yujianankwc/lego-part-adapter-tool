@@ -3906,7 +3906,7 @@
           return
         }
         const authToken = String(document.getElementById('gobricksAuthToken').value || '').trim()
-        if (!authToken) {
+        if (!authToken && !isPublicToolMode()) {
           alert('请先填写高砖 auth_token。')
           return
         }
