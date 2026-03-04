@@ -313,11 +313,25 @@ class PartAdapterGobricksSyncRequest(BaseModel):
     need_detail_info: bool = Field(default=True)
 
 
+class PartAdapterAnalyticsEventRequest(BaseModel):
+    event_type: str = Field(default='')
+    source_name: str = Field(default='')
+
+
 def _resolve_gobricks_auth_token(provided: str = '') -> str:
     direct = str(provided or '').strip()
     if direct:
         return direct
     return str(os.environ.get('GOBRICKS_AUTH_TOKEN') or '').strip()
+
+
+def _part_adapter_visitor_hash(request: Request) -> str:
+    client_host = str(request.client.host or '').strip() if request.client else ''
+    user_agent = str(request.headers.get('user-agent') or '').strip()
+    raw = f'{client_host}|{user_agent}'
+    if not raw.strip('|'):
+        return ''
+    return hashlib.sha256(raw.encode('utf-8')).hexdigest()[:16]
 
 
 def get_admin_token() -> str:
@@ -2137,6 +2151,7 @@ async def api_admin_part_adapter_import_bom(
         parsed = part_adapter_store.import_bom_file(filename=file.filename or '', content=content)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+    part_adapter_store.record_event('import_bom', route='/api/admin/part-adapter/import-bom', source_name=file.filename or '')
     return parsed
 
 
@@ -2364,6 +2379,7 @@ async def api_admin_part_adapter_convert_gobricks(
         bom_text=imported.get('bom_text', ''),
         remote_data=remote_data,
     )
+    part_adapter_store.record_event('convert_gobricks', route='/api/admin/part-adapter/convert-gobricks', source_name=file.filename or '')
     return {
         'ok': True,
         'message': body.get('msg') or '成功',
@@ -2393,7 +2409,33 @@ def api_admin_part_adapter_analyze(
         allow_display_sub=payload.allow_display_sub,
         allow_structural_sub=payload.allow_structural_sub,
     )
+    part_adapter_store.record_event('analyze', route='/api/admin/part-adapter/analyze', source_name=payload.source_name or payload.project_name)
     return {'job': job}
+
+
+@app.get('/api/admin/part-adapter/analytics')
+def api_admin_part_adapter_analytics(admin: Dict[str, Any] = Depends(require_admin)) -> Dict[str, Any]:
+    _ = admin
+    return {'summary': part_adapter_store.get_analytics_summary()}
+
+
+@app.post('/api/admin/part-adapter/analytics/event')
+def api_admin_part_adapter_analytics_event(
+    payload: PartAdapterAnalyticsEventRequest,
+    request: Request,
+    admin: Dict[str, Any] = Depends(require_admin),
+) -> Dict[str, Any]:
+    _ = admin
+    event_type = str(payload.event_type or '').strip()
+    if not event_type:
+        raise HTTPException(status_code=400, detail='缺少事件类型')
+    part_adapter_store.record_event(
+        event_type=event_type,
+        route=str(request.url.path or ''),
+        source_name=payload.source_name,
+        visitor_key=_part_adapter_visitor_hash(request),
+    )
+    return {'ok': True}
 
 
 @app.get('/api/admin/part-adapter/jobs')
@@ -2434,6 +2476,7 @@ def api_admin_part_adapter_export(job_id: str, admin: Dict[str, Any] = Depends(r
     csv_text = part_adapter_store.export_job_csv(job_id)
     if csv_text is None:
         raise HTTPException(status_code=404, detail='适配记录不存在')
+    part_adapter_store.record_event('export_csv', route=f'/api/admin/part-adapter/jobs/{job_id}/export.csv', source_name=job_id)
     return Response(
         content=csv_text,
         media_type='text/csv; charset=utf-8',
@@ -2467,7 +2510,7 @@ def admin_assets(asset_name: str) -> Any:
 
 
 @app.get('/admin/{module}', response_class=HTMLResponse)
-def admin_module_page(module: str) -> Any:
+def admin_module_page(module: str, request: Request) -> Any:
     safe_module = (module or '').strip().lower()
     if safe_module not in {
         'overview',
@@ -2484,6 +2527,12 @@ def admin_module_page(module: str) -> Any:
         raise HTTPException(status_code=404, detail='后台模块不存在')
     module_file = ADMIN_DIR / f'{safe_module}.html'
     if module_file.exists():
+        if safe_module == 'part-adapter':
+            part_adapter_store.record_event(
+                'page_view_admin',
+                route='/admin/part-adapter',
+                visitor_key=_part_adapter_visitor_hash(request),
+            )
         return FileResponse(module_file)
     index_file = ADMIN_DIR / 'index.html'
     if not index_file.exists():
@@ -2492,10 +2541,15 @@ def admin_module_page(module: str) -> Any:
 
 
 @app.get('/tools/part-adapter', response_class=HTMLResponse)
-def public_part_adapter_page() -> Any:
+def public_part_adapter_page(request: Request) -> Any:
     module_file = ADMIN_DIR / 'part-adapter.html'
     if not module_file.exists():
         raise HTTPException(status_code=404, detail='工具页面不存在')
+    part_adapter_store.record_event(
+        'page_view_public',
+        route='/tools/part-adapter',
+        visitor_key=_part_adapter_visitor_hash(request),
+    )
     response = FileResponse(module_file)
     response.set_cookie(
         key=PART_ADAPTER_PUBLIC_COOKIE,

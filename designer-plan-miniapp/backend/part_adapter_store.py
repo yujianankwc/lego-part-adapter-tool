@@ -18,6 +18,7 @@ DATA_DIR = BASE_DIR / 'data'
 PART_ADAPTER_DIR = DATA_DIR / 'part_adapter'
 RULES_PATH = PART_ADAPTER_DIR / 'rules.json'
 JOBS_PATH = PART_ADAPTER_DIR / 'jobs.json'
+ANALYTICS_PATH = PART_ADAPTER_DIR / 'analytics.json'
 
 REBRICKABLE_COLOR_NAME_ZH: Dict[str, str] = {
     'White': '白色',
@@ -323,6 +324,13 @@ DEFAULT_JOBS: Dict[str, Any] = {
     'items': [],
 }
 
+DEFAULT_ANALYTICS: Dict[str, Any] = {
+    'updated_at': '',
+    'totals': {},
+    'daily': {},
+    'recent': [],
+}
+
 
 class PartAdapterStore:
     def __init__(self) -> None:
@@ -343,6 +351,8 @@ class PartAdapterStore:
             self._write_json(RULES_PATH, seed)
         if not JOBS_PATH.exists():
             self._write_json(JOBS_PATH, deepcopy(DEFAULT_JOBS))
+        if not ANALYTICS_PATH.exists():
+            self._write_json(ANALYTICS_PATH, deepcopy(DEFAULT_ANALYTICS))
 
     def _read_json(self, path: Path, fallback: Dict[str, Any]) -> Dict[str, Any]:
         if not path.exists():
@@ -484,6 +494,105 @@ class PartAdapterStore:
         rules = self.get_rules()
         items = rules.get('source_refs')
         return deepcopy(items if isinstance(items, list) else [])
+
+    def _read_analytics_payload(self) -> Dict[str, Any]:
+        payload = self._read_json(ANALYTICS_PATH, DEFAULT_ANALYTICS)
+        merged = deepcopy(DEFAULT_ANALYTICS)
+        if isinstance(payload.get('updated_at'), str):
+            merged['updated_at'] = payload.get('updated_at') or ''
+        if isinstance(payload.get('totals'), dict):
+            merged['totals'] = deepcopy(payload.get('totals') or {})
+        if isinstance(payload.get('daily'), dict):
+            merged['daily'] = deepcopy(payload.get('daily') or {})
+        if isinstance(payload.get('recent'), list):
+            merged['recent'] = deepcopy(payload.get('recent') or [])
+        return merged
+
+    def record_event(
+        self,
+        event_type: str,
+        route: str = '',
+        source_name: str = '',
+        visitor_key: str = '',
+    ) -> None:
+        safe_event = str(event_type or '').strip()
+        if not safe_event:
+            return
+        with self.lock:
+            payload = self._read_analytics_payload()
+            today = datetime.now().strftime('%Y-%m-%d')
+            daily = payload.setdefault('daily', {})
+            day_bucket = daily.get(today)
+            if not isinstance(day_bucket, dict):
+                day_bucket = {'counts': {}, 'visitors': []}
+            counts = day_bucket.get('counts') if isinstance(day_bucket.get('counts'), dict) else {}
+            counts[safe_event] = int(counts.get(safe_event) or 0) + 1
+            day_bucket['counts'] = counts
+            visitors = day_bucket.get('visitors') if isinstance(day_bucket.get('visitors'), list) else []
+            safe_visitor = str(visitor_key or '').strip()
+            if safe_visitor and safe_visitor not in visitors:
+                visitors.append(safe_visitor)
+            day_bucket['visitors'] = visitors[-2000:]
+            daily[today] = day_bucket
+
+            totals = payload.setdefault('totals', {})
+            totals[safe_event] = int(totals.get(safe_event) or 0) + 1
+
+            recent = payload.setdefault('recent', [])
+            recent.insert(0, {
+                'at': _now_iso(),
+                'event_type': safe_event,
+                'route': str(route or '').strip(),
+                'source_name': str(source_name or '').strip(),
+            })
+            payload['recent'] = recent[:20]
+
+            keep_days = sorted(daily.keys())[-35:]
+            payload['daily'] = {key: daily.get(key) for key in keep_days if key in daily}
+            payload['updated_at'] = _now_iso()
+            self._write_json(ANALYTICS_PATH, payload)
+
+    def get_analytics_summary(self) -> Dict[str, Any]:
+        with self.lock:
+            payload = self._read_analytics_payload()
+        daily = payload.get('daily') if isinstance(payload.get('daily'), dict) else {}
+        today = datetime.now().strftime('%Y-%m-%d')
+        day_keys = sorted(daily.keys())
+        last_7_keys = day_keys[-7:]
+
+        def _count_for(keys: List[str], event_name: str) -> int:
+            total = 0
+            for key in keys:
+                item = daily.get(key) if isinstance(daily.get(key), dict) else {}
+                counts = item.get('counts') if isinstance(item.get('counts'), dict) else {}
+                total += int(counts.get(event_name) or 0)
+            return total
+
+        today_bucket = daily.get(today) if isinstance(daily.get(today), dict) else {}
+        today_counts = today_bucket.get('counts') if isinstance(today_bucket.get('counts'), dict) else {}
+        today_visitors = today_bucket.get('visitors') if isinstance(today_bucket.get('visitors'), list) else []
+        recent = payload.get('recent') if isinstance(payload.get('recent'), list) else []
+
+        return {
+            'updated_at': str(payload.get('updated_at') or ''),
+            'today': {
+                'page_views': int(today_counts.get('page_view_public') or 0) + int(today_counts.get('page_view_admin') or 0),
+                'unique_visitors': len(today_visitors),
+                'import_bom': int(today_counts.get('import_bom') or 0),
+                'convert_gobricks': int(today_counts.get('convert_gobricks') or 0),
+                'analyze': int(today_counts.get('analyze') or 0),
+                'exports': int(today_counts.get('export_csv') or 0) + int(today_counts.get('export_designer_pdf') or 0) + int(today_counts.get('export_designer_csv') or 0),
+            },
+            'last_7_days': {
+                'page_views': _count_for(last_7_keys, 'page_view_public') + _count_for(last_7_keys, 'page_view_admin'),
+                'import_bom': _count_for(last_7_keys, 'import_bom'),
+                'convert_gobricks': _count_for(last_7_keys, 'convert_gobricks'),
+                'analyze': _count_for(last_7_keys, 'analyze'),
+                'exports': _count_for(last_7_keys, 'export_csv') + _count_for(last_7_keys, 'export_designer_pdf') + _count_for(last_7_keys, 'export_designer_csv'),
+            },
+            'totals': deepcopy(payload.get('totals') if isinstance(payload.get('totals'), dict) else {}),
+            'recent': deepcopy(recent[:12]),
+        }
 
     def _meta_to_swatch_hex(self, meta: Dict[str, Any]) -> str:
         safe = meta if isinstance(meta, dict) else {}
