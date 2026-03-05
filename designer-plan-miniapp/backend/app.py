@@ -32,6 +32,35 @@ UPLOAD_DIR = DATA_DIR / 'uploads'
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 PART_ADAPTER_PUBLIC_COOKIE = 'kwc_part_adapter_token'
 
+
+def _load_local_env_file() -> None:
+    """
+    Load backend/.env.local for local development convenience.
+    Existing environment variables always take precedence.
+    """
+    env_path = BASE_DIR / '.env.local'
+    if not env_path.exists():
+        return
+    try:
+        raw_text = env_path.read_text(encoding='utf-8')
+    except Exception:
+        return
+    for line in raw_text.splitlines():
+        item = line.strip()
+        if not item or item.startswith('#') or '=' not in item:
+            continue
+        key, value = item.split('=', 1)
+        safe_key = key.strip()
+        if not safe_key:
+            continue
+        safe_value = value.strip().strip('"').strip("'")
+        if safe_key in os.environ:
+            continue
+        os.environ[safe_key] = safe_value
+
+
+_load_local_env_file()
+
 app = FastAPI(title='KWC Designer Plan API', version='1.2.0')
 app.add_middleware(
     CORSMiddleware,

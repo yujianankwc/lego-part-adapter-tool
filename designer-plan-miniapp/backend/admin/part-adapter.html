@@ -606,7 +606,7 @@
         align-items: center;
       }
 
-      .toolbar input,
+      .toolbar input:not([type='checkbox']),
       .toolbar select {
         min-width: 140px;
         min-height: 42px;
@@ -615,6 +615,15 @@
         background: #fff;
         padding: 0 12px;
         box-sizing: border-box;
+      }
+
+      .toolbar input[type='checkbox'] {
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+        min-height: 16px;
+        margin: 0;
+        accent-color: #1e63d7;
       }
 
       button {
@@ -738,6 +747,20 @@
         font-weight: 800;
         text-align: center;
         line-height: 1.15;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      }
+
+      .part-thumb.is-zoomable {
+        cursor: zoom-in;
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .part-thumb.is-zoomable:hover {
+          transform: scale(1.18);
+          border-color: #9db7ea;
+          box-shadow: 0 10px 22px rgba(27, 64, 132, 0.24);
+          z-index: 2;
+        }
       }
 
       .part-thumb img {
@@ -745,6 +768,67 @@
         height: 100%;
         object-fit: cover;
         display: block;
+      }
+
+      .image-preview-mask {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(8, 16, 34, 0.78);
+        backdrop-filter: blur(2px);
+      }
+
+      .image-preview-mask.visible {
+        display: flex;
+      }
+
+      .image-preview-dialog {
+        position: relative;
+        max-width: min(88vw, 900px);
+        max-height: 88vh;
+        border-radius: 14px;
+        border: 1px solid rgba(219, 229, 248, 0.35);
+        background: #fff;
+        box-shadow: 0 20px 46px rgba(12, 26, 56, 0.32);
+        overflow: hidden;
+      }
+
+      .image-preview-dialog img {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: min(88vw, 900px);
+        max-height: calc(88vh - 44px);
+        object-fit: contain;
+        background: #fff;
+      }
+
+      .image-preview-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        border: 1px solid #d4dff7;
+        background: rgba(255, 255, 255, 0.92);
+        color: #173b86;
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .image-preview-meta {
+        padding: 8px 12px;
+        border-top: 1px solid #e2eaf9;
+        font-size: 12px;
+        color: #4f6388;
+        background: #f9fbff;
+        word-break: break-word;
       }
 
       .part-main {
@@ -1464,6 +1548,8 @@
             <div class="hint" id="convertSummaryLine">等待直连转换。</div>
             <div class="toolbar">
               <label class="mode-toggle"><input id="designerExportActionableOnly" type="checkbox" checked /> 仅导出需修改项</label>
+              <label class="field-label" for="convertSearch" style="margin-bottom: 0">搜索</label>
+              <input id="convertSearch" placeholder="搜零件号/名称/颜色" style="min-width: 220px" />
               <label class="field-label" for="convertFilter" style="margin-bottom: 0">筛选</label>
               <select id="convertFilter" style="min-width: 160px">
                 <option value="all">全部</option>
@@ -1527,6 +1613,8 @@
           <span class="section-tip">这里最重要，优先看这里就够了</span>
         </div>
         <div class="toolbar" style="margin: 12px 0">
+          <label class="field-label" for="resultSearch">搜索</label>
+          <input id="resultSearch" placeholder="搜零件号/名称/颜色" style="min-width: 220px" />
           <label class="field-label" for="resultImageFilter">图片状态筛选</label>
           <select id="resultImageFilter" style="min-width: 180px">
             <option value="all">全部</option>
@@ -1791,6 +1879,14 @@
         </div>
         <div class="hint" style="margin-top: 8px">
           版权声明：页面中的第三方零件名称、编号、图片与颜色信息仅用于零件识别与兼容性参考，相关商标、图片与资料权利归各自权利人所有。
+        </div>
+      </div>
+
+      <div id="imagePreviewMask" class="image-preview-mask" onclick="closeImagePreview(event)">
+        <div class="image-preview-dialog" onclick="event.stopPropagation()">
+          <button class="image-preview-close" type="button" onclick="closeImagePreview(event)" aria-label="关闭">×</button>
+          <img id="imagePreviewImg" src="" alt="零件图片预览" />
+          <div id="imagePreviewMeta" class="image-preview-meta">零件图片预览</div>
         </div>
       </div>
 
@@ -2499,12 +2595,14 @@
         const rawText = String(fallbackText || '-').slice(0, 8)
         const safeText = escapeHtml(rawText)
         const fallbackJs = JSON.stringify(rawText)
+        const previewSrcJs = JSON.stringify(String(imageUrl || ''))
+        const previewAltJs = JSON.stringify(String(fallbackText || '零件图片'))
         const safeFallbackUrls = Array.isArray(fallbackUrls)
           ? fallbackUrls.map((item) => String(item || '').trim()).filter(Boolean)
           : []
         const fallbackChain = escapeHtml(safeFallbackUrls.join('|'))
         if (imageUrl) {
-          return `<div class="part-thumb"><img src="${escapeHtml(imageUrl)}" alt="${safeText}" loading="lazy" data-fallbacks="${fallbackChain}" onerror="const queue=(this.dataset.fallbacks||'').split('|').filter(Boolean); if(queue.length){this.dataset.fallbacks=queue.slice(1).join('|'); this.src=queue[0]; return;} this.onerror=null; this.remove(); this.parentElement.textContent=${fallbackJs}" /></div>`
+          return `<button type="button" class="part-thumb is-zoomable" onclick='openImagePreview(${previewSrcJs}, ${previewAltJs})'><img src="${escapeHtml(imageUrl)}" alt="${safeText}" loading="lazy" data-fallbacks="${fallbackChain}" onerror="const queue=(this.dataset.fallbacks||'').split('|').filter(Boolean); if(queue.length){this.dataset.fallbacks=queue.slice(1).join('|'); this.src=queue[0]; return;} this.onerror=null; this.remove(); this.parentElement.textContent=${fallbackJs}" /></button>`
         }
         return `<div class="part-thumb">${safeText}</div>`
       }
@@ -3115,6 +3213,36 @@
         document.getElementById('detailModal').classList.remove('open')
       }
 
+      function openImagePreview(src, altText = '') {
+        const imageSrc = String(src || '').trim()
+        if (!imageSrc) {
+          return
+        }
+        const mask = document.getElementById('imagePreviewMask')
+        const img = document.getElementById('imagePreviewImg')
+        const meta = document.getElementById('imagePreviewMeta')
+        if (!mask || !img || !meta) {
+          return
+        }
+        img.src = imageSrc
+        img.alt = String(altText || '零件图片预览')
+        meta.textContent = String(altText || '').trim() || '零件图片预览'
+        mask.classList.add('visible')
+      }
+
+      function closeImagePreview(event) {
+        if (event && event.target && event.target.id && event.target.id !== 'imagePreviewMask') {
+          return
+        }
+        const mask = document.getElementById('imagePreviewMask')
+        const img = document.getElementById('imagePreviewImg')
+        if (!mask || !img) {
+          return
+        }
+        mask.classList.remove('visible')
+        img.src = ''
+      }
+
       function orderDisplayItems(items) {
         const list = Array.isArray(items) ? items : []
         return list
@@ -3247,10 +3375,76 @@
         return list
       }
 
+      function filterConvertItemsBySearch(items) {
+        const list = Array.isArray(items) ? items : []
+        const keyword = String(document.getElementById('convertSearch')?.value || '').trim().toLowerCase()
+        if (!keyword) {
+          return list
+        }
+        return list.filter((item) => {
+          const safe = item && typeof item === 'object' ? item : {}
+          const haystack = [
+            safe.source_part,
+            safe.source_name,
+            safe.part_no,
+            safe.name,
+            safe.color_no,
+            safe.color_name,
+            safe.status_text,
+            safe.category,
+            safe.resolved_part,
+            safe.resolved_part_no,
+            safe.resolved_name,
+            safe.resolved_color,
+            safe.resolved_color_no,
+            safe.detail,
+          ]
+            .map((value) => String(value == null ? '' : value))
+            .join(' ')
+            .toLowerCase()
+          return haystack.includes(keyword)
+        })
+      }
+
+      function getConvertPriority(item) {
+        const safe = item && typeof item === 'object' ? item : {}
+        const status = String(safe.status_text || safe.category || '').trim()
+        const lowerStatus = status.toLowerCase()
+        const tag = String(safe.tag || '').trim().toLowerCase()
+        if (!status) {
+          return 6
+        }
+        if (status === '高砖接口成功' || status === '可直接使用') {
+          return 99
+        }
+        if (status.includes('缺零件') || status.includes('不售卖') || status.includes('限购')) {
+          return 1
+        }
+        if (status.includes('缺颜色') || status.includes('库存不足')) {
+          return 2
+        }
+        if (tag === 'printed' || status.includes('印刷') || lowerStatus.includes('print')) {
+          return 3
+        }
+        return 5
+      }
+
       function sortConvertItems(items) {
         const list = Array.isArray(items) ? [...items] : []
         const mode = String(document.getElementById('convertSort')?.value || 'default')
-        if (mode === 'qty_desc') {
+        if (mode === 'default') {
+          list.sort((a, b) => {
+            const p = getConvertPriority(a) - getConvertPriority(b)
+            if (p !== 0) {
+              return p
+            }
+            const q = Number(b.qty || 0) - Number(a.qty || 0)
+            if (q !== 0) {
+              return q
+            }
+            return String(a.status_text || a.category || '').localeCompare(String(b.status_text || b.category || ''), 'zh-Hans-CN')
+          })
+        } else if (mode === 'qty_desc') {
           list.sort((a, b) => Number(b.qty || 0) - Number(a.qty || 0))
         } else if (mode === 'qty_asc') {
           list.sort((a, b) => Number(a.qty || 0) - Number(b.qty || 0))
@@ -3307,7 +3501,7 @@
 
       function goToConvertPage(page) {
         const fullList = currentConvertReport && Array.isArray(currentConvertReport.items) ? currentConvertReport.items : []
-        const filtered = sortConvertItems(filterConvertItems(orderDisplayItems(fullList)))
+        const filtered = sortConvertItems(filterConvertItemsBySearch(filterConvertItems(orderDisplayItems(fullList))))
         const pageSize = getConvertPageSize()
         const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
         currentConvertPage = Math.max(1, Math.min(totalPages, Number(page || 1)))
@@ -3316,7 +3510,7 @@
 
       function changeConvertPage(delta) {
         const fullList = currentConvertReport && Array.isArray(currentConvertReport.items) ? currentConvertReport.items : []
-        const filtered = sortConvertItems(filterConvertItems(orderDisplayItems(fullList)))
+        const filtered = sortConvertItems(filterConvertItemsBySearch(filterConvertItems(orderDisplayItems(fullList))))
         const pageSize = getConvertPageSize()
         const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
         currentConvertPage = Math.max(1, Math.min(totalPages, currentConvertPage + Number(delta || 0)))
@@ -3336,22 +3530,96 @@
 
       function changeResultPage(delta) {
         const fullList = currentJob && Array.isArray(currentJob.results) ? currentJob.results : []
-        const filtered = filterByImageKind(orderDisplayItems(fullList))
+        const filtered = filterResultsBySearch(filterByImageKind(sortResultsByPriority(orderDisplayItems(fullList))))
         const pageSize = getResultPageSize()
         const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
         currentResultPage = Math.max(1, Math.min(totalPages, currentResultPage + Number(delta || 0)))
         renderResults(fullList)
       }
 
+      function getResultPriority(item) {
+        const safe = item && typeof item === 'object' ? item : {}
+        const stage = String(safe.stage || '').trim()
+        const risk = String(safe.risk || '').trim().toUpperCase()
+        const note = String(safe.note || '').trim()
+        const tag = String(safe.tag || '').trim().toLowerCase()
+
+        if (note.includes('缺零件') || note.includes('不售卖') || note.includes('限购') || stage === 'manual_required') {
+          return 1
+        }
+        if (note.includes('缺颜色') || note.includes('库存不足') || stage === 'manual_color') {
+          return 2
+        }
+        if (tag === 'printed' || stage === 'printed_fallback' || note.includes('印刷')) {
+          return 3
+        }
+        if (risk === 'D') {
+          return 1
+        }
+        if (risk === 'C') {
+          return 2
+        }
+        if (risk === 'B') {
+          return 3
+        }
+        if (risk === 'A') {
+          return 99
+        }
+        return 5
+      }
+
+      function sortResultsByPriority(items) {
+        const list = Array.isArray(items) ? [...items] : []
+        list.sort((a, b) => {
+          const p = getResultPriority(a) - getResultPriority(b)
+          if (p !== 0) {
+            return p
+          }
+          const q = Number(b.qty || 0) - Number(a.qty || 0)
+          if (q !== 0) {
+            return q
+          }
+          return Number(a.line_no || 0) - Number(b.line_no || 0)
+        })
+        return list
+      }
+
+      function filterResultsBySearch(items) {
+        const list = Array.isArray(items) ? items : []
+        const keyword = String(document.getElementById('resultSearch')?.value || '').trim().toLowerCase()
+        if (!keyword) {
+          return list
+        }
+        return list.filter((item) => {
+          const safe = item && typeof item === 'object' ? item : {}
+          const haystack = [
+            safe.part_no,
+            safe.name,
+            safe.color_no,
+            safe.color_name,
+            safe.resolved_part_no,
+            safe.resolved_part_name,
+            safe.resolved_color_no,
+            safe.stage,
+            safe.note,
+          ]
+            .map((value) => String(value == null ? '' : value))
+            .join(' ')
+            .toLowerCase()
+          return haystack.includes(keyword)
+        })
+      }
+
       function renderResults(results) {
         const rows = document.getElementById('resultRows')
-        const fullList = orderDisplayItems(results)
-        const list = filterByImageKind(fullList)
+        const fullList = sortResultsByPriority(orderDisplayItems(results))
+        const list = filterResultsBySearch(filterByImageKind(fullList))
         const filterMode = String(document.getElementById('resultImageFilter')?.value || 'all')
+        const keyword = String(document.getElementById('resultSearch')?.value || '').trim()
         const hint =
-          filterMode === 'all'
-            ? `显示全部 ${fullList.length} 条。`
-            : `筛选后显示 ${list.length} / ${fullList.length} 条。`
+          !keyword && filterMode === 'all'
+            ? `已按问题优先级排序，显示 ${list.length} 条。`
+            : `已筛选显示 ${list.length} / ${fullList.length} 条。`
         document.getElementById('resultImageFilterHint').textContent = hint
         if (!fullList.length) {
           currentResultPage = 1
@@ -3391,7 +3659,7 @@
       function renderReviewQueue(results) {
         const rows = document.getElementById('reviewRows')
         const baseList = (results || []).filter((item) => String(item.risk || '').toUpperCase() !== 'A')
-        const list = orderDisplayItems(filterByImageKind(baseList))
+        const list = sortResultsByPriority(orderDisplayItems(filterResultsBySearch(filterByImageKind(baseList))))
         if (!baseList.length) {
           rows.innerHTML = '<tr><td colspan="6" class="muted">当前没有需要人工复核的条目。</td></tr>'
           return
@@ -3657,7 +3925,8 @@
           rows.innerHTML = '<tr><td colspan="6" class="muted">尚未执行高砖直连转换。</td></tr>'
           return
         }
-        let list = sortConvertItems(filterConvertItems(fullList))
+        let list = sortConvertItems(filterConvertItemsBySearch(filterConvertItems(fullList)))
+        const keyword = String(document.getElementById('convertSearch')?.value || '').trim()
         const suggestionText = sum.indexed_candidates ? `；补充候选建议 ${sum.indexed_candidates || 0}` : ''
         const baseSummary =
           `输入 ${sum.input_rows || 0} 行；本地缓存命中 ${sum.local_cached_hits || 0}；印刷件回退 ${sum.local_printed_fallbacks || 0}；高砖成功 ${sum.remote_success || 0}；缺颜色 ${sum.remote_color_deficiency || 0}；库存不足 ${sum.remote_inventory_deficiency || 0}；缺零件 ${sum.remote_miss || 0}${suggestionText}。`
@@ -3674,7 +3943,9 @@
         const startIndex = (currentConvertPage - 1) * pageSize
         const pagedList = list.slice(startIndex, startIndex + pageSize)
         summaryEl.textContent =
-          list.length === fullList.length ? baseSummary : `${baseSummary} 已筛选显示 ${list.length} / ${fullList.length} 条。`
+          list.length === fullList.length
+            ? baseSummary
+            : `${baseSummary} 已筛选显示 ${list.length} / ${fullList.length} 条${keyword ? `（关键词：${keyword}）` : ''}。`
         renderConvertPager(list.length, pageSize, currentConvertPage)
         rows.innerHTML = pagedList
           .map(
@@ -4190,7 +4461,16 @@
         renderResults(currentJob && currentJob.results ? currentJob.results : [])
         renderReviewQueue(currentJob && currentJob.results ? currentJob.results : [])
       })
+      document.getElementById('resultSearch').addEventListener('input', () => {
+        currentResultPage = 1
+        renderResults(currentJob && currentJob.results ? currentJob.results : [])
+        renderReviewQueue(currentJob && currentJob.results ? currentJob.results : [])
+      })
       document.getElementById('convertFilter').addEventListener('change', () => {
+        currentConvertPage = 1
+        renderConvertReport(currentConvertReport)
+      })
+      document.getElementById('convertSearch').addEventListener('input', () => {
         currentConvertPage = 1
         renderConvertReport(currentConvertReport)
       })
@@ -4211,6 +4491,12 @@
       })
       document.getElementById('gobricksColorFinishFilter').addEventListener('change', () => {
         renderGobricksColorReference(currentGobricksColorReference)
+      })
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          closeImagePreview()
+          closeDetailModal()
+        }
       })
 
       loadDemoBom()
