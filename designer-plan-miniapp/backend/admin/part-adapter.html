@@ -1187,7 +1187,7 @@
             </summary>
             <div class="fold-body">
               <div class="toolbar">
-                <input id="baseUrl" value="http://127.0.0.1:8002" style="min-width: 220px" />
+                <input id="baseUrl" value="" placeholder="默认同当前站点地址" style="min-width: 220px" />
                 <input id="adminToken" value="" placeholder="访问凭证（如需）" autocomplete="off" style="min-width: 180px" />
                 <select id="adminRole" style="min-width: 140px">
                   <option value="superadmin">超级管理员</option>
@@ -1847,8 +1847,9 @@
 
       function getCfg() {
         const baseUrl = String(document.getElementById('baseUrl').value || '').trim().replace(/\/$/, '')
+        const fallbackBaseUrl = String(window.location.origin || '').replace(/\/$/, '')
         return {
-          baseUrl: baseUrl || 'http://127.0.0.1:8002',
+          baseUrl: baseUrl || fallbackBaseUrl || 'http://127.0.0.1:8002',
           adminToken: String(document.getElementById('adminToken').value || '').trim(),
           adminRole: String(document.getElementById('adminRole').value || 'superadmin').trim() || 'superadmin',
           adminOperator: encodeURIComponent(String(document.getElementById('adminOperator').value || '零件适配').trim() || '零件适配')
