@@ -112,6 +112,52 @@
         color: #596c8b;
       }
 
+      .wechat-tip {
+        display: none;
+        margin-top: 12px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid #dbe5f8;
+        background: #f8fbff;
+        font-size: 12px;
+        line-height: 1.7;
+        color: #6a7b96;
+      }
+
+      .wechat-tip.open {
+        display: grid;
+        gap: 8px;
+      }
+
+      .wechat-tip-toggle {
+        display: none;
+        margin-top: 10px;
+      }
+
+      .wechat-tip-toggle button {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 12px;
+      }
+
+      .wechat-tip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .wechat-url-input {
+        flex: 1 1 220px;
+        min-height: 38px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid #d6e3fb;
+        background: #fff;
+        color: var(--text);
+        font-size: 12px;
+      }
+
       .file-notice strong {
         display: inline-block;
         margin-right: 8px;
@@ -610,7 +656,10 @@
         }
 
         .page-footer {
-          display: none;
+          gap: 2px;
+          padding-top: 2px;
+          font-size: 11px;
+          line-height: 1.55;
         }
       }
     </style>
@@ -632,6 +681,17 @@
           </div>
         </div>
         <div class="file-notice" id="fileNotice"><strong>当前文件</strong><span id="fileNoticeName">未导入文件</span></div>
+        <div class="wechat-tip" id="wechatTip">
+          <div>如果你在微信里打开，建议先把聊天中的文件保存到“文件”中，再访问上传；更适合用 PC 端查看完整结果。</div>
+          <div class="wechat-tip-row">
+            <input class="wechat-url-input" id="wechatUrlInput" type="text" readonly />
+            <button type="button" id="copyUrlButton">复制网址</button>
+          </div>
+          <div style="font-size:12px;color:#7787a0;">也可以长按上面的网址手动复制。</div>
+        </div>
+        <div class="wechat-tip-toggle" id="wechatTipToggle">
+          <button type="button" id="toggleWechatTipButton">微信上传提示</button>
+        </div>
       </section>
 
       <section class="compliance-note">
@@ -729,6 +789,29 @@
           return raw ? JSON.parse(raw) : null
         } catch (err) {
           return null
+        }
+      }
+
+      function isWechatBrowser() {
+        return /micromessenger/i.test(String(navigator.userAgent || ''))
+      }
+
+      async function copyCurrentUrl() {
+        const text = window.location.href
+        const input = document.getElementById('wechatUrlInput')
+        if (input) {
+          input.value = text
+          input.focus()
+          input.select()
+        }
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text)
+          } else {
+            document.execCommand('copy')
+          }
+        } catch (err) {
+          // long-press fallback remains available
         }
       }
 
@@ -983,7 +1066,17 @@
       function render() {
         currentJob = loadJob()
         const stats = getOverview(currentJob)
+        const hasResults = stats.totalTypes > 0
+        const wechatTip = document.getElementById('wechatTip')
+        const wechatTipToggle = document.getElementById('wechatTipToggle')
         document.getElementById('fileNoticeName').textContent = getJobSourceName(currentJob) || '未导入文件'
+        if (isWechatBrowser()) {
+          if (wechatTip) wechatTip.classList.toggle('open', !hasResults)
+          if (wechatTipToggle) wechatTipToggle.style.display = hasResults ? 'block' : 'none'
+        } else {
+          if (wechatTip) wechatTip.classList.remove('open')
+          if (wechatTipToggle) wechatTipToggle.style.display = 'none'
+        }
         document.getElementById('totalQty').textContent = stats.totalQty || 0
         document.getElementById('totalTypes').textContent = stats.totalTypes || 0
         document.getElementById('exactCount').textContent = stats.exactCount || 0
@@ -1080,10 +1173,25 @@
         if (!trigger) return
         openImagePreview(trigger.dataset.previewUrl || '', trigger.dataset.previewTitle || '零件图片')
       })
+      document.getElementById('copyUrlButton').addEventListener('click', () => {
+        copyCurrentUrl()
+      })
+      document.getElementById('toggleWechatTipButton').addEventListener('click', () => {
+        const tip = document.getElementById('wechatTip')
+        if (!tip) return
+        tip.classList.toggle('open')
+      })
       document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') closeDrawer()
         if (event.key === 'Escape') closeImagePreview()
       })
+
+      if (isWechatBrowser()) {
+        const tip = document.getElementById('wechatTip')
+        const input = document.getElementById('wechatUrlInput')
+        if (tip) tip.classList.add('open')
+        if (input) input.value = window.location.href
+      }
 
       render()
     </script>
