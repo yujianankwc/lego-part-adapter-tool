@@ -1160,8 +1160,34 @@ class PartAdapterStore:
         mark('parse_bom_ms', step_started)
 
         step_started = time.perf_counter()
-        results = [
-            self._resolve_row(
+        resolve_cache: Dict[str, Dict[str, Any]] = {}
+        cache_hits = 0
+        cache_misses = 0
+        results: List[Dict[str, Any]] = []
+        for row in parsed:
+            cache_key = '||'.join(
+                [
+                    str(row.get('part_no') or '').strip(),
+                    str(row.get('color_no') or '').strip(),
+                    str(row.get('qty') or 1),
+                    str(row.get('tag') or '').strip().lower(),
+                    str(row.get('base_part_no') or '').strip(),
+                    str(color_mode or '').strip().lower(),
+                    str(optimizer_mode or '').strip().lower(),
+                    '1' if allow_display_sub else '0',
+                    '1' if allow_structural_sub else '0',
+                ]
+            )
+            cached = resolve_cache.get(cache_key)
+            if isinstance(cached, dict):
+                cache_hits += 1
+                resolved = deepcopy(cached)
+                for field in ('line_no', 'part_no', 'color_no', 'color_name', 'qty', 'name', 'tag', 'base_part_no'):
+                    resolved[field] = row.get(field)
+                results.append(resolved)
+                continue
+            cache_misses += 1
+            resolved = self._resolve_row(
                 item=row,
                 color_mode=color_mode,
                 optimizer_mode=optimizer_mode,
@@ -1169,8 +1195,8 @@ class PartAdapterStore:
                 allow_structural_sub=allow_structural_sub,
                 rules=rules,
             )
-            for row in parsed
-        ]
+            resolve_cache[cache_key] = deepcopy(resolved)
+            results.append(resolved)
         mark('resolve_rows_ms', step_started)
 
         step_started = time.perf_counter()
@@ -1182,6 +1208,9 @@ class PartAdapterStore:
         mark('build_summary_ms', step_started)
         timing_marks['row_count'] = len(parsed)
         timing_marks['result_count'] = len(results)
+        timing_marks['resolve_cache_hits'] = cache_hits
+        timing_marks['resolve_cache_misses'] = cache_misses
+        timing_marks['resolve_cache_size'] = len(resolve_cache)
         timing_marks['avg_resolve_row_ms'] = round(
             timing_marks.get('resolve_rows_ms', 0) / max(1, len(parsed)),
             2,
