@@ -1156,6 +1156,10 @@ class PartAdapterStore:
         mark('load_rules_ms', step_started)
 
         step_started = time.perf_counter()
+        analysis_cache = self._build_analysis_cache(rules)
+        mark('build_indexes_ms', step_started)
+
+        step_started = time.perf_counter()
         parsed = self._parse_bom_text(bom_text)
         mark('parse_bom_ms', step_started)
 
@@ -1194,6 +1198,7 @@ class PartAdapterStore:
                 allow_display_sub=allow_display_sub,
                 allow_structural_sub=allow_structural_sub,
                 rules=rules,
+                analysis_cache=analysis_cache,
             )
             resolve_cache[cache_key] = deepcopy(resolved)
             results.append(resolved)
@@ -1264,6 +1269,43 @@ class PartAdapterStore:
             ),
         )
         return deepcopy(job)
+
+    def _build_analysis_cache(self, rules: Dict[str, Any]) -> Dict[str, Any]:
+        exact_combo_map = rules.get('exact_combo_map') if isinstance(rules.get('exact_combo_map'), dict) else {}
+        gobricks_item_index = rules.get('gobricks_item_index') if isinstance(rules.get('gobricks_item_index'), dict) else {}
+        exact_combo_part_index: Dict[str, List[Dict[str, Any]]] = {}
+        gobricks_item_part_index: Dict[str, List[Dict[str, Any]]] = {}
+
+        for raw in exact_combo_map.values():
+            entry = raw if isinstance(raw, dict) else {}
+            lego_part_no = str(entry.get('lego_part_no') or '').strip()
+            if not lego_part_no:
+                continue
+            lego_base = self._extract_base_part_no(part_no=lego_part_no, ldraw_id='')
+            for key in {lego_part_no, lego_base}:
+                safe_key = str(key or '').strip()
+                if not safe_key:
+                    continue
+                exact_combo_part_index.setdefault(safe_key, []).append(entry)
+
+        for raw in gobricks_item_index.values():
+            item = raw if isinstance(raw, dict) else {}
+            lego_id = str(item.get('lego_id') or '').strip()
+            if not lego_id:
+                continue
+            lego_base = self._extract_base_part_no(part_no=lego_id, ldraw_id='')
+            for key in {lego_id, lego_base}:
+                safe_key = str(key or '').strip()
+                if not safe_key:
+                    continue
+                gobricks_item_part_index.setdefault(safe_key, []).append(item)
+
+        return {
+            'exact_combo_part_index': exact_combo_part_index,
+            'gobricks_item_part_index': gobricks_item_part_index,
+            'expand_part_candidates_cache': {},
+            'color_pair_score_cache': {},
+        }
 
     def import_gobricks_result_file(self, filename: str, content: bytes) -> Dict[str, Any]:
         safe_name = str(filename or '').strip()
@@ -2516,6 +2558,7 @@ class PartAdapterStore:
         allow_display_sub: bool,
         allow_structural_sub: bool,
         rules: Dict[str, Any],
+        analysis_cache: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         exact_part_map = rules.get('exact_part_map') if isinstance(rules.get('exact_part_map'), dict) else {}
         part_alias_map = rules.get('part_alias_map') if isinstance(rules.get('part_alias_map'), dict) else {}
@@ -2540,6 +2583,7 @@ class PartAdapterStore:
             part_no=part_no,
             base_part_no=base_part_no,
             color_no=color_no,
+            analysis_cache=analysis_cache,
         )
         shortage_text = str(shortage_hint.get('shortage_type') or '').strip() if isinstance(shortage_hint, dict) else ''
         shortage_is_color = self._shortage_is_color_issue(shortage_text)
@@ -2549,6 +2593,7 @@ class PartAdapterStore:
             part_no=part_no,
             base_part_no=base_part_no,
             color_no=color_no,
+            analysis_cache=analysis_cache,
         )
         index_candidates = self._find_gobricks_index_candidates(
             gobricks_item_index=gobricks_item_index,
@@ -2556,6 +2601,7 @@ class PartAdapterStore:
             part_no=part_no,
             base_part_no=base_part_no,
             color_no=color_no,
+            analysis_cache=analysis_cache,
         )
         candidate_note_parts = []
         history_suggestion = self._format_exact_combo_suggestions(history_candidates)
@@ -2570,6 +2616,7 @@ class PartAdapterStore:
             source_color_no=color_no,
             history_candidates=history_candidates,
             index_candidates=index_candidates,
+            analysis_cache=analysis_cache,
         )
         color_recommendation_text = self._format_color_recommendations(color_recommendations)
 
@@ -2606,6 +2653,7 @@ class PartAdapterStore:
             part_no=part_no,
             base_part_no=base_part_no,
             color_no=color_no,
+            analysis_cache=analysis_cache,
         )
         if combo_exact:
             add_candidate(
@@ -2877,7 +2925,17 @@ class PartAdapterStore:
                     candidates.append(target)
         return candidates
 
-    def _expand_part_candidates(self, part_no: str, base_part_no: str, part_alias_map: Dict[str, Any]) -> List[str]:
+    def _expand_part_candidates(
+        self,
+        part_no: str,
+        base_part_no: str,
+        part_alias_map: Dict[str, Any],
+        analysis_cache: Optional[Dict[str, Any]] = None,
+    ) -> List[str]:
+        cache = analysis_cache.get('expand_part_candidates_cache') if isinstance(analysis_cache, dict) else None
+        cache_key = f'{str(part_no or "").strip()}::{str(base_part_no or "").strip()}'
+        if isinstance(cache, dict) and cache_key in cache:
+            return list(cache.get(cache_key) or [])
         seen = set()
         ordered: List[str] = []
         for raw in (part_no, base_part_no):
@@ -2885,6 +2943,8 @@ class PartAdapterStore:
                 if candidate and candidate not in seen:
                     seen.add(candidate)
                     ordered.append(candidate)
+        if isinstance(cache, dict):
+            cache[cache_key] = list(ordered)
         return ordered
 
     def _resolve_external_part_no(self, part_no: str, ldraw_id: str, rules: Dict[str, Any]) -> str:
@@ -2957,8 +3017,9 @@ class PartAdapterStore:
         part_no: str,
         base_part_no: str,
         color_no: str,
+        analysis_cache: Optional[Dict[str, Any]] = None,
     ) -> Optional[Dict[str, Any]]:
-        for candidate in self._expand_part_candidates(part_no, base_part_no, part_alias_map):
+        for candidate in self._expand_part_candidates(part_no, base_part_no, part_alias_map, analysis_cache=analysis_cache):
             key = self._combo_key(candidate, color_no)
             value = exact_combo_map.get(key)
             if isinstance(value, dict):
@@ -2985,8 +3046,9 @@ class PartAdapterStore:
         part_no: str,
         base_part_no: str,
         color_no: str,
+        analysis_cache: Optional[Dict[str, Any]] = None,
     ) -> Optional[Dict[str, Any]]:
-        for candidate in self._expand_part_candidates(part_no, base_part_no, part_alias_map):
+        for candidate in self._expand_part_candidates(part_no, base_part_no, part_alias_map, analysis_cache=analysis_cache):
             key = self._combo_key(candidate, color_no)
             value = shortage_combo_map.get(key)
             if isinstance(value, dict):
@@ -3006,24 +3068,40 @@ class PartAdapterStore:
         part_no: str,
         base_part_no: str,
         color_no: str,
+        analysis_cache: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
-        candidate_parts = set(self._expand_part_candidates(part_no, base_part_no, part_alias_map))
+        candidate_parts = set(self._expand_part_candidates(part_no, base_part_no, part_alias_map, analysis_cache=analysis_cache))
         safe_part = str(part_no or '').strip()
         safe_base = str(base_part_no or safe_part or '').strip()
         safe_color = str(color_no or '').strip()
         candidates: List[Dict[str, Any]] = []
-        for raw in gobricks_item_index.values():
-            item = raw if isinstance(raw, dict) else {}
-            lego_id = str(item.get('lego_id') or '').strip()
-            if not lego_id:
-                continue
-            lego_base = self._extract_base_part_no(part_no=lego_id, ldraw_id='')
-            if lego_id not in candidate_parts and lego_base not in candidate_parts:
-                continue
-            lego_color_id = str(item.get('lego_color_id') or '').strip()
-            if safe_color and lego_color_id and lego_color_id == safe_color:
-                continue
-            candidates.append(item)
+        indexed = analysis_cache.get('gobricks_item_part_index') if isinstance(analysis_cache, dict) else None
+        if isinstance(indexed, dict):
+            seen_ids = set()
+            for candidate_part in candidate_parts:
+                for raw in indexed.get(candidate_part) or []:
+                    item = raw if isinstance(raw, dict) else {}
+                    item_key = str(item.get('item_id') or item.get('product_id') or '').strip()
+                    if item_key in seen_ids:
+                        continue
+                    seen_ids.add(item_key)
+                    lego_color_id = str(item.get('lego_color_id') or '').strip()
+                    if safe_color and lego_color_id and lego_color_id == safe_color:
+                        continue
+                    candidates.append(item)
+        else:
+            for raw in gobricks_item_index.values():
+                item = raw if isinstance(raw, dict) else {}
+                lego_id = str(item.get('lego_id') or '').strip()
+                if not lego_id:
+                    continue
+                lego_base = self._extract_base_part_no(part_no=lego_id, ldraw_id='')
+                if lego_id not in candidate_parts and lego_base not in candidate_parts:
+                    continue
+                lego_color_id = str(item.get('lego_color_id') or '').strip()
+                if safe_color and lego_color_id and lego_color_id == safe_color:
+                    continue
+                candidates.append(item)
         candidates.sort(
             key=lambda item: (
                 0 if str(item.get('lego_id') or '').strip() == safe_part else 1,
@@ -3040,24 +3118,43 @@ class PartAdapterStore:
         part_no: str,
         base_part_no: str,
         color_no: str,
+        analysis_cache: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
-        candidate_parts = set(self._expand_part_candidates(part_no, base_part_no, part_alias_map))
+        candidate_parts = set(self._expand_part_candidates(part_no, base_part_no, part_alias_map, analysis_cache=analysis_cache))
         safe_part = str(part_no or '').strip()
         safe_base = str(base_part_no or safe_part or '').strip()
         safe_color = str(color_no or '').strip()
         candidates: List[Dict[str, Any]] = []
-        for raw in exact_combo_map.values():
-            entry = raw if isinstance(raw, dict) else {}
-            lego_part_no = str(entry.get('lego_part_no') or '').strip()
-            if not lego_part_no:
-                continue
-            lego_base = self._extract_base_part_no(part_no=lego_part_no, ldraw_id='')
-            if lego_part_no not in candidate_parts and lego_base not in candidate_parts:
-                continue
-            lego_color_no = str(entry.get('lego_color_no') or '').strip()
-            if safe_color and lego_color_no == safe_color:
-                continue
-            candidates.append(entry)
+        indexed = analysis_cache.get('exact_combo_part_index') if isinstance(analysis_cache, dict) else None
+        if isinstance(indexed, dict):
+            seen_ids = set()
+            for candidate_part in candidate_parts:
+                for raw in indexed.get(candidate_part) or []:
+                    entry = raw if isinstance(raw, dict) else {}
+                    entry_key = self._combo_key(
+                        str(entry.get('lego_part_no') or '').strip(),
+                        str(entry.get('lego_color_no') or '').strip(),
+                    )
+                    if entry_key in seen_ids:
+                        continue
+                    seen_ids.add(entry_key)
+                    lego_color_no = str(entry.get('lego_color_no') or '').strip()
+                    if safe_color and lego_color_no == safe_color:
+                        continue
+                    candidates.append(entry)
+        else:
+            for raw in exact_combo_map.values():
+                entry = raw if isinstance(raw, dict) else {}
+                lego_part_no = str(entry.get('lego_part_no') or '').strip()
+                if not lego_part_no:
+                    continue
+                lego_base = self._extract_base_part_no(part_no=lego_part_no, ldraw_id='')
+                if lego_part_no not in candidate_parts and lego_base not in candidate_parts:
+                    continue
+                lego_color_no = str(entry.get('lego_color_no') or '').strip()
+                if safe_color and lego_color_no == safe_color:
+                    continue
+                candidates.append(entry)
         candidates.sort(
             key=lambda entry: (
                 0 if str(entry.get('lego_part_no') or '').strip() == safe_part else 1,
@@ -3125,6 +3222,7 @@ class PartAdapterStore:
         source_color_no: str,
         history_candidates: List[Dict[str, Any]],
         index_candidates: List[Dict[str, Any]],
+        analysis_cache: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         source_meta = self._get_color_meta(lego_color_catalog, source_color_no)
         candidates: List[Dict[str, Any]] = []
@@ -3138,7 +3236,13 @@ class PartAdapterStore:
             if not target_part_no or target_key in seen_targets:
                 continue
             candidate_meta = self._get_color_meta(lego_color_catalog, lego_color_no)
-            score = self._score_color_pair(source_meta, candidate_meta)
+            score = self._score_color_pair_cached(
+                source_color_no=source_color_no,
+                candidate_color_no=lego_color_no,
+                source_meta=source_meta,
+                candidate_meta=candidate_meta,
+                analysis_cache=analysis_cache,
+            )
             candidates.append(
                 {
                     'score': score,
@@ -3165,7 +3269,13 @@ class PartAdapterStore:
                 continue
             lego_color_no = str(item.get('lego_color_id') or '').strip()
             candidate_meta = self._get_color_meta(lego_color_catalog, lego_color_no)
-            score = self._score_color_pair(source_meta, candidate_meta)
+            score = self._score_color_pair_cached(
+                source_color_no=source_color_no,
+                candidate_color_no=lego_color_no,
+                source_meta=source_meta,
+                candidate_meta=candidate_meta,
+                analysis_cache=analysis_cache,
+            )
             candidates.append(
                 {
                     'score': score,
@@ -3190,6 +3300,25 @@ class PartAdapterStore:
             )
         )
         return candidates[:4]
+
+    def _score_color_pair_cached(
+        self,
+        source_color_no: str,
+        candidate_color_no: str,
+        source_meta: Dict[str, Any],
+        candidate_meta: Dict[str, Any],
+        analysis_cache: Optional[Dict[str, Any]] = None,
+    ) -> int:
+        safe_source = str(source_color_no or '').strip()
+        safe_candidate = str(candidate_color_no or '').strip()
+        cache = analysis_cache.get('color_pair_score_cache') if isinstance(analysis_cache, dict) else None
+        cache_key = f'{safe_source}::{safe_candidate}'
+        if isinstance(cache, dict) and cache_key in cache:
+            return int(cache.get(cache_key) or 0)
+        score = self._score_color_pair(source_meta, candidate_meta)
+        if isinstance(cache, dict):
+            cache[cache_key] = score
+        return score
 
     def _format_color_recommendations(
         self,
