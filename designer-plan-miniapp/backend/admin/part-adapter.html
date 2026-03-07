@@ -2832,6 +2832,11 @@
                 <input id="adminOperator" value="零件适配" style="min-width: 160px" />
                 <button onclick="reloadAll()">刷新数据</button>
               </div>
+              <div id="authRequiredActions" class="hint" style="display:none;margin-top:10px;">
+                当前页面需要后台登录态或访问凭证。请先到
+                <a href="/admin/settings" class="link-btn" style="margin:0 6px;">后台设置</a>
+                完成登录，再返回这里点击“刷新数据”。
+              </div>
               <div class="hint" id="status" style="margin-top: 10px">等待加载</div>
             </div>
           </details>
@@ -3960,10 +3965,18 @@
         }
       }
 
+      function setInternalAuthActionsVisible(visible) {
+        const el = document.getElementById('authRequiredActions')
+        if (el) {
+          el.style.display = visible ? 'block' : 'none'
+        }
+      }
+
       function showInternalAuthRequired(message) {
         const safeMessage = String(message || '').trim() || '请先登录后台，或在工具设置中填写访问凭证后再刷新……'
         setStatus(safeMessage, 'error')
         openInternalSettings()
+        setInternalAuthActionsVisible(true)
       }
 
       function getPartAdapterApiPrefix() {
@@ -7915,6 +7928,7 @@
               showInternalAuthRequired('请先登录后台，或在工具设置中填写访问凭证后再刷新……')
               return
             }
+            setInternalAuthActionsVisible(false)
           }
           setStatus('加载中...')
           syncStrategyPills()
