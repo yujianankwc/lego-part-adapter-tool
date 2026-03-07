@@ -176,6 +176,54 @@
         color: #4f6384;
       }
 
+      .wechat-tip {
+        display: none;
+        margin-top: 12px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        border: 1px solid #dbe5f8;
+        background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%);
+        font-size: 13px;
+        line-height: 1.7;
+        color: #566986;
+      }
+
+      .wechat-tip.open {
+        display: grid;
+        gap: 10px;
+      }
+
+      .wechat-tip-toggle {
+        display: none;
+        margin-top: 10px;
+        font-size: 12px;
+        color: #6c7d97;
+      }
+
+      .wechat-tip-toggle button {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 12px;
+      }
+
+      .wechat-url-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .wechat-url-input {
+        flex: 1 1 260px;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid #d6e3fb;
+        background: #fff;
+        color: var(--text);
+        font-size: 13px;
+      }
+
       .file-notice strong {
         display: block;
         margin-bottom: 4px;
@@ -466,7 +514,10 @@
         }
 
         .page-footer {
-          display: none;
+          gap: 2px;
+          padding-top: 2px;
+          font-size: 11px;
+          line-height: 1.55;
         }
       }
     </style>
@@ -494,6 +545,17 @@
         </div>
         <div class="status-line" id="statusLine">上传后，系统会直接告诉你能不能做、缺什么、下一步该点哪里。</div>
         <div class="file-notice" id="fileNotice"><strong>当前文件</strong><span id="fileNoticeName">未导入文件</span></div>
+        <div class="wechat-tip" id="wechatTip">
+          <div>当前在微信内打开。请先把聊天里的文件保存到“文件”中，再回到这里上传；更建议直接在 PC 端访问。</div>
+          <div class="wechat-url-row">
+            <input class="wechat-url-input" id="wechatUrlInput" type="text" readonly />
+            <button type="button" class="secondary-btn" id="copyUrlButton">复制网址</button>
+          </div>
+          <div style="font-size:12px;color:#7787a0;">也可以长按上面的网址手动复制。</div>
+        </div>
+        <div class="wechat-tip-toggle" id="wechatTipToggle">
+          <button type="button" class="secondary-btn" id="toggleWechatTipButton">微信上传提示</button>
+        </div>
         <div class="paste-shell" id="pasteShell">
           <textarea id="pasteInput" placeholder="把零件清单直接粘贴到这里，然后点击“开始分析”。"></textarea>
           <div class="actions" style="margin-top:0;">
@@ -577,6 +639,30 @@
         document.getElementById('statusLine').textContent = String(message || '').trim() || '等待操作'
       }
 
+      function isWechatBrowser() {
+        return /micromessenger/i.test(String(navigator.userAgent || ''))
+      }
+
+      async function copyCurrentUrl() {
+        const text = window.location.href
+        const input = document.getElementById('wechatUrlInput')
+        if (input) {
+          input.value = text
+          input.focus()
+          input.select()
+        }
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text)
+          } else {
+            document.execCommand('copy')
+          }
+          setStatus('网址已复制。可以发到电脑端打开，或在浏览器中继续访问。')
+        } catch (err) {
+          setStatus('未能自动复制，请长按网址手动复制。')
+        }
+      }
+
       function saveJob(job) {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(job || null))
@@ -616,6 +702,13 @@
         const stem = rawName.replace(/\.[^.]+$/, '').trim() || 'studio-bom'
         const safeStem = stem.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '-').replace(/-+/g, '-')
         return `${safeStem}-${suffix}-${new Date().toISOString().slice(0, 10)}.csv`
+      }
+
+      function buildSafeUploadFilename(name) {
+        const raw = String(name || '').trim() || 'studio-bom.csv'
+        const extMatch = raw.match(/(\.[a-zA-Z0-9]+)$/)
+        const ext = extMatch ? extMatch[1].toLowerCase() : '.csv'
+        return `studio-bom${ext}`
       }
 
       function getResultStatus(item) {
@@ -697,9 +790,18 @@
           if (node) node.classList.toggle('is-hidden', !hasResults)
         })
         const fileNotice = document.getElementById('fileNotice')
+        const wechatTip = document.getElementById('wechatTip')
+        const wechatTipToggle = document.getElementById('wechatTipToggle')
         const sourceName = getJobSourceName(job)
         fileNotice.style.display = hasResults && sourceName ? 'block' : 'none'
         document.getElementById('fileNoticeName').textContent = sourceName || '未导入文件'
+        if (isWechatBrowser()) {
+          if (wechatTip) wechatTip.classList.toggle('open', !hasResults)
+          if (wechatTipToggle) wechatTipToggle.style.display = hasResults ? 'block' : 'none'
+        } else {
+          if (wechatTip) wechatTip.classList.remove('open')
+          if (wechatTipToggle) wechatTipToggle.style.display = 'none'
+        }
         document.getElementById('totalQty').textContent = stats.totalQty || 0
         document.getElementById('totalTypesHint').textContent = `共 ${stats.totalTypes || 0} 种零件`
         document.getElementById('exactCount').textContent = stats.exactCount || 0
@@ -790,6 +892,10 @@
         URL.revokeObjectURL(url)
       }
 
+      function sleep(ms) {
+        return new Promise((resolve) => window.setTimeout(resolve, ms))
+      }
+
       function downloadMissingOnlyCsv() {
         const job = loadJob()
         const items = (job && Array.isArray(job.results) ? job.results : []).filter((item) => getResultStatus(item).key === 'blocked')
@@ -822,7 +928,7 @@
 
       async function apiUploadBom(file) {
         const form = new FormData()
-        form.append('file', file)
+        form.append('file', file, buildSafeUploadFilename(file && file.name))
         const res = await fetch(`${DEFAULT_BASE_URL}/api/tools/part-adapter/import-bom`, { method: 'POST', body: form })
         const body = await res.json().catch(() => ({ detail: '导入失败' }))
         if (!res.ok) throw new Error(body.detail || '导入失败')
@@ -831,7 +937,7 @@
 
       async function apiConvertWithGobricks(file) {
         const form = new FormData()
-        form.append('file', file)
+        form.append('file', file, buildSafeUploadFilename(file && file.name))
         form.append('auth_token', '')
         form.append('base_url', 'https://api.gobricks.cn')
         const res = await fetch(`${DEFAULT_BASE_URL}/api/tools/part-adapter/convert-gobricks`, { method: 'POST', body: form })
@@ -851,6 +957,44 @@
         return body
       }
 
+      async function apiAnalyzeAsyncStart(payload) {
+        const res = await fetch(`${DEFAULT_BASE_URL}/api/tools/part-adapter/analyze-async`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        const body = await res.json().catch(() => ({ detail: '分析任务创建失败' }))
+        if (!res.ok) throw new Error(body.detail || '分析任务创建失败')
+        return body
+      }
+
+      async function apiAnalyzeAsyncStatus(taskId) {
+        const res = await fetch(`${DEFAULT_BASE_URL}/api/tools/part-adapter/analyze-async/${encodeURIComponent(taskId)}`)
+        const body = await res.json().catch(() => ({ detail: '分析状态获取失败' }))
+        if (!res.ok) throw new Error(body.detail || '分析状态获取失败')
+        return body
+      }
+
+      async function waitForAnalyzeResult(taskId) {
+        const startedAt = Date.now()
+        while (Date.now() - startedAt < 5 * 60 * 1000) {
+          const body = await apiAnalyzeAsyncStatus(taskId)
+          const task = body && body.task ? body.task : {}
+          const status = String(task.status || '').trim().toLowerCase()
+          const progressText = String(task.progress_text || '').trim()
+          if (progressText) setStatus(progressText)
+          if (status === 'completed') {
+            if (!body.job) throw new Error('分析任务已完成，但未返回结果')
+            return body.job
+          }
+          if (status === 'failed') {
+            throw new Error(String(task.error || '分析失败'))
+          }
+          await sleep(1500)
+        }
+        throw new Error('分析时间较长，请稍后重试')
+      }
+
       async function runQuickFlow(file) {
         setStatus('正在导入清单...')
         const bom = await apiUploadBom(file)
@@ -866,8 +1010,8 @@
         } catch (err) {
           setStatus(`高砖判断未完成，继续使用本地清单分析：${err.message || '请求异常'}`)
         }
-        setStatus('正在生成适配结果...')
-        const analyzed = await apiAnalyze({
+        setStatus('正在提交分析任务...')
+        const taskBody = await apiAnalyzeAsyncStart({
           project_name: '',
           designer_name: '',
           source_name: sourceName,
@@ -878,10 +1022,14 @@
           allow_display_sub: true,
           allow_structural_sub: false
         })
-        const job = analyzed.job ? { ...analyzed.job, __public_source_name: sourceName } : null
+        const taskId = taskBody && taskBody.task ? String(taskBody.task.task_id || '') : ''
+        if (!taskId) throw new Error('分析任务未创建成功')
+        setStatus('分析任务已提交，正在整理零件匹配与替代方案，这一步可能需要几十秒。')
+        const analyzedJob = await waitForAnalyzeResult(taskId)
+        const job = analyzedJob ? { ...analyzedJob, __public_source_name: sourceName } : null
         saveJob(job)
         render(job)
-        setStatus('分析完成，可以直接看结论和待处理零件。')
+        setStatus('分析完成。先看结论，再处理前几条待处理零件即可。')
       }
 
       async function analyzePastedBom() {
@@ -890,8 +1038,8 @@
           alert('请先粘贴零件清单。')
           return
         }
-        setStatus('正在分析粘贴清单...')
-        const analyzed = await apiAnalyze({
+        setStatus('正在提交分析任务...')
+        const taskBody = await apiAnalyzeAsyncStart({
           project_name: '',
           designer_name: '',
           source_name: 'pasted-bom.txt',
@@ -902,10 +1050,14 @@
           allow_display_sub: true,
           allow_structural_sub: false
         })
-        const job = analyzed.job ? { ...analyzed.job, __public_source_name: 'pasted-bom.txt' } : null
+        const taskId = taskBody && taskBody.task ? String(taskBody.task.task_id || '') : ''
+        if (!taskId) throw new Error('分析任务未创建成功')
+        setStatus('分析任务已提交，正在整理零件匹配与替代方案，这一步可能需要几十秒。')
+        const analyzedJob = await waitForAnalyzeResult(taskId)
+        const job = analyzedJob ? { ...analyzedJob, __public_source_name: 'pasted-bom.txt' } : null
         saveJob(job)
         render(job)
-        setStatus('分析完成，可以直接看结论和待处理零件。')
+        setStatus('分析完成。先看结论，再处理前几条待处理零件即可。')
       }
 
       function scrollToTasks() {
@@ -922,6 +1074,14 @@
         render(null)
         setStatus('当前结果已清空，可以重新上传清单。')
       })
+      document.getElementById('copyUrlButton').addEventListener('click', () => {
+        copyCurrentUrl().catch(() => setStatus('未能自动复制，请长按网址手动复制。'))
+      })
+      document.getElementById('toggleWechatTipButton').addEventListener('click', () => {
+        const tip = document.getElementById('wechatTip')
+        if (!tip) return
+        tip.classList.toggle('open')
+      })
       document.getElementById('analyzePasteButton').addEventListener('click', () => {
         analyzePastedBom().catch((err) => {
           alert(err.message || '分析失败')
@@ -936,6 +1096,13 @@
           setStatus(`分析失败：${err.message || '请求异常'}`)
         })
       })
+
+      if (isWechatBrowser()) {
+        const tip = document.getElementById('wechatTip')
+        const input = document.getElementById('wechatUrlInput')
+        if (tip) tip.classList.add('open')
+        if (input) input.value = window.location.href
+      }
 
       render(loadJob())
     </script>

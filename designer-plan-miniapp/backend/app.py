@@ -4,6 +4,7 @@ import io
 import json
 import os
 import time
+import threading
 import uuid
 import zipfile
 from datetime import datetime
@@ -40,6 +41,10 @@ PUBLIC_PART_ADAPTER_MAX_UPLOAD_BYTES = 2 * 1024 * 1024
 PUBLIC_PART_ADAPTER_MAX_MODEL_BYTES = 20 * 1024 * 1024
 PUBLIC_PART_ADAPTER_MAX_BOM_LINES = 5000
 PUBLIC_PART_ADAPTER_MAX_BOM_TEXT_CHARS = 300000
+PUBLIC_ANALYZE_TASKS_PATH = DATA_DIR / 'part_adapter' / 'public_analyze_tasks.json'
+PUBLIC_ANALYZE_TASKS_PATH.parent.mkdir(parents=True, exist_ok=True)
+PUBLIC_ANALYZE_TASKS_LOCK = threading.Lock()
+DEFAULT_PUBLIC_ANALYZE_TASKS: Dict[str, Any] = {'items': []}
 
 
 def _get_cors_allowed_origins() -> List[str]:
@@ -538,6 +543,159 @@ def _public_part_adapter_catalogs_payload() -> Dict[str, Any]:
         'gobricks_color_catalog': summary.get('gobricks_color_catalog', {}),
         'gobricks_color_reference': summary.get('gobricks_color_reference', []),
     }
+
+
+def _read_local_json(path: Path, default: Dict[str, Any]) -> Dict[str, Any]:
+    if not path.exists():
+        return json.loads(json.dumps(default))
+    try:
+        raw = path.read_text(encoding='utf-8')
+    except Exception:
+        return json.loads(json.dumps(default))
+    if not raw.strip():
+        return json.loads(json.dumps(default))
+    try:
+        payload = json.loads(raw)
+    except Exception:
+        return json.loads(json.dumps(default))
+    return payload if isinstance(payload, dict) else json.loads(json.dumps(default))
+
+
+def _write_local_json(path: Path, payload: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
+
+
+def _create_public_analyze_task(source_name: str, visitor_key: str = '') -> Dict[str, Any]:
+    task = {
+        'task_id': f'pat-{uuid.uuid4().hex[:12]}',
+        'status': 'queued',
+        'source_name': str(source_name or '').strip(),
+        'progress_text': '排队中，正在准备分析任务。',
+        'error': '',
+        'result_job_id': '',
+        'created_at': now_iso(),
+        'updated_at': now_iso(),
+        'visitor_key': str(visitor_key or '').strip(),
+    }
+    with PUBLIC_ANALYZE_TASKS_LOCK:
+        payload = _read_local_json(PUBLIC_ANALYZE_TASKS_PATH, DEFAULT_PUBLIC_ANALYZE_TASKS)
+        items = payload.get('items')
+        source = items if isinstance(items, list) else []
+        source.insert(0, task)
+        payload['items'] = source[:120]
+        _write_local_json(PUBLIC_ANALYZE_TASKS_PATH, payload)
+    return task
+
+
+def _update_public_analyze_task(task_id: str, **fields: Any) -> Optional[Dict[str, Any]]:
+    safe_task_id = str(task_id or '').strip()
+    if not safe_task_id:
+        return None
+    updated: Optional[Dict[str, Any]] = None
+    with PUBLIC_ANALYZE_TASKS_LOCK:
+        payload = _read_local_json(PUBLIC_ANALYZE_TASKS_PATH, DEFAULT_PUBLIC_ANALYZE_TASKS)
+        items = payload.get('items')
+        source = items if isinstance(items, list) else []
+        for item in source:
+            if str(item.get('task_id') or '') != safe_task_id:
+                continue
+            for key, value in fields.items():
+                item[key] = value
+            item['updated_at'] = now_iso()
+            updated = dict(item)
+            break
+        if updated is None:
+            return None
+        payload['items'] = source
+        _write_local_json(PUBLIC_ANALYZE_TASKS_PATH, payload)
+    return updated
+
+
+def _get_public_analyze_task(task_id: str) -> Optional[Dict[str, Any]]:
+    safe_task_id = str(task_id or '').strip()
+    if not safe_task_id:
+        return None
+    with PUBLIC_ANALYZE_TASKS_LOCK:
+        payload = _read_local_json(PUBLIC_ANALYZE_TASKS_PATH, DEFAULT_PUBLIC_ANALYZE_TASKS)
+    items = payload.get('items')
+    source = items if isinstance(items, list) else []
+    for item in source:
+        if str(item.get('task_id') or '') == safe_task_id:
+            return dict(item)
+    return None
+
+
+def _public_task_response(task: Dict[str, Any]) -> Dict[str, Any]:
+    payload = {
+        'task': {
+            'task_id': str(task.get('task_id') or ''),
+            'status': str(task.get('status') or ''),
+            'source_name': str(task.get('source_name') or ''),
+            'progress_text': str(task.get('progress_text') or ''),
+            'error': str(task.get('error') or ''),
+            'result_job_id': str(task.get('result_job_id') or ''),
+            'created_at': str(task.get('created_at') or ''),
+            'updated_at': str(task.get('updated_at') or ''),
+        }
+    }
+    if payload['task']['status'] == 'completed' and payload['task']['result_job_id']:
+        job = part_adapter_store.get_job(payload['task']['result_job_id'])
+        if job:
+            payload['job'] = job
+    return payload
+
+
+def _run_public_part_adapter_analyze_task(task_id: str, payload: PartAdapterAnalyzeRequest, visitor_key: str = '') -> None:
+    task = _update_public_analyze_task(task_id, status='running', progress_text='正在分析零件匹配与替代方案。')
+    if not task:
+        return
+    try:
+        bom_text = _validate_public_bom_text(payload.bom_text)
+        color_mode = str(payload.color_mode or 'balanced').strip().lower()
+        if color_mode not in {'safe', 'balanced', 'aggressive'}:
+            color_mode = 'balanced'
+        optimizer_mode = str(payload.optimizer_mode or 'reliability').strip().lower()
+        if optimizer_mode not in {'reliability', 'cost', 'appearance'}:
+            optimizer_mode = 'reliability'
+        job = part_adapter_store.analyze(
+            project_name=payload.project_name,
+            designer_name=payload.designer_name,
+            source_name=payload.source_name,
+            bom_text=bom_text,
+            color_mode=color_mode,
+            optimizer_mode=optimizer_mode,
+            optimizer_profile=str(payload.optimizer_profile or 'v1').strip().lower() or 'v1',
+            allow_display_sub=payload.allow_display_sub,
+            allow_structural_sub=payload.allow_structural_sub,
+        )
+        _update_public_analyze_task(
+            task_id,
+            status='completed',
+            progress_text='分析完成，可以查看结论和待处理零件。',
+            result_job_id=str(job.get('job_id') or ''),
+            error='',
+        )
+        part_adapter_store.record_event(
+            'analyze_public_async',
+            route='/api/tools/part-adapter/analyze-async',
+            source_name=payload.source_name or payload.project_name,
+            visitor_key=visitor_key,
+        )
+    except HTTPException as exc:
+        _update_public_analyze_task(
+            task_id,
+            status='failed',
+            progress_text='分析未完成，请稍后重试。',
+            error=str(exc.detail or '分析失败'),
+        )
+    except Exception as exc:
+        _update_public_analyze_task(
+            task_id,
+            status='failed',
+            progress_text='分析未完成，请稍后重试。',
+            error=str(exc or '分析失败'),
+        )
 
 
 def get_pay_mode() -> str:
@@ -2832,6 +2990,40 @@ def api_tools_part_adapter_analyze(
         visitor_key=_part_adapter_visitor_hash(request),
     )
     return {'job': job}
+
+
+@app.post('/api/tools/part-adapter/analyze-async')
+def api_tools_part_adapter_analyze_async(
+    payload: PartAdapterAnalyzeRequest,
+    request: Request,
+) -> Dict[str, Any]:
+    _validate_public_bom_text(payload.bom_text)
+    visitor_key = _part_adapter_visitor_hash(request)
+    task = _create_public_analyze_task(
+        source_name=payload.source_name or payload.project_name,
+        visitor_key=visitor_key,
+    )
+    part_adapter_store.record_event(
+        'analyze_public_async_submit',
+        route='/api/tools/part-adapter/analyze-async',
+        source_name=payload.source_name or payload.project_name,
+        visitor_key=visitor_key,
+    )
+    worker = threading.Thread(
+        target=_run_public_part_adapter_analyze_task,
+        args=(str(task.get('task_id') or ''), payload, visitor_key),
+        daemon=True,
+    )
+    worker.start()
+    return _public_task_response(task)
+
+
+@app.get('/api/tools/part-adapter/analyze-async/{task_id}')
+def api_tools_part_adapter_analyze_async_status(task_id: str) -> Dict[str, Any]:
+    task = _get_public_analyze_task(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail='分析任务不存在')
+    return _public_task_response(task)
 
 
 @app.get('/api/admin/part-adapter/analytics')
