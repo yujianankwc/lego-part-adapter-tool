@@ -1,13 +1,15 @@
 import base64
 import hashlib
+import io
 import json
 import os
 import time
 import uuid
+import zipfile
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from urllib.parse import unquote, urlencode
+from urllib.parse import quote, unquote, urlencode
 from urllib.error import HTTPError
 from urllib.request import Request as UrlRequest
 from urllib.request import urlopen
@@ -30,7 +32,30 @@ BASE_DIR = Path(__file__).resolve().parent
 ADMIN_DIR = BASE_DIR / 'admin'
 UPLOAD_DIR = DATA_DIR / 'uploads'
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-PART_ADAPTER_PUBLIC_COOKIE = 'kwc_part_adapter_token'
+LDRAW_LIBRARY_REMOTE_BASE = 'https://library.ldraw.org/library/official'
+LDRAW_LIBRARY_CACHE_DIR = DATA_DIR / 'part_adapter_ldraw_library'
+LDRAW_LIBRARY_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+LOCAL_DEV_ADMIN_TOKEN = 'kwc-admin-dev'
+PUBLIC_PART_ADAPTER_MAX_UPLOAD_BYTES = 2 * 1024 * 1024
+PUBLIC_PART_ADAPTER_MAX_MODEL_BYTES = 20 * 1024 * 1024
+PUBLIC_PART_ADAPTER_MAX_BOM_LINES = 5000
+PUBLIC_PART_ADAPTER_MAX_BOM_TEXT_CHARS = 300000
+
+
+def _get_cors_allowed_origins() -> List[str]:
+    raw = str(os.getenv('CORS_ALLOWED_ORIGINS') or '').strip()
+    if raw:
+        items = [str(item or '').strip() for item in raw.split(',')]
+        cleaned = [item for item in items if item]
+        if cleaned:
+            return cleaned
+    return [
+        'http://127.0.0.1:8002',
+        'http://127.0.0.1:8003',
+        'http://localhost:8002',
+        'http://localhost:8003',
+        'https://tools.kuwanchao.com',
+    ]
 
 
 def _load_local_env_file() -> None:
@@ -64,7 +89,7 @@ _load_local_env_file()
 app = FastAPI(title='KWC Designer Plan API', version='1.2.0')
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=_get_cors_allowed_origins(),
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],
@@ -311,6 +336,8 @@ class PartAdapterAnalyzeRequest(BaseModel):
     source_name: str = Field(default='')
     bom_text: str = Field(default='')
     color_mode: str = Field(default='balanced')
+    optimizer_mode: str = Field(default='reliability')
+    optimizer_profile: str = Field(default='v1')
     allow_display_sub: bool = Field(default=True)
     allow_structural_sub: bool = Field(default=False)
 
@@ -354,6 +381,107 @@ def _resolve_gobricks_auth_token(provided: str = '') -> str:
     return str(os.environ.get('GOBRICKS_AUTH_TOKEN') or '').strip()
 
 
+def _decode_text_bytes(raw: bytes) -> str:
+    for encoding in ('utf-8-sig', 'utf-8', 'gb18030', 'utf-16', 'latin-1'):
+        try:
+            return raw.decode(encoding)
+        except Exception:
+            continue
+    return raw.decode('utf-8', errors='replace')
+
+
+def _extract_preview_model_text(filename: str, content: bytes) -> Dict[str, Any]:
+    safe_name = str(filename or 'model').strip() or 'model'
+    suffix = Path(safe_name).suffix.lower()
+    text_exts = {'.ldr', '.mpd', '.dat'}
+    if suffix in text_exts:
+        return {
+            'source_format': suffix.lstrip('.'),
+            'source_entry': safe_name,
+            'source_text': _decode_text_bytes(content),
+        }
+
+    if suffix == '.io' or zipfile.is_zipfile(io.BytesIO(content)):
+        try:
+            with zipfile.ZipFile(io.BytesIO(content), 'r') as zf:
+                file_entries = [name for name in zf.namelist() if not name.endswith('/')]
+                candidates = [name for name in file_entries if Path(name).suffix.lower() in text_exts]
+                if not candidates:
+                    raise ValueError('io 文件中未找到可识别的 LDraw 模型文本（.ldr/.mpd/.dat）')
+
+                def _score(entry_name: str) -> tuple:
+                    lower = entry_name.lower()
+                    ext = Path(entry_name).suffix.lower()
+                    depth = lower.count('/')
+                    ext_rank = 0 if ext == '.mpd' else 1 if ext == '.ldr' else 2
+                    model_rank = 0 if ('model' in lower or 'main' in lower) else 1
+                    return (ext_rank, model_rank, depth, len(lower))
+
+                candidates.sort(key=_score)
+                chosen = candidates[0]
+                with zf.open(chosen, 'r') as fh:
+                    raw = fh.read()
+                return {
+                    'source_format': Path(chosen).suffix.lower().lstrip('.'),
+                    'source_entry': chosen,
+                    'source_text': _decode_text_bytes(raw),
+                }
+        except ValueError:
+            raise
+        except Exception as exc:
+            raise ValueError(f'解析 io 文件失败: {exc}')
+
+    raise ValueError('仅支持 .io / .ldr / .mpd / .dat 文件')
+
+
+def _sanitize_ldraw_library_path(raw_path: str) -> str:
+    safe = str(unquote(raw_path or '')).strip().replace('\\', '/').lstrip('/')
+    if not safe:
+        raise ValueError('文件路径不能为空')
+    parts = [p for p in safe.split('/') if p]
+    if not parts or any(p in {'.', '..'} for p in parts):
+        raise ValueError('文件路径非法')
+    normalized = '/'.join(parts)
+    lower = normalized.lower()
+    if not (lower.endswith('.dat') or lower.endswith('.ldr') or lower.endswith('.mpd')):
+        raise ValueError('仅支持 .dat/.ldr/.mpd 文件')
+    return normalized
+
+
+def _read_or_fetch_ldraw_library_file(rel_path: str) -> str:
+    safe_rel = _sanitize_ldraw_library_path(rel_path)
+    local_path = (LDRAW_LIBRARY_CACHE_DIR / safe_rel).resolve()
+    base_path = LDRAW_LIBRARY_CACHE_DIR.resolve()
+    if base_path not in local_path.parents and local_path != base_path:
+        raise ValueError('文件路径非法')
+    if local_path.exists():
+        return _decode_text_bytes(local_path.read_bytes())
+
+    encoded_path = quote(safe_rel, safe='/-._~')
+    url = f'{LDRAW_LIBRARY_REMOTE_BASE}/{encoded_path}'
+    try:
+        req = UrlRequest(
+            url,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (KWC-PartAdapter/1.0)',
+                'Accept': '*/*',
+            },
+            method='GET',
+        )
+        with urlopen(req, timeout=25) as resp:
+            raw = resp.read()
+    except HTTPError as exc:
+        if int(exc.code or 0) == 404:
+            raise FileNotFoundError(safe_rel)
+        raise RuntimeError(f'远程获取失败: HTTP {exc.code}')
+    except Exception as exc:
+        raise RuntimeError(f'远程获取失败: {exc}')
+
+    local_path.parent.mkdir(parents=True, exist_ok=True)
+    local_path.write_bytes(raw)
+    return _decode_text_bytes(raw)
+
+
 def _part_adapter_visitor_hash(request: Request) -> str:
     client_host = str(request.client.host or '').strip() if request.client else ''
     user_agent = str(request.headers.get('user-agent') or '').strip()
@@ -364,7 +492,52 @@ def _part_adapter_visitor_hash(request: Request) -> str:
 
 
 def get_admin_token() -> str:
-    return os.getenv('ADMIN_TOKEN', 'kwc-admin-dev').strip() or 'kwc-admin-dev'
+    return str(os.getenv('ADMIN_TOKEN') or '').strip()
+
+
+def _is_loopback_request(request: Optional[Request] = None) -> bool:
+    if not request or not request.client:
+        return False
+    client_host = str(request.client.host or '').strip().lower()
+    return client_host in {'127.0.0.1', '::1', 'localhost'}
+
+
+def _is_valid_legacy_admin_token(token: str, request: Optional[Request] = None) -> bool:
+    safe_token = str(token or '').strip()
+    if not safe_token:
+        return False
+    configured_token = get_admin_token()
+    if configured_token and safe_token == configured_token:
+        return True
+    return _is_loopback_request(request) and safe_token == LOCAL_DEV_ADMIN_TOKEN
+
+
+def _validate_public_upload_content(content: bytes, max_bytes: int = PUBLIC_PART_ADAPTER_MAX_UPLOAD_BYTES) -> None:
+    if not content:
+        raise HTTPException(status_code=400, detail='文件为空')
+    if len(content) > int(max_bytes):
+        raise HTTPException(status_code=400, detail=f'文件过大，请控制在 {int(max_bytes / 1024 / 1024)}MB 以内')
+
+
+def _validate_public_bom_text(bom_text: str) -> str:
+    safe_text = str(bom_text or '').strip()
+    if not safe_text:
+        raise HTTPException(status_code=400, detail='请先提供 BOM 文本')
+    if len(safe_text) > PUBLIC_PART_ADAPTER_MAX_BOM_TEXT_CHARS:
+        raise HTTPException(status_code=400, detail='BOM 文本过长，请拆分后再试')
+    if len(safe_text.splitlines()) > PUBLIC_PART_ADAPTER_MAX_BOM_LINES:
+        raise HTTPException(status_code=400, detail=f'BOM 行数过多，请控制在 {PUBLIC_PART_ADAPTER_MAX_BOM_LINES} 行以内')
+    return safe_text
+
+
+def _public_part_adapter_catalogs_payload() -> Dict[str, Any]:
+    summary = part_adapter_store.get_rules_summary()
+    return {
+        'updated_at': summary.get('updated_at', ''),
+        'lego_color_catalog': summary.get('lego_color_catalog', {}),
+        'gobricks_color_catalog': summary.get('gobricks_color_catalog', {}),
+        'gobricks_color_reference': summary.get('gobricks_color_reference', []),
+    }
 
 
 def get_pay_mode() -> str:
@@ -667,11 +840,11 @@ def admin_has_permission(identity: Dict[str, Any], permission: str) -> bool:
 
 
 def get_admin_identity_from_headers(
+    request: Optional[Request] = None,
     x_admin_session: Optional[str] = None,
     x_admin_token: Optional[str] = None,
     x_admin_role: Optional[str] = None,
     x_admin_operator: Optional[str] = None,
-    admin_token_cookie: Optional[str] = None,
 ) -> Optional[Dict[str, Any]]:
     session_token = (x_admin_session or '').strip()
     if session_token:
@@ -680,9 +853,7 @@ def get_admin_identity_from_headers(
             return identity
 
     token = (x_admin_token or '').strip()
-    if not token:
-        token = (admin_token_cookie or '').strip()
-    if token == get_admin_token():
+    if _is_valid_legacy_admin_token(token=token, request=request):
         role = normalize_admin_role(x_admin_role)
         operator = resolve_admin_actor(x_admin_operator)
         return _build_legacy_admin_identity(role=role, operator=operator)
@@ -697,11 +868,11 @@ def require_admin(
     x_admin_operator: Optional[str] = Header(default=None, alias='X-Admin-Operator'),
 ) -> Dict[str, Any]:
     identity = get_admin_identity_from_headers(
+        request=request,
         x_admin_session=x_admin_session,
         x_admin_token=x_admin_token,
         x_admin_role=x_admin_role,
         x_admin_operator=x_admin_operator,
-        admin_token_cookie=request.cookies.get(PART_ADAPTER_PUBLIC_COOKIE),
     )
     if not identity:
         raise HTTPException(status_code=401, detail='后台登录态失效，请重新登录')
@@ -746,11 +917,11 @@ async def admin_role_guard(request: Request, call_next: Any) -> Any:
         if path.startswith('/api/admin/auth/login'):
             return await call_next(request)
         identity = get_admin_identity_from_headers(
+            request=request,
             x_admin_session=request.headers.get('X-Admin-Session'),
             x_admin_token=request.headers.get('X-Admin-Token'),
             x_admin_role=request.headers.get('X-Admin-Role'),
             x_admin_operator=request.headers.get('X-Admin-Operator'),
-            admin_token_cookie=request.cookies.get(PART_ADAPTER_PUBLIC_COOKIE),
         )
         if not identity:
             return JSONResponse(status_code=401, content={'detail': '后台登录态失效，请重新登录'})
@@ -2147,6 +2318,11 @@ def api_admin_part_adapter_rules(admin: Dict[str, Any] = Depends(require_admin))
     return part_adapter_store.get_rules_summary()
 
 
+@app.get('/api/tools/part-adapter/catalogs')
+def api_tools_part_adapter_catalogs() -> Dict[str, Any]:
+    return _public_part_adapter_catalogs_payload()
+
+
 @app.put('/api/admin/part-adapter/rules')
 def api_admin_part_adapter_update_rules(
     payload: PartAdapterRulesUpdateRequest,
@@ -2182,6 +2358,112 @@ async def api_admin_part_adapter_import_bom(
         raise HTTPException(status_code=400, detail=str(exc))
     part_adapter_store.record_event('import_bom', route='/api/admin/part-adapter/import-bom', source_name=file.filename or '')
     return parsed
+
+
+@app.post('/api/tools/part-adapter/import-bom')
+async def api_tools_part_adapter_import_bom(
+    request: Request,
+    file: UploadFile = File(...),
+) -> Dict[str, Any]:
+    content = await file.read()
+    _validate_public_upload_content(content)
+    try:
+        parsed = part_adapter_store.import_bom_file(filename=file.filename or '', content=content)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    _validate_public_bom_text(parsed.get('bom_text', ''))
+    part_adapter_store.record_event(
+        'import_bom_public',
+        route='/api/tools/part-adapter/import-bom',
+        source_name=file.filename or '',
+        visitor_key=_part_adapter_visitor_hash(request),
+    )
+    return parsed
+
+
+@app.post('/api/admin/part-adapter/preview-model')
+async def api_admin_part_adapter_preview_model(
+    file: UploadFile = File(...),
+    admin: Dict[str, Any] = Depends(require_admin),
+) -> Dict[str, Any]:
+    _ = admin
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail='文件为空')
+    if len(content) > 20 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail='文件过大，请控制在 20MB 以内')
+    try:
+        parsed = _extract_preview_model_text(file.filename or '', content)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    part_adapter_store.record_event('preview_model', route='/api/admin/part-adapter/preview-model', source_name=file.filename or '')
+    source_text = str(parsed.get('source_text') or '')
+    return {
+        'ok': True,
+        'filename': file.filename or '',
+        'source_format': parsed.get('source_format') or '',
+        'source_entry': parsed.get('source_entry') or file.filename or '',
+        'source_text': source_text,
+        'line_count': len(source_text.splitlines()),
+    }
+
+
+@app.post('/api/tools/part-adapter/preview-model')
+async def api_tools_part_adapter_preview_model(
+    request: Request,
+    file: UploadFile = File(...),
+) -> Dict[str, Any]:
+    content = await file.read()
+    _validate_public_upload_content(content, max_bytes=PUBLIC_PART_ADAPTER_MAX_MODEL_BYTES)
+    try:
+        parsed = _extract_preview_model_text(file.filename or '', content)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    part_adapter_store.record_event(
+        'preview_model_public',
+        route='/api/tools/part-adapter/preview-model',
+        source_name=file.filename or '',
+        visitor_key=_part_adapter_visitor_hash(request),
+    )
+    source_text = str(parsed.get('source_text') or '')
+    return {
+        'ok': True,
+        'filename': file.filename or '',
+        'source_format': parsed.get('source_format') or '',
+        'source_entry': parsed.get('source_entry') or file.filename or '',
+        'source_text': source_text,
+        'line_count': len(source_text.splitlines()),
+    }
+
+
+@app.get('/api/admin/part-adapter/ldraw-library/{file_path:path}')
+def api_admin_part_adapter_ldraw_library_file(
+    file_path: str,
+    admin: Dict[str, Any] = Depends(require_admin),
+) -> Response:
+    _ = admin
+    try:
+        text = _read_or_fetch_ldraw_library_file(file_path)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail='LDraw 文件不存在')
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+    return Response(content=text, media_type='text/plain; charset=utf-8')
+
+
+@app.get('/api/tools/part-adapter/ldraw-library/{file_path:path}')
+def api_tools_part_adapter_ldraw_library_file(file_path: str) -> Response:
+    try:
+        text = _read_or_fetch_ldraw_library_file(file_path)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail='LDraw 文件不存在')
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+    return Response(content=text, media_type='text/plain; charset=utf-8')
 
 
 @app.post('/api/admin/part-adapter/import-gobricks-result')
@@ -2417,6 +2699,79 @@ async def api_admin_part_adapter_convert_gobricks(
     }
 
 
+@app.post('/api/tools/part-adapter/convert-gobricks')
+async def api_tools_part_adapter_convert_gobricks(
+    request: Request,
+    auth_token: str = Form(default=''),
+    base_url: str = Form(default='https://api.gobricks.cn'),
+    file: UploadFile = File(...),
+) -> Dict[str, Any]:
+    safe_token = _resolve_gobricks_auth_token(auth_token)
+    if not safe_token:
+        raise HTTPException(status_code=400, detail='请先提供高砖 auth_token，或在服务端配置 GOBRICKS_AUTH_TOKEN')
+    safe_base_url = str(base_url or 'https://api.gobricks.cn').strip().rstrip('/') or 'https://api.gobricks.cn'
+    file_bytes = await file.read()
+    _validate_public_upload_content(file_bytes)
+    try:
+        imported = part_adapter_store.import_bom_file(filename=file.filename or '', content=file_bytes)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    _validate_public_bom_text(imported.get('bom_text', ''))
+
+    multipart = build_multipart_form_data(
+        fields={'auth_token': safe_token},
+        file_field_name='file',
+        filename=file.filename or 'upload.csv',
+        file_content=file_bytes,
+        content_type=file.content_type or 'text/csv',
+    )
+    path = '/trade/external/v1/convertToGdsItemList'
+    try:
+        req = UrlRequest(
+            f'{safe_base_url}{path}',
+            data=multipart['body'],
+            headers={'Content-Type': multipart['content_type']},
+            method='POST',
+        )
+        with urlopen(req, timeout=60) as resp:
+            body_text = resp.read().decode('utf-8', errors='replace')
+    except HTTPError as exc:
+        detail_text = exc.read().decode('utf-8', errors='replace')
+        try:
+            body = json.loads(detail_text or '{}')
+        except Exception:
+            body = {'msg': detail_text or '高砖转换失败'}
+        raise HTTPException(status_code=400, detail=body.get('msg') or body.get('message') or '高砖转换失败')
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f'高砖转换失败: {exc}')
+
+    try:
+        body = json.loads(body_text or '{}')
+    except Exception:
+        raise HTTPException(status_code=400, detail='高砖返回内容无法解析')
+    if int(body.get('ret') or 0) != 1:
+        raise HTTPException(status_code=400, detail=body.get('msg') or '高砖转换失败')
+
+    remote_data = body.get('data') if isinstance(body.get('data'), dict) else {}
+    report = part_adapter_store.process_gobricks_conversion_result(
+        source_file=file.filename or '',
+        bom_text=imported.get('bom_text', ''),
+        remote_data=remote_data,
+    )
+    part_adapter_store.record_event(
+        'convert_gobricks_public',
+        route='/api/tools/part-adapter/convert-gobricks',
+        source_name=file.filename or '',
+        visitor_key=_part_adapter_visitor_hash(request),
+    )
+    return {
+        'ok': True,
+        'message': body.get('msg') or '成功',
+        'bom': imported,
+        'report': report,
+    }
+
+
 @app.post('/api/admin/part-adapter/analyze')
 def api_admin_part_adapter_analyze(
     payload: PartAdapterAnalyzeRequest,
@@ -2429,16 +2784,53 @@ def api_admin_part_adapter_analyze(
     color_mode = str(payload.color_mode or 'balanced').strip().lower()
     if color_mode not in {'safe', 'balanced', 'aggressive'}:
         color_mode = 'balanced'
+    optimizer_mode = str(payload.optimizer_mode or 'reliability').strip().lower()
+    if optimizer_mode not in {'reliability', 'cost', 'appearance'}:
+        optimizer_mode = 'reliability'
     job = part_adapter_store.analyze(
         project_name=payload.project_name,
         designer_name=payload.designer_name,
         source_name=payload.source_name,
         bom_text=bom_text,
         color_mode=color_mode,
+        optimizer_mode=optimizer_mode,
+        optimizer_profile=str(payload.optimizer_profile or 'v1').strip().lower() or 'v1',
         allow_display_sub=payload.allow_display_sub,
         allow_structural_sub=payload.allow_structural_sub,
     )
     part_adapter_store.record_event('analyze', route='/api/admin/part-adapter/analyze', source_name=payload.source_name or payload.project_name)
+    return {'job': job}
+
+
+@app.post('/api/tools/part-adapter/analyze')
+def api_tools_part_adapter_analyze(
+    payload: PartAdapterAnalyzeRequest,
+    request: Request,
+) -> Dict[str, Any]:
+    bom_text = _validate_public_bom_text(payload.bom_text)
+    color_mode = str(payload.color_mode or 'balanced').strip().lower()
+    if color_mode not in {'safe', 'balanced', 'aggressive'}:
+        color_mode = 'balanced'
+    optimizer_mode = str(payload.optimizer_mode or 'reliability').strip().lower()
+    if optimizer_mode not in {'reliability', 'cost', 'appearance'}:
+        optimizer_mode = 'reliability'
+    job = part_adapter_store.analyze(
+        project_name=payload.project_name,
+        designer_name=payload.designer_name,
+        source_name=payload.source_name,
+        bom_text=bom_text,
+        color_mode=color_mode,
+        optimizer_mode=optimizer_mode,
+        optimizer_profile=str(payload.optimizer_profile or 'v1').strip().lower() or 'v1',
+        allow_display_sub=payload.allow_display_sub,
+        allow_structural_sub=payload.allow_structural_sub,
+    )
+    part_adapter_store.record_event(
+        'analyze_public',
+        route='/api/tools/part-adapter/analyze',
+        source_name=payload.source_name or payload.project_name,
+        visitor_key=_part_adapter_visitor_hash(request),
+    )
     return {'job': job}
 
 
@@ -2513,6 +2905,24 @@ def api_admin_part_adapter_export(job_id: str, admin: Dict[str, Any] = Depends(r
     )
 
 
+@app.get('/api/tools/part-adapter/jobs/{job_id}/export.csv')
+def api_tools_part_adapter_export(job_id: str, request: Request) -> Response:
+    csv_text = part_adapter_store.export_job_csv(job_id)
+    if csv_text is None:
+        raise HTTPException(status_code=404, detail='适配记录不存在')
+    part_adapter_store.record_event(
+        'export_csv_public',
+        route=f'/api/tools/part-adapter/jobs/{job_id}/export.csv',
+        source_name=job_id,
+        visitor_key=_part_adapter_visitor_hash(request),
+    )
+    return Response(
+        content=csv_text,
+        media_type='text/csv; charset=utf-8',
+        headers={'Content-Disposition': f'attachment; filename=\"{job_id}.csv\"'},
+    )
+
+
 @app.get('/admin', response_class=HTMLResponse)
 def admin_page() -> Any:
     overview_file = ADMIN_DIR / 'overview.html'
@@ -2571,7 +2981,7 @@ def admin_module_page(module: str, request: Request) -> Any:
 
 @app.get('/tools/part-adapter', response_class=HTMLResponse)
 def public_part_adapter_page(request: Request) -> Any:
-    module_file = ADMIN_DIR / 'part-adapter.html'
+    module_file = ADMIN_DIR / 'part-adapter-public.html'
     if not module_file.exists():
         raise HTTPException(status_code=404, detail='工具页面不存在')
     part_adapter_store.record_event(
@@ -2579,16 +2989,33 @@ def public_part_adapter_page(request: Request) -> Any:
         route='/tools/part-adapter',
         visitor_key=_part_adapter_visitor_hash(request),
     )
-    response = FileResponse(module_file)
-    response.set_cookie(
-        key=PART_ADAPTER_PUBLIC_COOKIE,
-        value=get_admin_token(),
-        httponly=True,
-        samesite='lax',
-        secure=False,
-        path='/',
+    return FileResponse(module_file)
+
+
+@app.get('/tools/part-adapter/results', response_class=HTMLResponse)
+def public_part_adapter_results_page(request: Request) -> Any:
+    module_file = ADMIN_DIR / 'part-adapter-results.html'
+    if not module_file.exists():
+        raise HTTPException(status_code=404, detail='结果页面不存在')
+    part_adapter_store.record_event(
+        'page_view_public_results',
+        route='/tools/part-adapter/results',
+        visitor_key=_part_adapter_visitor_hash(request),
     )
-    return response
+    return FileResponse(module_file)
+
+
+@app.get('/admin/part-adapter/analytics', response_class=HTMLResponse)
+def admin_part_adapter_analytics_page(request: Request) -> Any:
+    module_file = ADMIN_DIR / 'part-adapter-analytics.html'
+    if not module_file.exists():
+        raise HTTPException(status_code=404, detail='统计页面不存在')
+    part_adapter_store.record_event(
+        'page_view_admin',
+        route='/admin/part-adapter/analytics',
+        visitor_key=_part_adapter_visitor_hash(request),
+    )
+    return FileResponse(module_file)
 
 
 @app.get('/')

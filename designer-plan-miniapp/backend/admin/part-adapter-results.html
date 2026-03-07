@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>零件适配结果</title>
+    <link rel="icon" type="image/svg+xml" href="/static/part_adapter_ui/part-adapter-favicon.svg" />
+    <link rel="shortcut icon" href="/static/part_adapter_ui/part-adapter-favicon.svg" />
+    <style>
+      :root {
+        --bg: #eff4fb;
+        --surface: rgba(255, 255, 255, 0.94);
+        --border: #dbe4f5;
+        --text: #1f304d;
+        --subtle: #66758f;
+        --primary: #173b86;
+        --primary-strong: #0f2f78;
+        --shadow: 0 18px 42px rgba(20, 45, 95, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top right, rgba(83, 129, 216, 0.14), transparent 28%),
+          linear-gradient(180deg, #f7faff 0%, var(--bg) 100%);
+      }
+
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 16px 48px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .card {
+        border-radius: 22px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .topbar,
+      .summary-card,
+      .toolbar-card,
+      .list-card {
+        padding: 22px;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid #d8e4fb;
+        background: #fff;
+        color: var(--primary);
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .brand-lockup {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+        margin-top: 14px;
+      }
+
+      .brand-mark {
+        width: 56px;
+        height: 56px;
+        display: grid;
+        place-items: center;
+      }
+
+      .brand-mark img {
+        width: 56px;
+        height: 56px;
+        display: block;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.12;
+        color: #12294f;
+      }
+
+      .subtitle {
+        margin: 10px 0 0;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #60708c;
+      }
+
+      .file-notice {
+        margin-top: 12px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid #dbe5f8;
+        background: #f8fbff;
+        font-size: 13px;
+        line-height: 1.65;
+        color: #596c8b;
+      }
+
+      .file-notice strong {
+        display: inline-block;
+        margin-right: 8px;
+        color: #173b86;
+      }
+
+      .compliance-note {
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid #dfe7f8;
+        background: rgba(255, 255, 255, 0.72);
+        font-size: 12px;
+        line-height: 1.75;
+        color: #74839d;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .stat {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 30px;
+        line-height: 1;
+        color: var(--primary);
+      }
+
+      .stat span {
+        display: block;
+        margin-top: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #687994;
+      }
+
+      .toolbar-row,
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .toolbar-row + .toolbar-row {
+        margin-top: 12px;
+      }
+
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      button,
+      .tab-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid #d6e3fb;
+        background: #fff;
+        color: var(--primary);
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .tab-btn.is-active,
+      .primary-btn {
+        border-color: var(--primary);
+        background: linear-gradient(180deg, var(--primary) 0%, var(--primary-strong) 100%);
+        color: #fff;
+        box-shadow: 0 14px 28px rgba(23, 59, 134, 0.16);
+      }
+
+      .hint {
+        font-size: 13px;
+        color: var(--subtle);
+        line-height: 1.65;
+      }
+
+      .search {
+        min-width: 220px;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid #d6e3fb;
+        background: #fff;
+        color: var(--text);
+      }
+
+      .summary-line {
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid #dbe5f8;
+        background: #f8fbff;
+        font-size: 13px;
+        line-height: 1.65;
+        color: #5f7090;
+      }
+
+      .load-more-row {
+        display: flex;
+        justify-content: center;
+        margin-top: 14px;
+      }
+
+      .result-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .result-card {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: start;
+        padding: 16px;
+        border-radius: 20px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .thumb {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        border: 1px solid #d6e3fb;
+        background: #fff;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6f7f99;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+
+      .result-main {
+        min-width: 0;
+        display: grid;
+        gap: 10px;
+      }
+
+      .result-head {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .result-name {
+        font-size: 16px;
+        font-weight: 900;
+        color: #17304f;
+      }
+
+      .result-meta {
+        font-size: 12px;
+        line-height: 1.6;
+        color: #6c7d97;
+      }
+
+      .status-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .status-chip.is-exact {
+        background: #edf9f0;
+        border: 1px solid #cde8d6;
+        color: #0c7a3f;
+      }
+
+      .status-chip.is-replaceable {
+        background: #eef4ff;
+        border: 1px solid #cfe0fc;
+        color: #1d4a9a;
+      }
+
+      .status-chip.is-pending {
+        background: #fff7de;
+        border: 1px solid #f2dfab;
+        color: #9a6700;
+      }
+
+      .status-chip.is-blocked {
+        background: #fff0f0;
+        border: 1px solid #f3c7c7;
+        color: #b42318;
+      }
+
+      .reason {
+        font-size: 13px;
+        line-height: 1.65;
+        color: #596c8b;
+      }
+
+      .meta-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        border: 1px solid #d7e4fa;
+        background: #fff;
+        color: #49678f;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .drawer-mask {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: none;
+        background: rgba(10, 18, 36, 0.42);
+      }
+
+      .drawer-mask.open { display: block; }
+
+      .drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 61;
+        width: min(520px, 100vw);
+        background: #fff;
+        border-left: 1px solid #dbe5f8;
+        box-shadow: -24px 0 60px rgba(14, 33, 72, 0.18);
+        transform: translateX(100%);
+        transition: transform 180ms ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .drawer.open { transform: translateX(0); }
+
+      .drawer-head,
+      .drawer-foot {
+        padding: 18px;
+        border-bottom: 1px solid #e5ecfa;
+      }
+
+      .drawer-foot {
+        border-bottom: 0;
+        border-top: 1px solid #e5ecfa;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .drawer-body {
+        flex: 1 1 auto;
+        overflow: auto;
+        padding: 18px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .drawer-block {
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid #dfe7f8;
+        background: #fbfdff;
+      }
+
+      .drawer-block h3 {
+        margin: 0 0 10px;
+        font-size: 14px;
+        color: var(--primary);
+      }
+
+      .drawer-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .drawer-image-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .drawer-image-card {
+        display: grid;
+        gap: 10px;
+        padding: 12px;
+        border-radius: 16px;
+        border: 1px solid #e0e8fa;
+        background: #fff;
+      }
+
+      .drawer-image-card strong {
+        font-size: 12px;
+        color: #73839d;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .drawer-preview-btn {
+        display: grid;
+        place-items: center;
+        width: 100%;
+        min-height: 180px;
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid #d6e3fb;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        cursor: zoom-in;
+      }
+
+      .drawer-preview-btn img {
+        max-width: 100%;
+        max-height: 150px;
+        object-fit: contain;
+        display: block;
+      }
+
+      .drawer-preview-empty {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #7585a0;
+      }
+
+      .drawer-image-caption {
+        font-size: 12px;
+        line-height: 1.6;
+        color: #647590;
+      }
+
+      .drawer-item {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid #e0e8fa;
+        background: #fff;
+      }
+
+      .drawer-item strong {
+        display: block;
+        font-size: 11px;
+        color: #73839d;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .drawer-item span {
+        display: block;
+        margin-top: 6px;
+        font-size: 13px;
+        line-height: 1.55;
+        color: #243756;
+        word-break: break-word;
+      }
+
+      .empty {
+        padding: 16px 2px 4px;
+        color: #6c7d97;
+        line-height: 1.65;
+      }
+
+      .page-footer {
+        display: grid;
+        gap: 4px;
+        justify-items: center;
+        padding: 4px 8px 0;
+        font-size: 12px;
+        line-height: 1.6;
+        color: #8a98af;
+      }
+
+      .image-preview-mask {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        display: none;
+        background: rgba(10, 18, 36, 0.72);
+      }
+
+      .image-preview-mask.open {
+        display: grid;
+        place-items: center;
+      }
+
+      .image-preview-panel {
+        width: min(92vw, 980px);
+        max-height: 88vh;
+        padding: 20px;
+        border-radius: 22px;
+        background: #fff;
+        box-shadow: 0 24px 70px rgba(14, 33, 72, 0.28);
+        display: grid;
+        gap: 12px;
+      }
+
+      .image-preview-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .image-preview-title {
+        font-size: 16px;
+        font-weight: 900;
+        color: #173b86;
+      }
+
+      .image-preview-stage {
+        display: grid;
+        place-items: center;
+        min-height: 240px;
+        max-height: calc(88vh - 100px);
+        overflow: auto;
+        border-radius: 18px;
+        border: 1px solid #dce6fa;
+        background: #f8fbff;
+        padding: 16px;
+      }
+
+      .image-preview-stage img {
+        max-width: 100%;
+        max-height: calc(88vh - 140px);
+        object-fit: contain;
+        display: block;
+      }
+
+      @media (max-width: 900px) {
+        .brand-lockup {
+          gap: 12px;
+          align-items: flex-start;
+        }
+
+        .brand-mark {
+          width: 48px;
+          height: 48px;
+        }
+
+        .brand-mark img {
+          width: 48px;
+          height: 48px;
+        }
+
+        .summary-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .result-card {
+          grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .result-card > div:last-child,
+        .result-card > button,
+        .result-card > a {
+          grid-column: 1 / -1;
+        }
+
+        .drawer-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .drawer-image-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .page-footer {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <section class="card topbar">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <a class="back-link" href="/tools/part-adapter">返回快速判断页</a>
+          <button type="button" id="clearResultButton">清空当前结果</button>
+        </div>
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">
+            <img src="/static/part_adapter_ui/part-adapter-favicon.svg" alt="" />
+          </div>
+          <div>
+            <h1>适配结果</h1>
+            <p class="subtitle">这里展示基于导入清单生成的完整适配结果，包括可替代项、缺失项、待确认项和导出动作。</p>
+          </div>
+        </div>
+        <div class="file-notice" id="fileNotice"><strong>当前文件</strong><span id="fileNoticeName">未导入文件</span></div>
+      </section>
+
+      <section class="compliance-note">
+        以下结果为第三方适配分析建议，仅供选件与下单参考，不代表官方兼容结论，也不代表相关品牌之间存在合作、授权或认可关系。
+      </section>
+
+      <section class="card summary-card">
+        <div class="summary-grid">
+          <div class="stat"><strong id="totalQty">0</strong><span>零件总数（颗）</span></div>
+          <div class="stat"><strong id="totalTypes">0</strong><span>零件种类数</span></div>
+          <div class="stat"><strong id="exactCount">0</strong><span>可直接匹配（种）</span></div>
+          <div class="stat"><strong id="replaceableCount">0</strong><span>可替代（种）</span></div>
+          <div class="stat"><strong id="pendingCount">0</strong><span>待确认（种）</span></div>
+          <div class="stat"><strong id="blockedCount">0</strong><span>暂时缺失（种）</span></div>
+        </div>
+      </section>
+
+      <section class="card toolbar-card">
+        <div class="toolbar-row">
+          <div class="tabs" id="tabs">
+            <button type="button" class="tab-btn is-active" data-tab="all">全部结果</button>
+            <button type="button" class="tab-btn" data-tab="replaceable">可替代</button>
+            <button type="button" class="tab-btn" data-tab="pending">待确认</button>
+            <button type="button" class="tab-btn" data-tab="blocked">暂时缺失</button>
+          </div>
+        </div>
+        <div class="toolbar-row">
+          <input id="searchInput" class="search" placeholder="搜零件名称、编号、原因" />
+          <div class="actions">
+            <button type="button" class="primary-btn" onclick="downloadProcurementSuggestionCsv()">导出采购建议</button>
+            <button type="button" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>
+            <button type="button" onclick="downloadMatchResultCsv()">导出完整结果</button>
+          </div>
+        </div>
+        <div class="summary-line" id="summaryLine">等待读取最近一次分析结果。</div>
+      </section>
+
+      <section class="card list-card">
+        <div class="result-list" id="resultList">
+          <div class="empty">当前还没有可展示的完整结果。请先回到快速判断页上传清单。</div>
+        </div>
+        <div class="load-more-row" id="loadMoreRow" style="display:none;">
+          <button type="button" id="loadMoreButton">加载更多</button>
+        </div>
+      </section>
+
+      <footer class="page-footer">
+        <div>版本 1.0：人人都是积木设计师。万物皆可积木</div>
+        <div>鲁ICP备2020043483号-1，©2020-2026 酷玩潮®</div>
+        <div>LEGO® 为 LEGO 集团的商标。LEGO 集团未赞助、授权或认可本工具。</div>
+        <div>LEGO® is a trademark of the LEGO Group, which does not sponsor, authorize, or endorse this tool.</div>
+      </footer>
+    </div>
+
+    <div class="drawer-mask" id="drawerMask" onclick="closeDrawer(event)"></div>
+    <aside class="drawer" id="drawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div style="font-size:18px;font-weight:900;color:#173b86;" id="drawerTitle">零件详情</div>
+        <div class="hint" id="drawerSubtitle" style="margin-top:6px;">点击列表中的零件后查看替代原因和差异。</div>
+      </div>
+      <div class="drawer-body" id="drawerBody"></div>
+      <div class="drawer-foot">
+        <button type="button" class="primary-btn" onclick="closeDrawer()">知道了</button>
+      </div>
+    </aside>
+
+    <div class="image-preview-mask" id="imagePreviewMask" onclick="closeImagePreview(event)">
+      <div class="image-preview-panel" onclick="event.stopPropagation()">
+        <div class="image-preview-head">
+          <div class="image-preview-title" id="imagePreviewTitle">零件图片</div>
+          <button type="button" onclick="closeImagePreview()">关闭</button>
+        </div>
+        <div class="image-preview-stage" id="imagePreviewStage"></div>
+      </div>
+    </div>
+
+    <script>
+      const STORAGE_KEY = 'kwc_public_part_adapter_last_job_v2'
+      let currentTab = 'all'
+      let currentJob = null
+      let currentVisibleCount = 24
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;')
+      }
+
+      function loadJob() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY)
+          return raw ? JSON.parse(raw) : null
+        } catch (err) {
+          return null
+        }
+      }
+
+      function clearStoredJob() {
+        try {
+          localStorage.removeItem(STORAGE_KEY)
+        } catch (err) {
+          // ignore
+        }
+      }
+
+      function getJobSourceName(job) {
+        const project = job && typeof job.project === 'object' ? job.project : {}
+        return String(
+          project.source_name ||
+          job && job.__public_source_name ||
+          ''
+        ).trim()
+      }
+
+      function buildExportFilename(job, suffix) {
+        const rawName = getJobSourceName(job) || 'studio-bom'
+        const stem = rawName.replace(/\.[^.]+$/, '').trim() || 'studio-bom'
+        const safeStem = stem.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '-').replace(/-+/g, '-')
+        return `${safeStem}-${suffix}-${new Date().toISOString().slice(0, 10)}.csv`
+      }
+
+      function getResultStatus(item) {
+        const stage = String(item && item.stage || '').trim()
+        const risk = String(item && item.risk || '').toUpperCase()
+        if (stage === 'blocked' || stage === 'manual_required' || !String(item && item.resolved_part_no || '').trim()) {
+          return { key: 'blocked', label: '暂时缺失' }
+        }
+        if (stage === 'substitute' || stage === 'manual_color' || stage === 'printed_fallback') {
+          return { key: 'replaceable', label: '可替代' }
+        }
+        if (risk && risk !== 'A') {
+          return { key: 'pending', label: '待确认' }
+        }
+        return { key: 'exact', label: '完全匹配' }
+      }
+
+      function getReasonLabel(item) {
+        const stage = String(item && item.stage || '').trim()
+        const note = String(item && item.note || '').trim()
+        const tag = String(item && item.tag || '').trim()
+        if (stage === 'blocked' || stage === 'manual_required') return '当前无稳定替代件'
+        if (stage === 'manual_color' || note.includes('颜色')) return '结构兼容，颜色不同'
+        if (tag === 'printed' || stage === 'printed_fallback') return '印刷件需要单独确认'
+        if (note.includes('结构') || String(item && item.risk || '').toUpperCase() === 'D') return '可能影响关键连接'
+        if (stage === 'substitute') return '结构兼容，可尝试替换'
+        return '高砖已有同款'
+      }
+
+      function getImageUrl(item) {
+        const candidates = [item && item.source_image_url, item && item.image_url, item && item.primary_image_url, item && item.image]
+        return candidates.map((v) => String(v || '').trim()).find(Boolean) || ''
+      }
+
+      function getResolvedImageUrl(item) {
+        const resolvedMeta = item && typeof item.resolved_meta === 'object' ? item.resolved_meta : {}
+        const optimizerMeta = item && typeof item.optimizer_market_meta === 'object' ? item.optimizer_market_meta : {}
+        const candidates = [
+          item && item.resolved_image_url,
+          resolvedMeta && resolvedMeta.image_url,
+          optimizerMeta && optimizerMeta.image_url
+        ]
+        return candidates.map((v) => String(v || '').trim()).find(Boolean) || ''
+      }
+
+      function formatPrice(value) {
+        const number = Number(value || 0)
+        if (!number) return '成本待确认'
+        return `¥${number.toFixed(2)}`
+      }
+
+      function getOverview(job) {
+        const summary = (job && job.summary) || {}
+        const results = Array.isArray(job && job.results) ? job.results : []
+        let exactCount = 0
+        let replaceableCount = 0
+        let pendingCount = 0
+        let blockedCount = 0
+        results.forEach((item) => {
+          const key = getResultStatus(item).key
+          if (key === 'exact') exactCount += 1
+          if (key === 'replaceable') replaceableCount += 1
+          if (key === 'pending') pendingCount += 1
+          if (key === 'blocked') blockedCount += 1
+        })
+        return {
+          totalQty: Number(summary.total_qty || 0),
+          totalTypes: Number(summary.total_types || results.length || 0),
+          exactCount,
+          replaceableCount,
+          pendingCount,
+          blockedCount
+        }
+      }
+
+      function sortByPriority(items) {
+        return [...(items || [])].sort((a, b) => {
+          const order = { blocked: 0, pending: 1, replaceable: 2, exact: 3 }
+          const aStatus = getResultStatus(a).key
+          const bStatus = getResultStatus(b).key
+          if (order[aStatus] !== order[bStatus]) return order[aStatus] - order[bStatus]
+          return Number(b && b.qty || 0) - Number(a && a.qty || 0)
+        })
+      }
+
+      function triggerCsv(filename, headers, rows) {
+        const csv = [headers.join(','), ...rows.map((row) => row.map((cell) => `"${String(cell == null ? '' : cell).replace(/"/g, '""')}"`).join(','))].join('\n')
+        const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(url)
+      }
+
+      function downloadMatchResultCsv() {
+        const list = currentJob && Array.isArray(currentJob.results) ? currentJob.results : []
+        if (!list.length) {
+          alert('当前没有可导出的结果。')
+          return
+        }
+        triggerCsv(buildExportFilename(currentJob, 'match-result'), ['状态', '零件名称', '零件编号', '数量', '原因', '建议件', '颜色', '小计'], list.map((item) => [
+          getResultStatus(item).label,
+          item.name || '',
+          item.part_no || '',
+          item.qty || 0,
+          getReasonLabel(item),
+          item.resolved_part_name || item.resolved_part_no || '',
+          item.resolved_color_no || '',
+          formatPrice(item.line_cost || item.unit_cost || 0)
+        ]))
+      }
+
+      function downloadMissingOnlyCsv() {
+        const list = (currentJob && Array.isArray(currentJob.results) ? currentJob.results : []).filter((item) => getResultStatus(item).key === 'blocked')
+        if (!list.length) {
+          alert('当前没有缺失清单。')
+          return
+        }
+        triggerCsv(buildExportFilename(currentJob, 'missing-parts'), ['零件名称', '零件编号', '数量', '原因'], list.map((item) => [
+          item.name || '',
+          item.part_no || '',
+          item.qty || 0,
+          getReasonLabel(item)
+        ]))
+      }
+
+      function downloadProcurementSuggestionCsv() {
+        const list = (currentJob && Array.isArray(currentJob.results) ? currentJob.results : []).filter((item) => ['exact', 'replaceable'].includes(getResultStatus(item).key))
+        if (!list.length) {
+          alert('当前没有可导出的采购建议。')
+          return
+        }
+        triggerCsv(buildExportFilename(currentJob, 'procurement-suggestion'), ['建议件', '颜色', '数量', '状态', '小计'], list.map((item) => [
+          item.resolved_part_name || item.resolved_part_no || '',
+          item.resolved_color_no || '',
+          item.qty || 0,
+          getResultStatus(item).label,
+          formatPrice(item.line_cost || item.unit_cost || 0)
+        ]))
+      }
+
+      function openDrawer(lineNo) {
+        const item = currentJob && Array.isArray(currentJob.results)
+          ? currentJob.results.find((entry) => Number(entry.line_no || 0) === Number(lineNo || 0))
+          : null
+        if (!item) return
+        const sourceImageUrl = getImageUrl(item)
+        const resolvedImageUrl = getResolvedImageUrl(item)
+        document.getElementById('drawerTitle').textContent = item.name || item.part_no || '零件详情'
+        document.getElementById('drawerSubtitle').textContent = `${item.part_no || '-'} · ${getResultStatus(item).label}`
+        document.getElementById('drawerBody').innerHTML = `
+          <div class="drawer-block">
+            <h3>零件图片</h3>
+            <div class="drawer-image-grid">
+              <div class="drawer-image-card">
+                <strong>原始清单零件图</strong>
+                ${sourceImageUrl
+                  ? `<button type="button" class="drawer-preview-btn" data-preview-url="${escapeHtml(sourceImageUrl)}" data-preview-title="原始清单零件图">
+                      <img src="${escapeHtml(sourceImageUrl)}" alt="${escapeHtml(item.name || item.part_no || '原始清单零件')}" loading="lazy" />
+                    </button>
+                    <div class="drawer-image-caption">点击放大查看原始清单中的零件图片。</div>`
+                  : `<div class="drawer-preview-btn"><div class="drawer-preview-empty">当前没有可用的原始零件图片。</div></div>
+                    <div class="drawer-image-caption">图片缺失时，仍可根据编号和名称继续判断。</div>`}
+              </div>
+              <div class="drawer-image-card">
+                <strong>高砖建议件图片</strong>
+                ${resolvedImageUrl
+                  ? `<button type="button" class="drawer-preview-btn" data-preview-url="${escapeHtml(resolvedImageUrl)}" data-preview-title="高砖建议件图片">
+                      <img src="${escapeHtml(resolvedImageUrl)}" alt="${escapeHtml(item.resolved_part_name || item.resolved_part_no || '高砖建议件')}" loading="lazy" />
+                    </button>
+                    <div class="drawer-image-caption">点击放大查看建议高砖件图片。</div>`
+                  : `<div class="drawer-preview-btn"><div class="drawer-preview-empty">当前没有可用的高砖图片。</div></div>
+                    <div class="drawer-image-caption">没有图片时，先按建议件编号和颜色确认。</div>`}
+              </div>
+            </div>
+          </div>
+          <div class="drawer-block">
+            <h3>原始清单零件</h3>
+            <div class="drawer-grid">
+              <div class="drawer-item"><strong>名称</strong><span>${escapeHtml(item.name || item.part_no || '-')}</span></div>
+              <div class="drawer-item"><strong>编号 / 数量</strong><span>${escapeHtml(`${item.part_no || '-'} · x${item.qty || 0}`)}</span></div>
+              <div class="drawer-item"><strong>原始颜色</strong><span>${escapeHtml(item.color_name || item.color_no || '-')}</span></div>
+              <div class="drawer-item"><strong>当前状态</strong><span>${escapeHtml(getResultStatus(item).label)}</span></div>
+            </div>
+          </div>
+          <div class="drawer-block">
+            <h3>推荐高砖件</h3>
+            <div class="drawer-grid">
+              <div class="drawer-item"><strong>建议件</strong><span>${escapeHtml(item.resolved_part_name || item.resolved_part_no || '待确认')}</span></div>
+              <div class="drawer-item"><strong>建议颜色</strong><span>${escapeHtml(item.resolved_color_no || '待确认')}</span></div>
+              <div class="drawer-item"><strong>替代理由</strong><span>${escapeHtml(getReasonLabel(item))}</span></div>
+              <div class="drawer-item"><strong>价格影响</strong><span>${escapeHtml(formatPrice(item.line_cost || item.unit_cost || 0))}</span></div>
+              <div class="drawer-item"><strong>风险等级</strong><span>${escapeHtml(String(item.risk || '-'))}</span></div>
+              <div class="drawer-item"><strong>备注</strong><span>${escapeHtml(String(item.note || '无额外备注'))}</span></div>
+            </div>
+          </div>`
+        document.getElementById('drawerMask').classList.add('open')
+        document.getElementById('drawer').classList.add('open')
+        document.getElementById('drawer').setAttribute('aria-hidden', 'false')
+      }
+
+      function openImagePreview(url, title) {
+        const safeUrl = String(url || '').trim()
+        if (!safeUrl) return
+        document.getElementById('imagePreviewTitle').textContent = String(title || '零件图片')
+        document.getElementById('imagePreviewStage').innerHTML = `<img src="${escapeHtml(safeUrl)}" alt="${escapeHtml(title || '零件图片')}" />`
+        document.getElementById('imagePreviewMask').classList.add('open')
+      }
+
+      function closeImagePreview(event) {
+        if (event && event.target && event.target.id && event.target.id !== 'imagePreviewMask') return
+        document.getElementById('imagePreviewMask').classList.remove('open')
+        document.getElementById('imagePreviewStage').innerHTML = ''
+      }
+
+      function closeDrawer(event) {
+        if (event && event.target && event.target.id && event.target.id !== 'drawerMask') return
+        document.getElementById('drawerMask').classList.remove('open')
+        document.getElementById('drawer').classList.remove('open')
+        document.getElementById('drawer').setAttribute('aria-hidden', 'true')
+      }
+
+      function render() {
+        currentJob = loadJob()
+        const stats = getOverview(currentJob)
+        document.getElementById('fileNoticeName').textContent = getJobSourceName(currentJob) || '未导入文件'
+        document.getElementById('totalQty').textContent = stats.totalQty || 0
+        document.getElementById('totalTypes').textContent = stats.totalTypes || 0
+        document.getElementById('exactCount').textContent = stats.exactCount || 0
+        document.getElementById('replaceableCount').textContent = stats.replaceableCount || 0
+        document.getElementById('pendingCount').textContent = stats.pendingCount || 0
+        document.getElementById('blockedCount').textContent = stats.blockedCount || 0
+
+        const results = sortByPriority(currentJob && currentJob.results || [])
+        const search = String(document.getElementById('searchInput').value || '').trim().toLowerCase()
+        const filtered = results.filter((item) => {
+          const status = getResultStatus(item).key
+          if (currentTab !== 'all' && status !== currentTab) return false
+          if (!search) return true
+          const hay = [item.name, item.part_no, item.resolved_part_name, getReasonLabel(item), item.note].join(' ').toLowerCase()
+          return hay.includes(search)
+        })
+        const visibleItems = filtered.slice(0, currentVisibleCount)
+        const loadMoreRow = document.getElementById('loadMoreRow')
+
+        document.getElementById('summaryLine').textContent = results.length
+          ? `当前文件：${getJobSourceName(currentJob) || '未命名清单'}；当前显示 ${visibleItems.length} / ${filtered.length} 条；本次分析共 ${results.length} 条结果、${stats.totalTypes} 种零件、${stats.totalQty} 颗。`
+          : '当前还没有可展示的完整结果。请先回到快速判断页上传清单。'
+
+        const listEl = document.getElementById('resultList')
+        if (!filtered.length) {
+          listEl.innerHTML = '<div class="empty">当前筛选条件下没有匹配结果。</div>'
+          loadMoreRow.style.display = 'none'
+          return
+        }
+        listEl.innerHTML = visibleItems.map((item) => {
+          const status = getResultStatus(item)
+          const imageUrl = getImageUrl(item)
+          return `<article class="result-card" id="line-${Number(item.line_no || 0)}">
+            <div class="thumb">${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(item.name || item.part_no || '零件')}" loading="lazy" />` : escapeHtml(String(item.part_no || '-').slice(0, 6))}</div>
+            <div class="result-main">
+              <div class="result-head">
+                <span class="result-name">${escapeHtml(item.name || item.part_no || '-')}</span>
+                <span class="status-chip is-${escapeHtml(status.key)}">${escapeHtml(status.label)}</span>
+              </div>
+              <div class="result-meta">${escapeHtml(`${item.part_no || '-'} · 数量 x${item.qty || 0} · 原色 ${item.color_name || item.color_no || '-'}`)}</div>
+              <div class="reason">${escapeHtml(getReasonLabel(item))}</div>
+              <div class="meta-pills">
+                <span class="pill">建议件 ${escapeHtml(item.resolved_part_no || '-')}</span>
+                <span class="pill">建议色 ${escapeHtml(item.resolved_color_no || '-')}</span>
+                <span class="pill">小计 ${escapeHtml(formatPrice(item.line_cost || item.unit_cost || 0))}</span>
+              </div>
+            </div>
+            <button type="button" onclick="openDrawer(${Number(item.line_no || 0)})">查看方案</button>
+          </article>`
+        }).join('')
+
+        loadMoreRow.style.display = visibleItems.length < filtered.length ? 'flex' : 'none'
+
+        if (window.location.hash) {
+          const target = document.querySelector(window.location.hash)
+          if (target) {
+            setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60)
+          }
+        }
+      }
+
+      document.getElementById('tabs').addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-tab]')
+        if (!btn) return
+        currentTab = String(btn.dataset.tab || 'all')
+        currentVisibleCount = 24
+        document.querySelectorAll('#tabs [data-tab]').forEach((node) => {
+          node.classList.toggle('is-active', node === btn)
+        })
+        render()
+      })
+
+      document.getElementById('searchInput').addEventListener('input', () => {
+        currentVisibleCount = 24
+        render()
+      })
+      document.getElementById('clearResultButton').addEventListener('click', () => {
+        clearStoredJob()
+        currentVisibleCount = 24
+        currentTab = 'all'
+        document.getElementById('searchInput').value = ''
+        document.querySelectorAll('#tabs [data-tab]').forEach((node) => {
+          node.classList.toggle('is-active', String(node.dataset.tab || '') === 'all')
+        })
+        closeDrawer()
+        render()
+      })
+      document.getElementById('loadMoreButton').addEventListener('click', () => {
+        currentVisibleCount += 24
+        render()
+      })
+      document.getElementById('drawerBody').addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-preview-url]')
+        if (!trigger) return
+        openImagePreview(trigger.dataset.previewUrl || '', trigger.dataset.previewTitle || '零件图片')
+      })
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeDrawer()
+        if (event.key === 'Escape') closeImagePreview()
+      })
+
+      render()
+    </script>
+  </body>
+</html>

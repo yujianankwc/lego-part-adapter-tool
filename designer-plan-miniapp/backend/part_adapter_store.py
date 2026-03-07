@@ -6,7 +6,7 @@ import re
 import threading
 import uuid
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.error import HTTPError
@@ -557,6 +557,7 @@ class PartAdapterStore:
             payload = self._read_analytics_payload()
         daily = payload.get('daily') if isinstance(payload.get('daily'), dict) else {}
         today = datetime.now().strftime('%Y-%m-%d')
+        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
         day_keys = sorted(daily.keys())
         last_7_keys = day_keys[-7:]
 
@@ -568,28 +569,72 @@ class PartAdapterStore:
                 total += int(counts.get(event_name) or 0)
             return total
 
-        today_bucket = daily.get(today) if isinstance(daily.get(today), dict) else {}
-        today_counts = today_bucket.get('counts') if isinstance(today_bucket.get('counts'), dict) else {}
-        today_visitors = today_bucket.get('visitors') if isinstance(today_bucket.get('visitors'), list) else []
+        def _single_day_summary(day_key: str) -> Dict[str, int]:
+            bucket = daily.get(day_key) if isinstance(daily.get(day_key), dict) else {}
+            counts = bucket.get('counts') if isinstance(bucket.get('counts'), dict) else {}
+            visitors = bucket.get('visitors') if isinstance(bucket.get('visitors'), list) else []
+            return {
+                'public_home_views': int(counts.get('page_view_public') or 0),
+                'public_results_views': int(counts.get('page_view_public_results') or 0),
+                'admin_views': int(counts.get('page_view_admin') or 0),
+                'page_views': int(counts.get('page_view_public') or 0) + int(counts.get('page_view_admin') or 0),
+                'unique_visitors': len(visitors),
+                'import_bom': int(counts.get('import_bom') or 0),
+                'convert_gobricks': int(counts.get('convert_gobricks') or 0),
+                'analyze': int(counts.get('analyze') or 0),
+                'exports': int(counts.get('export_csv') or 0) + int(counts.get('export_designer_pdf') or 0) + int(counts.get('export_designer_csv') or 0),
+            }
+
+        def _funnel(summary: Dict[str, int]) -> Dict[str, Any]:
+            home_views = int(summary.get('public_home_views') or 0)
+            results_views = int(summary.get('public_results_views') or 0)
+            uses = (
+                int(summary.get('import_bom') or 0) +
+                int(summary.get('convert_gobricks') or 0) +
+                int(summary.get('analyze') or 0) +
+                int(summary.get('exports') or 0)
+            )
+
+            def _rate(numerator: int, denominator: int) -> float:
+                if denominator <= 0:
+                    return 0.0
+                return round((numerator / denominator) * 100, 1)
+
+            return {
+                'home_views': home_views,
+                'results_views': results_views,
+                'uses': uses,
+                'result_view_rate': _rate(results_views, home_views),
+                'use_rate': _rate(uses, home_views),
+            }
+
+        today_summary = _single_day_summary(today)
+        yesterday_summary = _single_day_summary(yesterday)
         recent = payload.get('recent') if isinstance(payload.get('recent'), list) else []
 
         return {
             'updated_at': str(payload.get('updated_at') or ''),
-            'today': {
-                'page_views': int(today_counts.get('page_view_public') or 0) + int(today_counts.get('page_view_admin') or 0),
-                'unique_visitors': len(today_visitors),
-                'import_bom': int(today_counts.get('import_bom') or 0),
-                'convert_gobricks': int(today_counts.get('convert_gobricks') or 0),
-                'analyze': int(today_counts.get('analyze') or 0),
-                'exports': int(today_counts.get('export_csv') or 0) + int(today_counts.get('export_designer_pdf') or 0) + int(today_counts.get('export_designer_csv') or 0),
-            },
+            'today': today_summary,
+            'yesterday': yesterday_summary,
             'last_7_days': {
+                'public_home_views': _count_for(last_7_keys, 'page_view_public'),
+                'public_results_views': _count_for(last_7_keys, 'page_view_public_results'),
+                'admin_views': _count_for(last_7_keys, 'page_view_admin'),
                 'page_views': _count_for(last_7_keys, 'page_view_public') + _count_for(last_7_keys, 'page_view_admin'),
                 'import_bom': _count_for(last_7_keys, 'import_bom'),
                 'convert_gobricks': _count_for(last_7_keys, 'convert_gobricks'),
                 'analyze': _count_for(last_7_keys, 'analyze'),
                 'exports': _count_for(last_7_keys, 'export_csv') + _count_for(last_7_keys, 'export_designer_pdf') + _count_for(last_7_keys, 'export_designer_csv'),
             },
+            'funnel_today': _funnel(today_summary),
+            'funnel_last_7_days': _funnel({
+                'public_home_views': _count_for(last_7_keys, 'page_view_public'),
+                'public_results_views': _count_for(last_7_keys, 'page_view_public_results'),
+                'import_bom': _count_for(last_7_keys, 'import_bom'),
+                'convert_gobricks': _count_for(last_7_keys, 'convert_gobricks'),
+                'analyze': _count_for(last_7_keys, 'analyze'),
+                'exports': _count_for(last_7_keys, 'export_csv') + _count_for(last_7_keys, 'export_designer_pdf') + _count_for(last_7_keys, 'export_designer_csv'),
+            }),
             'totals': deepcopy(payload.get('totals') if isinstance(payload.get('totals'), dict) else {}),
             'recent': deepcopy(recent[:12]),
         }
@@ -1093,6 +1138,8 @@ class PartAdapterStore:
         source_name: str,
         bom_text: str,
         color_mode: str = 'balanced',
+        optimizer_mode: str = 'reliability',
+        optimizer_profile: str = 'v1',
         allow_display_sub: bool = True,
         allow_structural_sub: bool = False,
     ) -> Dict[str, Any]:
@@ -1103,6 +1150,7 @@ class PartAdapterStore:
             self._resolve_row(
                 item=row,
                 color_mode=color_mode,
+                optimizer_mode=optimizer_mode,
                 allow_display_sub=allow_display_sub,
                 allow_structural_sub=allow_structural_sub,
                 rules=rules,
@@ -1120,6 +1168,8 @@ class PartAdapterStore:
             },
             'strategy': {
                 'color_mode': color_mode,
+                'optimizer_mode': optimizer_mode,
+                'optimizer_profile': optimizer_profile,
                 'allow_display_sub': bool(allow_display_sub),
                 'allow_structural_sub': bool(allow_structural_sub),
             },
@@ -2285,6 +2335,10 @@ class PartAdapterStore:
                 'match_stage',
                 'risk_level',
                 'review_status',
+                'optimizer_source',
+                'optimizer_score',
+                'unit_cost',
+                'line_cost',
                 'note',
             ]
         )
@@ -2301,6 +2355,10 @@ class PartAdapterStore:
                     row.get('stage', ''),
                     row.get('risk', ''),
                     row.get('review_status', ''),
+                    row.get('candidate_source', ''),
+                    row.get('optimizer', {}).get('total_score', '') if isinstance(row.get('optimizer'), dict) else '',
+                    row.get('unit_cost', 0),
+                    row.get('line_cost', 0),
                     row.get('note', ''),
                 ]
             )
@@ -2376,6 +2434,7 @@ class PartAdapterStore:
         self,
         item: Dict[str, Any],
         color_mode: str,
+        optimizer_mode: str,
         allow_display_sub: bool,
         allow_structural_sub: bool,
         rules: Dict[str, Any],
@@ -2436,6 +2495,33 @@ class PartAdapterStore:
         )
         color_recommendation_text = self._format_color_recommendations(color_recommendations)
 
+        candidates: List[Dict[str, Any]] = []
+
+        def add_candidate(
+            candidate_source: str,
+            stage: str,
+            risk: str,
+            note: str,
+            resolved_part_no: str,
+            resolved_color_no: str,
+            color_score: int,
+            shape_score: int,
+        ) -> None:
+            candidates.append(
+                self._build_optimizer_candidate(
+                    item=item,
+                    candidate_source=candidate_source,
+                    stage=stage,
+                    risk=risk,
+                    note=note,
+                    resolved_part_no=resolved_part_no,
+                    resolved_color_no=resolved_color_no,
+                    rules=rules,
+                    color_score=color_score,
+                    shape_score=shape_score,
+                )
+            )
+
         combo_exact = self._match_combo_rule(
             exact_combo_map=exact_combo_map,
             part_alias_map=part_alias_map,
@@ -2444,40 +2530,16 @@ class PartAdapterStore:
             color_no=color_no,
         )
         if combo_exact:
-            return {
-                **item,
-                'resolved_part_no': str(combo_exact.get('gobricks_part_no') or '-'),
-                'resolved_color_no': str(combo_exact.get('gobricks_color_no') or '-'),
-                'stage': 'exact_combo_match',
-                'risk': 'A',
-                'note': '命中全局高砖映射库',
-                'review_status': 'auto_pass',
-            }
-
-        if is_printed:
-            fallback_part_no = str(
-                exact_part_map.get(self._normalize_part_alias(base_part_no, part_alias_map))
-                or exact_part_map.get(self._normalize_part_alias(part_no, part_alias_map))
-                or exact_part_map.get(base_part_no)
-                or exact_part_map.get(part_no)
-                or ''
-            ).strip()
-            note_parts = [f'印刷件降级为空白件/贴纸方案，基础模具 {base_part_no or part_no}，需人工确认']
-            if shortage_text:
-                note_parts.append(f'历史高砖结果：{shortage_text}')
-            if candidate_suggestion:
-                note_parts.append(candidate_suggestion)
-            if color_recommendation_text:
-                note_parts.append(color_recommendation_text)
-            return {
-                **item,
-                'resolved_part_no': fallback_part_no or f'{base_part_no or part_no}-BLANK',
-                'resolved_color_no': color_no or '-',
-                'stage': 'printed_fallback',
-                'risk': 'C',
-                'note': '；'.join(note_parts),
-                'review_status': 'pending_review',
-            }
+            add_candidate(
+                candidate_source='exact_combo',
+                stage='exact_combo_match',
+                risk='A',
+                note='命中全局高砖映射库',
+                resolved_part_no=str(combo_exact.get('gobricks_part_no') or '-'),
+                resolved_color_no=str(combo_exact.get('gobricks_color_no') or '-'),
+                color_score=100,
+                shape_score=98,
+            )
 
         history_exact_part = self._infer_exact_part_from_history(history_candidates)
         exact_part = str(
@@ -2492,179 +2554,176 @@ class PartAdapterStore:
         color_rule = color_group.get(color_mode) if isinstance(color_group, dict) else None
         color_rule_safe = color_rule if isinstance(color_rule, dict) else None
 
+        if is_printed:
+            fallback_part_no = str(
+                exact_part_map.get(self._normalize_part_alias(base_part_no, part_alias_map))
+                or exact_part_map.get(self._normalize_part_alias(part_no, part_alias_map))
+                or exact_part_map.get(base_part_no)
+                or exact_part_map.get(part_no)
+                or ''
+            ).strip()
+            note_parts = [f'印刷件降级为空白件/贴纸方案，基础模具 {base_part_no or part_no}，需人工确认']
+            if shortage_text:
+                note_parts.append(f'历史高砖结果：{shortage_text}')
+            add_candidate(
+                candidate_source='printed_fallback',
+                stage='printed_fallback',
+                risk='C',
+                note='；'.join(note_parts),
+                resolved_part_no=fallback_part_no or f'{base_part_no or part_no}-BLANK',
+                resolved_color_no=color_no or '-',
+                color_score=70,
+                shape_score=78,
+            )
+
         if exact_part and color_rule_safe:
             risk = str(color_rule_safe.get('risk') or 'A').upper()
             stage = 'exact_match' if risk == 'A' else 'near_color'
             note = '编号映射 + 颜色直通' if stage == 'exact_match' else str(color_rule_safe.get('note') or '已按近色规则替换')
-            if history_exact_part and not str(
-                exact_part_map.get(self._normalize_part_alias(part_no, part_alias_map))
-                or exact_part_map.get(self._normalize_part_alias(base_part_no, part_alias_map))
-                or exact_part_map.get(part_no)
-                or exact_part_map.get(base_part_no)
-                or ''
-            ).strip():
-                note = f'基于历史稳定命中识别同模具；{note}'
-            return {
-                **item,
-                'resolved_part_no': exact_part,
-                'resolved_color_no': str(color_rule_safe.get('to') or color_no or '-'),
-                'stage': stage,
-                'risk': risk,
-                'note': note,
-                'review_status': 'auto_pass' if risk == 'A' else 'pending_review',
-            }
+            add_candidate(
+                candidate_source='rule_exact',
+                stage=stage,
+                risk=risk,
+                note=note,
+                resolved_part_no=exact_part,
+                resolved_color_no=str(color_rule_safe.get('to') or color_no or '-'),
+                color_score=100 if risk == 'A' else 82,
+                shape_score=95,
+            )
 
         if exact_part and color_rule is None:
-            best_target: Optional[Dict[str, str]] = None
-            if color_recommendations:
-                best_recommendation = color_recommendations[0]
-                best_target = {
-                    'part_no': str(best_recommendation.get('resolved_part_no') or '-'),
-                    'color_no': str(best_recommendation.get('resolved_color_no') or '-'),
-                }
-            elif index_candidates:
+            for recommendation in color_recommendations[:2]:
+                add_candidate(
+                    candidate_source='smart_color',
+                    stage='smart_color_match',
+                    risk=str(recommendation.get('risk') or 'C').upper(),
+                    note=f"近色推荐：LEGO色 {recommendation.get('lego_color_no') or '-'} {recommendation.get('lego_color_name') or ''}，得分 {recommendation.get('score') or 0}",
+                    resolved_part_no=str(recommendation.get('resolved_part_no') or exact_part or '-'),
+                    resolved_color_no=str(recommendation.get('resolved_color_no') or '-'),
+                    color_score=int(recommendation.get('score') or 0),
+                    shape_score=95,
+                )
+            if index_candidates:
                 best = index_candidates[0]
                 best_target = self._extract_gobricks_target(
                     item_id=str(best.get('item_id') or ''),
                     product_id=str(best.get('product_id') or ''),
                     color_id=str(best.get('color_id') or ''),
                 )
-            if best_target:
-                best_score = int(color_recommendations[0].get('score') or 0) if color_recommendations else 0
-                risk = str(color_recommendations[0].get('risk') or 'C') if color_recommendations else 'C'
-                stage = 'smart_color_match' if color_recommendations else 'indexed_candidate'
-                if shortage_is_color:
-                    note_parts = ['历史高砖结果显示缺颜色，已按同模具候选继续处理，需人工确认']
-                else:
-                    note_parts = ['本地规则无原色，改用排序后的近色候选，需人工确认' if color_recommendations else '本地规则无原色，改用高砖在售同模具候选，需人工确认']
-                if shortage_text:
-                    note_parts.append(f'历史高砖结果：{shortage_text}')
-                if candidate_suggestion:
-                    note_parts.append(candidate_suggestion)
-                if color_recommendation_text:
-                    note_parts.append(color_recommendation_text)
-                if color_recommendations:
-                    note_parts.append(f'系统已按近色评分排序，当前首选得分 {best_score}')
-                return {
-                    **item,
-                    'resolved_part_no': str(best_target.get('part_no') or '-'),
-                    'resolved_color_no': str(best_target.get('color_no') or '-'),
-                    'stage': stage,
-                    'risk': risk,
-                    'note': '；'.join(note_parts),
-                    'review_status': 'pending_review',
-                }
-            note_parts = ['已识别同模具，但当前策略下没有足够接近的可用颜色']
-            if history_exact_part and not str(
-                exact_part_map.get(self._normalize_part_alias(part_no, part_alias_map))
-                or exact_part_map.get(self._normalize_part_alias(base_part_no, part_alias_map))
-                or exact_part_map.get(part_no)
-                or exact_part_map.get(base_part_no)
-                or ''
-            ).strip():
-                note_parts.insert(0, '基于历史稳定命中已识别出高砖同模具')
-            if shortage_text:
-                note_parts.append(f'历史高砖结果：{shortage_text}')
-            if candidate_suggestion:
-                note_parts.append(candidate_suggestion)
-            if color_recommendation_text:
-                note_parts.append(color_recommendation_text)
-            return {
-                **item,
-                'resolved_part_no': exact_part,
-                'resolved_color_no': '-',
-                'stage': 'manual_color',
-                'risk': 'D',
-                'note': '；'.join(note_parts),
-                'review_status': 'pending_review',
-            }
+                add_candidate(
+                    candidate_source='index',
+                    stage='indexed_candidate',
+                    risk='C',
+                    note='本地规则无原色，改用高砖在售同模具候选',
+                    resolved_part_no=str(best_target.get('part_no') or '-'),
+                    resolved_color_no=str(best_target.get('color_no') or '-'),
+                    color_score=int(color_recommendations[0].get('score') or 68) if color_recommendations else 68,
+                    shape_score=92,
+                )
 
         sub_group = substitutions.get(part_no) if isinstance(substitutions.get(part_no), dict) else {}
         sub_key = 'structural' if is_structural else 'display'
         selected = sub_group.get(sub_key) if isinstance(sub_group, dict) else None
         sub_rule = selected if isinstance(selected, dict) else None
         sub_enabled = allow_structural_sub if is_structural else allow_display_sub
-
         if sub_rule and sub_enabled:
             fallback_color = color_rule_safe or {'to': color_no or '-', 'risk': sub_rule.get('risk') or 'B'}
-            return {
-                **item,
-                'resolved_part_no': str(sub_rule.get('to') or '-'),
-                'resolved_color_no': str(fallback_color.get('to') or color_no or '-'),
-                'stage': 'substitute',
-                'risk': str(sub_rule.get('risk') or 'B').upper(),
-                'note': str(sub_rule.get('note') or '已按相似件规则替换'),
-                'review_status': 'pending_review',
-            }
-
-        if sub_rule and not sub_enabled:
-            note_parts = ['当前策略未开启该类零件替代']
-            if shortage_text:
-                note_parts.append(f'历史高砖结果：{shortage_text}')
-            if candidate_suggestion:
-                note_parts.append(candidate_suggestion)
-            if color_recommendation_text:
-                note_parts.append(color_recommendation_text)
-            return {
-                **item,
-                'resolved_part_no': '-',
-                'resolved_color_no': '-',
-                'stage': 'blocked_by_policy',
-                'risk': 'D',
-                'note': '；'.join(note_parts),
-                'review_status': 'pending_review',
-            }
-
-        best_target = None
-        if history_candidates:
-            best_history = history_candidates[0]
-            best_target = {
-                'part_no': str(best_history.get('gobricks_part_no') or '-'),
-                'color_no': str(best_history.get('gobricks_color_no') or '-'),
-            }
-        elif index_candidates:
-            best = index_candidates[0]
-            best_target = self._extract_gobricks_target(
-                item_id=str(best.get('item_id') or ''),
-                product_id=str(best.get('product_id') or ''),
-                color_id=str(best.get('color_id') or ''),
+            add_candidate(
+                candidate_source='substitution_structural' if is_structural else 'substitution_display',
+                stage='substitute',
+                risk=str(sub_rule.get('risk') or 'B').upper(),
+                note=str(sub_rule.get('note') or '已按相似件规则替换'),
+                resolved_part_no=str(sub_rule.get('to') or '-'),
+                resolved_color_no=str(fallback_color.get('to') or color_no or '-'),
+                color_score=74,
+                shape_score=60 if is_structural else 68,
             )
-        if best_target:
-            note_parts = ['未命中本地规则，改用高砖在售同模具候选，需人工确认']
+        if sub_rule and not sub_enabled:
+            add_candidate(
+                candidate_source='blocked',
+                stage='blocked_by_policy',
+                risk='D',
+                note='当前策略未开启该类零件替代',
+                resolved_part_no='-',
+                resolved_color_no='-',
+                color_score=0,
+                shape_score=0,
+            )
+
+        for entry in history_candidates[:2]:
+            add_candidate(
+                candidate_source='history_exact',
+                stage='indexed_candidate',
+                risk='B',
+                note=f"历史命中候选：{str(entry.get('gobricks_part_no') or '-')} / {str(entry.get('gobricks_color_no') or '-')}",
+                resolved_part_no=str(entry.get('gobricks_part_no') or '-'),
+                resolved_color_no=str(entry.get('gobricks_color_no') or '-'),
+                color_score=88,
+                shape_score=92,
+            )
+        for index_item in index_candidates[:2]:
+            target = self._extract_gobricks_target(
+                item_id=str(index_item.get('item_id') or ''),
+                product_id=str(index_item.get('product_id') or ''),
+                color_id=str(index_item.get('color_id') or ''),
+            )
+            candidate_note = f"高砖在售候选：{str(index_item.get('item_id') or '-')}"
+            if shortage_text:
+                candidate_note = f'{candidate_note}；历史高砖结果：{shortage_text}'
+            add_candidate(
+                candidate_source='index',
+                stage='indexed_candidate',
+                risk='C',
+                note=candidate_note,
+                resolved_part_no=str(target.get('part_no') or '-'),
+                resolved_color_no=str(target.get('color_no') or '-'),
+                color_score=int(color_recommendations[0].get('score') or 68) if color_recommendations else 68,
+                shape_score=90,
+            )
+
+        if not candidates:
+            note_parts = ['未命中编号映射，也没有可用替代件']
+            if shortage_is_color:
+                note_parts = ['历史高砖结果显示缺颜色，但当前没有可用的同模具候选']
             if shortage_text:
                 note_parts.append(f'历史高砖结果：{shortage_text}')
             if candidate_suggestion:
                 note_parts.append(candidate_suggestion)
             if color_recommendation_text:
                 note_parts.append(color_recommendation_text)
-            return {
-                **item,
-                'resolved_part_no': str(best_target.get('part_no') or '-'),
-                'resolved_color_no': str(best_target.get('color_no') or '-'),
-                'stage': 'indexed_candidate',
-                'risk': 'C',
-                'note': '；'.join(note_parts),
-                'review_status': 'pending_review',
-            }
+            add_candidate(
+                candidate_source='manual',
+                stage='manual_color' if shortage_is_color else 'manual_required',
+                risk='D',
+                note='；'.join(note_parts),
+                resolved_part_no='-',
+                resolved_color_no='-',
+                color_score=0,
+                shape_score=0,
+            )
 
-        note_parts = ['未命中编号映射，也没有可用替代件']
-        if shortage_is_color:
-            note_parts = ['历史高砖结果显示缺颜色，但当前没有可用的同模具候选']
-        if shortage_text:
-            note_parts.append(f'历史高砖结果：{shortage_text}')
-        if candidate_suggestion:
-            note_parts.append(candidate_suggestion)
-        if color_recommendation_text:
-            note_parts.append(color_recommendation_text)
-        return {
-            **item,
-            'resolved_part_no': '-',
-            'resolved_color_no': '-',
-            'stage': 'manual_color' if shortage_is_color else 'manual_required',
-            'risk': 'D',
-            'note': '；'.join(note_parts),
-            'review_status': 'pending_review',
-        }
+        ranked = self._finalize_optimizer_candidates(
+            candidates=candidates,
+            qty=int(item.get('qty') or 1),
+            optimizer_mode=optimizer_mode,
+        )
+        best = deepcopy(ranked[0]) if ranked else {**item, 'resolved_part_no': '-', 'resolved_color_no': '-', 'stage': 'manual_required', 'risk': 'D', 'note': '未识别到可用方案'}
+        best['review_status'] = 'auto_pass' if str(best.get('risk') or '').upper() == 'A' else 'pending_review'
+        best['alternatives'] = [
+            {
+                'resolved_part_no': str(candidate.get('resolved_part_no') or '-'),
+                'resolved_color_no': str(candidate.get('resolved_color_no') or '-'),
+                'stage': str(candidate.get('stage') or ''),
+                'risk': str(candidate.get('risk') or ''),
+                'candidate_source': str(candidate.get('candidate_source') or ''),
+                'total_score': candidate.get('optimizer', {}).get('total_score', 0) if isinstance(candidate.get('optimizer'), dict) else 0,
+                'reason_text': candidate.get('optimizer', {}).get('reason_text', '') if isinstance(candidate.get('optimizer'), dict) else '',
+            }
+            for candidate in ranked[1:4]
+        ]
+        if not str(best.get('note') or '').strip():
+            best['note'] = str(best.get('optimizer', {}).get('reason_text') or '').strip()
+        return best
 
     def _build_summary(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
         total_types = len(results)
@@ -2677,6 +2736,22 @@ class PartAdapterStore:
             for item in results
             if str(item.get('resolved_part_no') or '').strip() not in {'', '-'}
         )
+        estimated_cost_total = round(
+            sum(float(item.get('line_cost') or 0) for item in results if float(item.get('line_cost') or 0) > 0),
+            2,
+        )
+        low_stock_count = sum(
+            1 for item in results
+            if str(item.get('resolved_part_no') or '').strip() not in {'', '-'}
+            and int(item.get('inventory') or 0) > 0
+            and int(item.get('inventory') or 0) < max(1, int(item.get('qty') or 1))
+        )
+        unknown_cost_count = sum(
+            1 for item in results
+            if str(item.get('resolved_part_no') or '').strip() not in {'', '-'}
+            and float(item.get('unit_cost') or 0) <= 0
+        )
+        optimizer_mode = str(results[0].get('optimizer', {}).get('mode') or 'reliability').strip() if results else 'reliability'
         return {
             'total_types': total_types,
             'total_qty': total_qty,
@@ -2686,6 +2761,12 @@ class PartAdapterStore:
             'producible_qty': producible_qty,
             'auto_match_rate': round((auto_qty / total_qty) * 100, 2) if total_qty else 0,
             'producible_rate': round((producible_qty / total_qty) * 100, 2) if total_qty else 0,
+            'optimizer_mode': optimizer_mode,
+            'estimated_cost_total': estimated_cost_total,
+            'estimated_cost_currency': 'CNY',
+            'low_stock_count': low_stock_count,
+            'unknown_cost_count': unknown_cost_count,
+            'optimized_at': _now_iso(),
         }
 
     def _combo_key(self, part_no: str, color_no: str) -> str:
@@ -3058,6 +3139,228 @@ class PartAdapterStore:
                 f"{item_id or '-'}（LEGO色 {lego_color_id or '-'} -> 高砖色 {gobricks_color_id or '-'}，{caption or '同模具候选'}）"
             )
         return '可参考高砖在售同模具候选：' + '；'.join(chunks)
+
+    def _get_optimizer_weights(self, optimizer_mode: str) -> Dict[str, float]:
+        mode = str(optimizer_mode or 'reliability').strip().lower()
+        if mode == 'cost':
+            return {'success': 0.32, 'availability': 0.18, 'color': 0.12, 'cost': 0.30, 'shape': 0.08}
+        if mode == 'appearance':
+            return {'success': 0.34, 'availability': 0.16, 'color': 0.28, 'cost': 0.08, 'shape': 0.14}
+        return {'success': 0.45, 'availability': 0.20, 'color': 0.15, 'cost': 0.15, 'shape': 0.05}
+
+    def _get_candidate_market_meta(
+        self,
+        resolved_part_no: str,
+        resolved_color_no: str,
+        rules: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        safe_part = str(resolved_part_no or '').strip()
+        safe_color = str(resolved_color_no or '').strip()
+        if not safe_part or safe_part in {'-', ''}:
+            return {}
+        item_index = rules.get('gobricks_item_index') if isinstance(rules.get('gobricks_item_index'), dict) else {}
+        entry = None
+        direct_item_id = f'{safe_part}-{safe_color}'.rstrip('-')
+        for key in (direct_item_id, safe_part):
+            if isinstance(item_index.get(key), dict):
+                entry = item_index.get(key)
+                break
+        if not isinstance(entry, dict):
+            for raw in item_index.values():
+                item = raw if isinstance(raw, dict) else {}
+                product_id = str(item.get('product_id') or '').strip()
+                color_id = str(item.get('color_id') or '').strip()
+                normalized_part = f'G{product_id}' if product_id else ''
+                if normalized_part and normalized_part == safe_part and (not safe_color or color_id == safe_color):
+                    entry = item
+                    break
+        if not isinstance(entry, dict):
+            return {}
+        return {
+            'item_id': str(entry.get('item_id') or '').strip(),
+            'inventory': int(entry.get('inventory') or 0),
+            'price': float(entry.get('price') or 0),
+            'status': str(entry.get('status') or '').strip(),
+        }
+
+    def _build_optimizer_candidate(
+        self,
+        item: Dict[str, Any],
+        candidate_source: str,
+        stage: str,
+        risk: str,
+        note: str,
+        resolved_part_no: str,
+        resolved_color_no: str,
+        rules: Dict[str, Any],
+        color_score: int,
+        shape_score: int,
+    ) -> Dict[str, Any]:
+        market_meta = self._get_candidate_market_meta(
+            resolved_part_no=resolved_part_no,
+            resolved_color_no=resolved_color_no,
+            rules=rules,
+        )
+        return {
+            **item,
+            'resolved_part_no': str(resolved_part_no or '-').strip() or '-',
+            'resolved_color_no': str(resolved_color_no or '-').strip() or '-',
+            'stage': stage,
+            'risk': str(risk or 'D').upper(),
+            'note': str(note or '').strip(),
+            'candidate_source': candidate_source,
+            'optimizer_market_meta': market_meta,
+            'optimizer_color_score': max(0, min(100, int(color_score or 0))),
+            'optimizer_shape_score': max(0, min(100, int(shape_score or 0))),
+        }
+
+    def _success_score_for_candidate(self, candidate: Dict[str, Any]) -> int:
+        source = str(candidate.get('candidate_source') or '').strip().lower()
+        risk = str(candidate.get('risk') or 'D').strip().upper()
+        base_map = {
+            'exact_combo': 100,
+            'rule_exact': 95,
+            'history_exact': 88,
+            'smart_color': 84,
+            'index': 76,
+            'printed_fallback': 68,
+            'substitution_display': 66,
+            'substitution_structural': 58,
+            'blocked': 18,
+            'manual': 8,
+        }
+        penalty_map = {'A': 0, 'B': 8, 'C': 18, 'D': 40}
+        score = base_map.get(source, 50) - penalty_map.get(risk, 25)
+        return max(0, min(100, score))
+
+    def _availability_score_for_candidate(self, inventory: int, qty: int, resolved_part_no: str) -> int:
+        if str(resolved_part_no or '').strip() in {'', '-'}:
+            return 0
+        safe_inventory = max(0, int(inventory or 0))
+        safe_qty = max(1, int(qty or 1))
+        if safe_inventory >= safe_qty * 3:
+            return 100
+        if safe_inventory >= safe_qty:
+            return 80
+        if safe_inventory > 0:
+            return 55
+        return 18
+
+    def _build_optimizer_reason_text(self, candidate: Dict[str, Any], scores: Dict[str, int]) -> str:
+        parts: List[str] = []
+        source = str(candidate.get('candidate_source') or '').strip().lower()
+        market_meta = candidate.get('optimizer_market_meta') if isinstance(candidate.get('optimizer_market_meta'), dict) else {}
+        inventory = int(market_meta.get('inventory') or 0)
+        price = float(market_meta.get('price') or 0)
+        if source == 'exact_combo':
+            parts.append('命中历史稳定映射')
+        elif source == 'rule_exact':
+            parts.append('命中本地规则映射')
+        elif source == 'smart_color':
+            parts.append('同模具下按近色与在售情况排序')
+        elif source == 'index':
+            parts.append('未命中本地规则，转用高砖在售候选')
+        elif source.startswith('substitution'):
+            parts.append('使用相似件替代方案')
+        elif source == 'printed_fallback':
+            parts.append('印刷件先降级为空白件方案')
+        if scores.get('availability', 0) >= 80:
+            parts.append(f'库存可覆盖当前数量（{inventory}）')
+        elif inventory > 0:
+            parts.append(f'库存偏紧（{inventory}）')
+        if price > 0:
+            parts.append(f'单件约 ¥{price:.2f}')
+        if scores.get('color', 0) >= 85:
+            parts.append('颜色接近度高')
+        elif scores.get('color', 0) >= 70:
+            parts.append('颜色可接受')
+        elif str(candidate.get('resolved_part_no') or '').strip() not in {'', '-'}:
+            parts.append('颜色需人工确认')
+        return '；'.join(parts) or str(candidate.get('note') or '').strip() or '系统综合识别率、库存和成本后给出的首选方案'
+
+    def _finalize_optimizer_candidates(
+        self,
+        candidates: List[Dict[str, Any]],
+        qty: int,
+        optimizer_mode: str,
+    ) -> List[Dict[str, Any]]:
+        if not candidates:
+            return []
+        weights = self._get_optimizer_weights(optimizer_mode)
+        priced = [float(item.get('optimizer_market_meta', {}).get('price') or 0) for item in candidates if float(item.get('optimizer_market_meta', {}).get('price') or 0) > 0]
+        min_price = min(priced) if priced else 0
+        max_price = max(priced) if priced else 0
+        finalized: List[Dict[str, Any]] = []
+        for raw in candidates:
+            candidate = deepcopy(raw)
+            market_meta = candidate.get('optimizer_market_meta') if isinstance(candidate.get('optimizer_market_meta'), dict) else {}
+            inventory = int(market_meta.get('inventory') or 0)
+            price = float(market_meta.get('price') or 0)
+            success_score = self._success_score_for_candidate(candidate)
+            availability_score = self._availability_score_for_candidate(inventory, qty, str(candidate.get('resolved_part_no') or ''))
+            color_score = int(candidate.get('optimizer_color_score') or 0)
+            shape_score = int(candidate.get('optimizer_shape_score') or 0)
+            if price <= 0:
+                cost_score = 50
+            elif max_price > min_price:
+                cost_score = int(round(100 - ((price - min_price) / (max_price - min_price)) * 100))
+            else:
+                cost_score = 100
+            total_score = round(
+                success_score * weights['success']
+                + availability_score * weights['availability']
+                + color_score * weights['color']
+                + cost_score * weights['cost']
+                + shape_score * weights['shape'],
+                2,
+            )
+            scores = {
+                'success': success_score,
+                'availability': availability_score,
+                'color': color_score,
+                'cost': cost_score,
+                'shape': shape_score,
+            }
+            reason_tags = []
+            if success_score >= 90:
+                reason_tags.append('HIGH_CONFIDENCE')
+            if availability_score < 60:
+                reason_tags.append('LOW_STOCK')
+            if color_score >= 85:
+                reason_tags.append('NEAR_COLOR')
+            if cost_score >= 85:
+                reason_tags.append('LOW_COST')
+            candidate.update(
+                {
+                    'inventory': inventory,
+                    'unit_cost': round(price, 2) if price > 0 else 0,
+                    'line_cost': round(price * max(1, int(qty or 1)), 2) if price > 0 else 0,
+                    'optimizer': {
+                        'mode': optimizer_mode,
+                        'total_score': total_score,
+                        'score_breakdown': scores,
+                        'candidate_source': str(candidate.get('candidate_source') or '').strip(),
+                        'reason_tags': reason_tags,
+                        'reason_text': self._build_optimizer_reason_text(candidate, scores),
+                    },
+                }
+            )
+            finalized.append(candidate)
+        finalized.sort(
+            key=lambda item: (
+                -float(item.get('optimizer', {}).get('total_score') or 0),
+                str(item.get('risk') or 'D'),
+                -int(item.get('inventory') or 0),
+                float(item.get('unit_cost') or 0) if float(item.get('unit_cost') or 0) > 0 else 999999,
+                str(item.get('resolved_part_no') or ''),
+                str(item.get('resolved_color_no') or ''),
+            )
+        )
+        for index, item in enumerate(finalized, start=1):
+            optimizer = item.get('optimizer') if isinstance(item.get('optimizer'), dict) else {}
+            optimizer['rank'] = index
+            item['optimizer'] = optimizer
+        return finalized
 
     def _classify_remote_shortage(
         self,

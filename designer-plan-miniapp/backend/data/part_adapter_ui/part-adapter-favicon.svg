@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <radialGradient id="tileBg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(36 34) rotate(38.2) scale(112.643)">
+      <stop stop-color="#EEF6FD"/>
+      <stop offset="1" stop-color="#D7E5F3"/>
+    </radialGradient>
+    <linearGradient id="leftFace" x1="28" y1="30" x2="65" y2="106" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D56B0"/>
+      <stop offset="1" stop-color="#0A3F90"/>
+    </linearGradient>
+    <linearGradient id="rightFace" x1="64" y1="26" x2="110" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C7D8EB"/>
+      <stop offset="1" stop-color="#A7BEDB"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#tileBg)"/>
+  <path d="M28 43H45V28H64V43H83V91L64 101L28 88V43Z" fill="url(#leftFace)"/>
+  <path d="M64 43V101L101 84V43H83V28H64V43Z" fill="url(#rightFace)"/>
+  <path d="M49 64L58 55L70 67L94 42H103V51L64 87L49 64Z" fill="white"/>
+</svg>

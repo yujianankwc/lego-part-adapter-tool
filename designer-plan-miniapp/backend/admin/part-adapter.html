@@ -45,6 +45,7 @@
         border: 1px solid var(--pa-border);
         background: var(--pa-surface);
         box-shadow: var(--pa-shadow);
+        overflow: hidden;
       }
 
       .product-head {
@@ -55,7 +56,7 @@
       }
 
       .product-copy {
-        padding: 20px;
+        padding: 18px 20px;
         border-radius: 18px;
         border: 1px solid rgba(23, 59, 134, 0.08);
         background:
@@ -84,15 +85,15 @@
       }
 
       .product-copy h1 {
-        margin: 0 0 12px;
-        font-size: 34px;
+        margin: 0 0 10px;
+        font-size: 32px;
         line-height: 1.08;
       }
 
       .product-copy p {
         margin: 0;
         color: #54657f;
-        line-height: 1.8;
+        line-height: 1.7;
         font-size: 14px;
       }
 
@@ -191,6 +192,70 @@
         white-space: nowrap;
       }
 
+      .focus-overlay {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 26;
+        width: min(360px, calc(100vw - 28px));
+        display: none;
+        border-radius: 18px;
+        border: 1px solid #d8e4fb;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 18px 42px rgba(18, 40, 86, 0.14);
+        overflow: hidden;
+      }
+
+      .focus-overlay.visible {
+        display: block;
+      }
+
+      .focus-overlay-head {
+        padding: 14px 16px 10px;
+        border-bottom: 1px solid #e5ecfa;
+        background: linear-gradient(180deg, #f8fbff 0%, #f2f7ff 100%);
+      }
+
+      .focus-overlay-title {
+        margin: 0;
+        font-size: 14px;
+        color: #173b86;
+      }
+
+      .focus-overlay-sub {
+        margin-top: 4px;
+        font-size: 12px;
+        color: #6a7b98;
+        line-height: 1.6;
+      }
+
+      .focus-overlay-list {
+        display: grid;
+        gap: 8px;
+        padding: 12px 14px 14px;
+      }
+
+      .focus-overlay-item {
+        display: grid;
+        gap: 4px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid #dfe7f8;
+        background: #fff;
+      }
+
+      .focus-overlay-item strong {
+        font-size: 13px;
+        color: #20304d;
+      }
+
+      .focus-overlay-item span {
+        font-size: 12px;
+        color: #6f7f99;
+        line-height: 1.6;
+      }
+
       @keyframes paPulse {
         0%,
         100% {
@@ -224,6 +289,248 @@
         display: none !important;
       }
 
+      .public-lite-shell {
+        display: none;
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 28px 16px 40px;
+      }
+
+      .public-lite-shell.active {
+        display: grid;
+        gap: 16px;
+      }
+
+      .public-lite-card {
+        padding: 22px;
+        border-radius: 22px;
+      }
+
+      .public-upload-card {
+        display: grid;
+        gap: 14px;
+        background:
+          radial-gradient(circle at top right, rgba(77, 126, 220, 0.09), transparent 26%),
+          linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+      }
+
+      .public-upload-title {
+        margin: 0;
+        font-size: 34px;
+        line-height: 1.08;
+        color: #12294f;
+      }
+
+      .public-upload-subtitle {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.7;
+        color: #5a6d8c;
+      }
+
+      .public-upload-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .public-upload-actions .primary-action {
+        min-width: 180px;
+      }
+
+      .public-upload-hint,
+      .public-lite-status {
+        font-size: 13px;
+        line-height: 1.65;
+        color: #66758f;
+      }
+
+      .public-lite-status {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid #dbe5f8;
+        background: #f8fbff;
+      }
+
+      .public-paste-panel {
+        display: none;
+        gap: 10px;
+      }
+
+      .public-paste-panel.open {
+        display: grid;
+      }
+
+      .public-paste-panel textarea {
+        min-height: 132px;
+        border-radius: 16px;
+        border: 1px solid #d8e4fb;
+        background: #fff;
+        padding: 12px 14px;
+        color: #20304d;
+        resize: vertical;
+        font: 13px/1.6 SFMono-Regular, Menlo, Consolas, monospace;
+      }
+
+      .public-lite-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .public-lite-stat {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .public-lite-stat strong {
+        display: block;
+        font-size: 32px;
+        line-height: 1;
+        color: #173b86;
+      }
+
+      .public-lite-stat span {
+        display: block;
+        margin-top: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748f;
+      }
+
+      .public-lite-conclusion {
+        display: grid;
+        gap: 6px;
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #d7e4fb;
+        background: linear-gradient(180deg, #f9fbff 0%, #f2f6ff 100%);
+      }
+
+      .public-lite-conclusion.is-good {
+        border-color: #cfe7d8;
+        background: linear-gradient(180deg, #f8fef9 0%, #eef8f0 100%);
+      }
+
+      .public-lite-conclusion.is-warn {
+        border-color: #f0deb0;
+        background: linear-gradient(180deg, #fffdf8 0%, #fff7e4 100%);
+      }
+
+      .public-lite-conclusion.is-danger {
+        border-color: #f1cfcf;
+        background: linear-gradient(180deg, #fffafa 0%, #fff1f1 100%);
+      }
+
+      .public-lite-conclusion strong {
+        font-size: 18px;
+        color: #173b86;
+      }
+
+      .public-lite-conclusion span {
+        font-size: 14px;
+        line-height: 1.65;
+        color: #556784;
+      }
+
+      .public-lite-action-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr 1fr;
+        gap: 12px;
+      }
+
+      .public-lite-task-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+
+      .public-lite-task-title {
+        margin: 0;
+        font-size: 20px;
+        color: #12294f;
+      }
+
+      .public-lite-task-subtitle {
+        margin: 6px 0 0;
+        font-size: 13px;
+        color: #677892;
+        line-height: 1.65;
+      }
+
+      .public-lite-task-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .public-lite-task-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 16px;
+        border-radius: 18px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+      }
+
+      .public-lite-task-copy {
+        min-width: 0;
+        display: grid;
+        gap: 6px;
+      }
+
+      .public-lite-task-main {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .public-lite-task-name {
+        font-size: 15px;
+        font-weight: 800;
+        color: #17304f;
+      }
+
+      .public-lite-task-code {
+        font-size: 12px;
+        color: #6d7d97;
+      }
+
+      .public-lite-task-reason {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #5a6d8c;
+      }
+
+      .public-lite-bottom-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      .text-link-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid #d8e4fb;
+        background: #fff;
+        color: #21468d;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
       .topbar {
         position: sticky;
         top: 10px;
@@ -251,7 +558,7 @@
 
       .hero-panel {
         border-radius: 18px;
-        padding: 18px;
+        padding: 16px 18px;
         border: 1px solid rgba(255, 255, 255, 0.12);
         background:
           radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 28%),
@@ -261,15 +568,15 @@
       }
 
       .hero-panel h2 {
-        margin: 0 0 10px;
-        font-size: 22px;
+        margin: 0 0 8px;
+        font-size: 20px;
       }
 
       .hero-panel p {
         margin: 0;
         color: rgba(255, 255, 255, 0.86);
-        line-height: 1.65;
-        font-size: 13px;
+        line-height: 1.55;
+        font-size: 12px;
       }
 
       .hero-metrics {
@@ -505,7 +812,7 @@
       }
 
       .quick-guide {
-        padding: 14px 16px;
+        padding: 12px 16px;
       }
 
       .quick-guide-head {
@@ -513,11 +820,12 @@
         align-items: center;
         justify-content: space-between;
         gap: 16px;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
       }
 
       .quick-guide-head h3 {
         margin: 0;
+        font-size: 18px;
       }
 
       .step-strip {
@@ -530,7 +838,7 @@
         border-radius: 16px;
         border: 1px solid #dce6fa;
         background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
-        padding: 12px;
+        padding: 10px 12px;
       }
 
       .step-no {
@@ -548,16 +856,16 @@
       }
 
       .step-title {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 700;
         color: #173b86;
         margin-bottom: 4px;
       }
 
       .step-desc {
-        font-size: 12px;
+        font-size: 11px;
         color: #66758f;
-        line-height: 1.6;
+        line-height: 1.5;
       }
 
       .core-actions {
@@ -570,12 +878,58 @@
         min-width: 132px;
       }
 
+      .more-actions {
+        position: relative;
+      }
+
+      .more-actions summary {
+        list-style: none;
+        cursor: pointer;
+      }
+
+      .more-actions summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .more-actions-panel {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 8px);
+        z-index: 12;
+        min-width: 220px;
+        padding: 10px;
+        border-radius: 14px;
+        border: 1px solid #dbe4f8;
+        background: #fff;
+        box-shadow: 0 16px 34px rgba(18, 40, 86, 0.12);
+        display: grid;
+        gap: 8px;
+      }
+
+      .more-actions-panel button {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .focus-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid #d8e4fb;
+        background: #f7faff;
+        font-size: 12px;
+        font-weight: 700;
+        color: #23478f;
+      }
+
       .section-title-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
       }
 
       .section-title-row h3 {
@@ -588,7 +942,7 @@
       }
 
       .compact-card {
-        padding: 14px;
+        padding: 16px;
       }
 
       .low-priority summary .fold-summary-copy h3::after {
@@ -624,6 +978,32 @@
         min-height: 16px;
         margin: 0;
         accent-color: #1e63d7;
+      }
+
+      .viewer-stage {
+        width: 100%;
+        height: 420px;
+        border: 1px solid #d5def4;
+        border-radius: 14px;
+        background: radial-gradient(circle at top right, rgba(68, 117, 207, 0.08), transparent 28%), #f7faff;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .viewer-stage canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .viewer-empty {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #63779d;
+        font-size: 14px;
       }
 
       button {
@@ -1200,7 +1580,1058 @@
         word-break: break-word;
       }
 
+      .result-list,
+      .review-alert-list {
+        display: grid;
+        gap: 12px;
+        padding: 0 16px 16px;
+      }
+
+      .result-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+        gap: 14px;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .result-main,
+      .result-side {
+        display: grid;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .result-pair {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+      }
+
+      .result-arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        min-height: 38px;
+        border-radius: 999px;
+        border: 1px solid #d7e4fa;
+        background: #f3f7ff;
+        color: #2e56a4;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .result-block {
+        display: grid;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .result-block-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: #6e7f9d;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .result-summary-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .priority-summary {
+        display: grid;
+        grid-template-columns: minmax(300px, 1.15fr) minmax(240px, 0.85fr);
+        gap: 12px;
+        padding: 0 16px 14px;
+      }
+
+      .priority-card {
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .priority-card h4 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: #173b86;
+      }
+
+      .priority-card p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.7;
+        color: #54657f;
+      }
+
+      .convert-digest {
+        display: grid;
+        grid-template-columns: minmax(320px, 1.1fr) minmax(240px, 0.9fr);
+        gap: 12px;
+        padding: 0 16px 14px;
+      }
+
+      .convert-digest-card {
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .convert-digest-card h4 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: #173b86;
+      }
+
+      .convert-digest-card p {
+        margin: 0;
+        font-size: 13px;
+        color: #54657f;
+        line-height: 1.7;
+      }
+
+      .priority-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .priority-item {
+        display: grid;
+        gap: 4px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid #dfe7f8;
+        background: #fff;
+      }
+
+      .priority-item strong {
+        font-size: 13px;
+        color: #20304d;
+      }
+
+      .priority-item span {
+        font-size: 12px;
+        color: #6f7f99;
+        line-height: 1.6;
+      }
+
+      .quick-filter-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 0 16px 12px;
+      }
+
+      .quick-filter-btn {
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+
+      .quick-filter-btn.is-active {
+        border-color: #173b86;
+        background: linear-gradient(180deg, #173b86 0%, #0f2f78 100%);
+        color: #fff;
+      }
+
+      .action-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        border: 1px solid #cfe0fc;
+        background: #eef4ff;
+        color: #1d4a9a;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .action-chip.action-critical {
+        border-color: #f3c7c7;
+        background: #fff0f0;
+        color: #b42318;
+      }
+
+      .action-chip.action-warning {
+        border-color: #f2dfab;
+        background: #fff7de;
+        color: #9a6700;
+      }
+
+      .action-chip.action-ok {
+        border-color: #cde8d6;
+        background: #edf9f0;
+        color: #0c7a3f;
+      }
+
+      .result-explainer {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid #dce6fa;
+        background: #fbfdff;
+      }
+
+      .result-explainer-title {
+        font-size: 13px;
+        font-weight: 800;
+        color: #173b86;
+      }
+
+      .result-details summary {
+        list-style: none;
+        cursor: pointer;
+      }
+
+      .result-details summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .result-details-trigger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid #d7e4fa;
+        background: #f6f9ff;
+        color: #35507f;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .result-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .result-meta-box {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid #e0e8fa;
+        background: #fff;
+      }
+
+      .result-meta-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: #73839d;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .result-meta-value {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #253857;
+        line-height: 1.5;
+        word-break: break-word;
+      }
+
+      .review-alert-card {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #f3d3a6;
+        background: linear-gradient(180deg, #fffdfa 0%, #fff7eb 100%);
+      }
+
+      .review-alert-card.is-critical {
+        border-color: #efc0c0;
+        background: linear-gradient(180deg, #fffafa 0%, #fff1f1 100%);
+      }
+
+      .risk-summary-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin: 0 16px 12px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid #f0d4d4;
+        background: linear-gradient(180deg, #fff8f8 0%, #fff1f1 100%);
+      }
+
+      .risk-summary-copy {
+        display: grid;
+        gap: 4px;
+      }
+
+      .risk-summary-copy strong {
+        font-size: 14px;
+        color: #a12222;
+      }
+
+      .risk-summary-copy span {
+        font-size: 12px;
+        color: #7e4d4d;
+        line-height: 1.65;
+      }
+
+      .risk-summary-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .review-alert-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .review-alert-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #20304d;
+        line-height: 1.45;
+      }
+
+      .review-alert-sub {
+        margin-top: 4px;
+        font-size: 12px;
+        color: #677892;
+        line-height: 1.6;
+      }
+
+      .review-alert-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .review-alert-box {
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(220, 230, 250, 0.92);
+        background: rgba(255, 255, 255, 0.88);
+      }
+
+      .review-empty,
+      .result-empty {
+        padding: 14px 16px 18px;
+        color: #70819e;
+      }
+
+      .project-summary-shell,
+      .match-overview-card,
+      .processing-hub-card,
+      .parts-workbench-card,
+      .risk-feed-card {
+        display: grid;
+        gap: 14px;
+      }
+
+      .project-summary-shell {
+        grid-template-columns: 156px minmax(0, 1fr);
+        padding: 0 16px 14px;
+      }
+
+      .project-summary-cover {
+        display: grid;
+        align-content: space-between;
+        gap: 10px;
+        min-height: 156px;
+        padding: 14px;
+        border-radius: 18px;
+        border: 1px solid #d9e5fb;
+        background: linear-gradient(180deg, #f7faff 0%, #eef4ff 100%);
+        color: #173b86;
+      }
+
+      .project-cover-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        min-height: 30px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: #e8f0ff;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .project-cover-title {
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .project-cover-note {
+        font-size: 12px;
+        line-height: 1.6;
+        color: #5f7190;
+      }
+
+      .project-summary-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .project-summary-main {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #dbe6fb;
+        background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+      }
+
+      .project-status-line {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .analysis-status-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid #cfe0fc;
+        background: #eef4ff;
+        color: #1d4a9a;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .analysis-status-pill.is-good {
+        border-color: #cde8d6;
+        background: #edf9f0;
+        color: #0c7a3f;
+      }
+
+      .analysis-status-pill.is-warn {
+        border-color: #f2dfab;
+        background: #fff7de;
+        color: #9a6700;
+      }
+
+      .analysis-status-pill.is-danger {
+        border-color: #f3c7c7;
+        background: #fff0f0;
+        color: #b42318;
+      }
+
+      .project-main-title {
+        margin-top: 10px;
+        font-size: 22px;
+        line-height: 1.3;
+        font-weight: 800;
+        color: #173b86;
+      }
+
+      .project-main-meta {
+        margin-top: 8px;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #5e6f8b;
+      }
+
+      .project-info-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .project-info-item {
+        display: grid;
+        gap: 6px;
+        padding: 12px;
+        border-radius: 16px;
+        border: 1px solid #dfe7f8;
+        background: #fbfdff;
+      }
+
+      .match-overview-card {
+        border-color: #cfdcf7;
+        box-shadow: 0 20px 52px rgba(17, 42, 92, 0.12);
+      }
+
+      .project-info-label,
+      .overview-stat-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: #71819d;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .project-info-value {
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.55;
+        color: #223455;
+        word-break: break-word;
+      }
+
+      .match-overview-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        padding: 0 16px;
+      }
+
+      .overview-stat-card {
+        display: grid;
+        gap: 8px;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .overview-stat-card.is-primary {
+        background: linear-gradient(180deg, #1d4da4 0%, #12357f 100%);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+
+      .overview-stat-card.is-primary .overview-stat-label,
+      .overview-stat-card.is-primary .overview-stat-value,
+      .overview-stat-card.is-primary .overview-stat-sub {
+        color: #fff;
+      }
+
+      .overview-stat-card.is-good {
+        border-color: #d1ead9;
+        background: linear-gradient(180deg, #f9fefb 0%, #eef9f1 100%);
+      }
+
+      .overview-stat-card.is-info {
+        border-color: #d3e4fe;
+        background: linear-gradient(180deg, #fbfdff 0%, #eff5ff 100%);
+      }
+
+      .overview-stat-card.is-warning {
+        border-color: #f1dfb4;
+        background: linear-gradient(180deg, #fffdf7 0%, #fff7e6 100%);
+      }
+
+      .overview-stat-card.is-danger {
+        border-color: #f2cfcf;
+        background: linear-gradient(180deg, #fffafa 0%, #fff1f1 100%);
+      }
+
+      .overview-stat-card.is-key {
+        border-width: 2px;
+      }
+
+      .overview-stat-value {
+        font-size: 34px;
+        line-height: 1;
+        font-weight: 900;
+        color: #173b86;
+      }
+
+      .overview-stat-sub {
+        font-size: 12px;
+        line-height: 1.6;
+        color: #6d7d97;
+      }
+
+      .result-conclusion-bar {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin: 0 16px 16px;
+        padding: 18px 18px;
+        border-radius: 18px;
+        border: 1px solid #d5e2fb;
+        background: linear-gradient(180deg, #f9fbff 0%, #f1f6ff 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      }
+
+      .result-conclusion-bar.is-good {
+        border-color: #cfe7d8;
+        background: linear-gradient(180deg, #f8fef9 0%, #eef8f0 100%);
+      }
+
+      .result-conclusion-bar.is-warn {
+        border-color: #f0deb0;
+        background: linear-gradient(180deg, #fffdf8 0%, #fff7e4 100%);
+      }
+
+      .result-conclusion-bar.is-danger {
+        border-color: #f1cfcf;
+        background: linear-gradient(180deg, #fffafa 0%, #fff1f1 100%);
+      }
+
+      .result-conclusion-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: #173b86;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 900;
+        flex: 0 0 auto;
+      }
+
+      .result-conclusion-copy {
+        display: grid;
+        gap: 4px;
+        flex: 1 1 auto;
+      }
+
+      .result-conclusion-copy strong {
+        font-size: 16px;
+        color: #173b86;
+      }
+
+      .result-conclusion-copy span {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #556784;
+      }
+
+      .result-conclusion-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex: 0 0 auto;
+      }
+
+      .result-conclusion-actions .priority-action {
+        min-width: 170px;
+      }
+
+      .processing-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0 16px;
+      }
+
+      .processing-tabs::before {
+        content: '先切到要处理的任务，再看下面结果。';
+        width: 100%;
+        font-size: 12px;
+        color: #66758f;
+        line-height: 1.6;
+      }
+
+      .processing-tab {
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid #d6e3fb;
+        background: #f7faff;
+        color: #37517f;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .processing-tab.is-active {
+        border-color: #173b86;
+        background: linear-gradient(180deg, #173b86 0%, #0f2f78 100%);
+        color: #fff;
+        box-shadow: 0 10px 22px rgba(23, 59, 134, 0.16);
+      }
+
+      .processing-toolbar {
+        display: grid;
+        gap: 10px;
+      }
+
+      .processing-toolbar-actions,
+      .workbench-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        padding: 0 16px;
+      }
+
+      .workbench-result-list {
+        display: grid;
+        gap: 12px;
+        padding: 0 16px 16px;
+      }
+
+      .result-view-summary {
+        display: grid;
+        gap: 4px;
+        margin: 0 16px 12px;
+        padding: 13px 14px;
+        border-radius: 16px;
+        border: 1px solid #d7e4fb;
+        background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+      }
+
+      .result-view-summary strong {
+        font-size: 14px;
+        color: #173b86;
+      }
+
+      .result-view-summary span {
+        font-size: 12px;
+        line-height: 1.65;
+        color: #60718c;
+      }
+
+      .result-card {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+      }
+
+      .result-card.is-exact {
+        border-color: #d1ead9;
+        background: linear-gradient(180deg, #fcfffd 0%, #f4fbf6 100%);
+      }
+
+      .result-card.is-replaceable {
+        border-color: #d4e4fd;
+        background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%);
+      }
+
+      .result-card.is-pending {
+        border-color: #f0deb0;
+        background: linear-gradient(180deg, #fffefa 0%, #fff8ea 100%);
+      }
+
+      .result-card.is-blocked {
+        border-color: #f0cbcb;
+        background: linear-gradient(180deg, #fffafa 0%, #fff2f2 100%);
+      }
+
+      .result-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .result-card-meta {
+        display: grid;
+        gap: 6px;
+      }
+
+      .result-card-title {
+        font-size: 16px;
+        line-height: 1.35;
+        font-weight: 800;
+        color: #183255;
+      }
+
+      .result-card-subtitle {
+        font-size: 12px;
+        color: #6b7c96;
+        line-height: 1.6;
+      }
+
+      .result-card-status {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .status-chip,
+      .compat-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .status-chip.is-exact {
+        background: #edf9f0;
+        border: 1px solid #cde8d6;
+        color: #0c7a3f;
+      }
+
+      .status-chip.is-replaceable {
+        background: #eef4ff;
+        border: 1px solid #cfe0fc;
+        color: #1d4a9a;
+      }
+
+      .status-chip.is-pending {
+        background: #fff7de;
+        border: 1px solid #f2dfab;
+        color: #9a6700;
+      }
+
+      .status-chip.is-blocked {
+        background: #fff0f0;
+        border: 1px solid #f3c7c7;
+        color: #b42318;
+      }
+
+      .compat-chip {
+        background: #fff;
+        border: 1px solid #d7e4fa;
+        color: #476389;
+      }
+
+      .result-card-body {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.95fr) minmax(220px, 0.75fr) minmax(260px, 1.1fr);
+        gap: 14px;
+      }
+
+      .result-primary-pane,
+      .result-target-pane,
+      .result-decision-pane {
+        display: grid;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .result-pane-title {
+        font-size: 11px;
+        font-weight: 800;
+        color: #71819d;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .decision-strip {
+        display: grid;
+        gap: 10px;
+        padding: 15px;
+        border-radius: 16px;
+        border: 1px solid #d4e1fb;
+        background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+      }
+
+      .decision-row {
+        display: grid;
+        gap: 4px;
+      }
+
+      .decision-row strong {
+        font-size: 13px;
+        color: #20304d;
+      }
+
+      .decision-row span {
+        font-size: 12px;
+        line-height: 1.65;
+        color: #62738f;
+      }
+
+      .decision-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .primary-inline-btn {
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 12px;
+        border: 1px solid #173b86;
+        background: linear-gradient(180deg, #173b86 0%, #0f2f78 100%);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .ghost-btn {
+        min-height: 36px;
+        padding: 0 12px;
+        border-radius: 12px;
+        border: 1px solid #cfe0fc;
+        background: #f4f8ff;
+        color: #1d4a9a;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .secondary-btn {
+        background: #fff;
+        color: #173b86;
+      }
+
+      .replacement-drawer-mask {
+        position: fixed;
+        inset: 0;
+        z-index: 55;
+        display: none;
+        background: rgba(10, 18, 36, 0.42);
+      }
+
+      .replacement-drawer-mask.open {
+        display: block;
+      }
+
+      .replacement-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 60;
+        width: min(520px, 100vw);
+        display: flex;
+        flex-direction: column;
+        transform: translateX(100%);
+        transition: transform 180ms ease;
+        background: #fff;
+        border-left: 1px solid #dbe5f8;
+        box-shadow: -24px 0 60px rgba(14, 33, 72, 0.18);
+      }
+
+      .replacement-drawer.open {
+        transform: translateX(0);
+      }
+
+      .replacement-drawer-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 18px 18px 14px;
+        border-bottom: 1px solid #e5ecfa;
+        background: linear-gradient(180deg, #f8fbff 0%, #f3f7ff 100%);
+      }
+
+      .replacement-drawer-body {
+        flex: 1 1 auto;
+        overflow: auto;
+        padding: 18px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .drawer-block {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid #dfe7f8;
+        background: #fbfdff;
+      }
+
+      .drawer-block h4 {
+        margin: 0;
+        font-size: 14px;
+        color: #173b86;
+      }
+
+      .drawer-kv {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .drawer-kv-item {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid #e0e8fa;
+        background: #fff;
+      }
+
+      .drawer-kv-item .label {
+        font-size: 11px;
+        font-weight: 800;
+        color: #73839d;
+        text-transform: uppercase;
+      }
+
+      .drawer-kv-item .value {
+        margin-top: 6px;
+        font-size: 13px;
+        line-height: 1.55;
+        color: #243756;
+        word-break: break-word;
+      }
+
+      .drawer-foot {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 14px 18px 18px;
+        border-top: 1px solid #e5ecfa;
+        background: #fff;
+      }
+
+      .action-footer {
+        position: sticky;
+        bottom: 16px;
+        z-index: 22;
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+        padding: 16px;
+        border-radius: 20px;
+        border: 1px solid #d8e4fb;
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 16px 36px rgba(16, 36, 78, 0.08);
+      }
+
+      .action-footer.is-danger {
+        border-color: #efcfcf;
+        box-shadow: 0 18px 42px rgba(158, 35, 35, 0.08);
+      }
+
+      .action-footer.is-warn {
+        border-color: #ecdcb5;
+      }
+
+      .action-footer.is-good {
+        border-color: #d2e8d8;
+      }
+
+      .action-footer-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .action-footer-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .action-footer-actions .priority-action {
+        min-width: 160px;
+        border-color: #173b86;
+        background: linear-gradient(180deg, #173b86 0%, #0f2f78 100%);
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(23, 59, 134, 0.18);
+      }
+
       @media (max-width: 980px) {
+        .public-lite-stats,
+        .public-lite-action-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .public-lite-task-item {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
         .product-head,
         .hero,
         .row-grid,
@@ -1212,6 +2643,13 @@
 
         .topbar {
           position: static;
+        }
+
+        .focus-overlay {
+          right: 14px;
+          left: 14px;
+          width: auto;
+          bottom: 14px;
         }
 
         .wrap {
@@ -1243,24 +2681,136 @@
         .detail-grid {
           grid-template-columns: 1fr;
         }
+
+        .result-card,
+        .result-card-body,
+        .result-pair,
+        .review-alert-grid,
+        .result-meta-grid,
+        .priority-summary,
+        .convert-digest,
+        .project-summary-shell,
+        .project-info-list,
+        .match-overview-grid,
+        .drawer-kv {
+          grid-template-columns: 1fr;
+        }
+
+        .result-arrow {
+          display: none;
+        }
+
+        .action-footer {
+          bottom: 10px;
+        }
+
+        .replacement-drawer {
+          width: 100vw;
+        }
+
+        .result-conclusion-bar {
+          flex-direction: column;
+        }
+
+        .result-conclusion-actions {
+          width: 100%;
+          justify-content: flex-start;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="wrap">
+    <div id="publicLiteShell" class="public-lite-shell">
+      <section class="card public-lite-card public-upload-card">
+        <div>
+          <h1 class="public-upload-title">乐高零件适配助手</h1>
+          <p class="public-upload-subtitle">上传 Studio 清单，快速看看哪些零件可以直接在高砖体系落地。</p>
+        </div>
+        <div class="public-upload-actions">
+          <button type="button" class="primary-action" onclick="startPublicQuickFlow()">上传 Studio 清单</button>
+          <button type="button" class="secondary-btn" onclick="togglePublicPastePanel()">粘贴零件清单</button>
+        </div>
+        <div class="public-upload-hint">支持 Studio 导出清单或常见零件列表格式。</div>
+        <div id="publicLiteStatus" class="public-lite-status">上传后，系统会直接告诉你能不能继续做、缺什么、下一步该点哪里。</div>
+        <div id="publicPastePanel" class="public-paste-panel">
+          <textarea id="publicBomPaste" placeholder="把零件清单直接粘贴到这里，然后点击“开始分析”。"></textarea>
+          <div class="public-upload-actions">
+            <button type="button" class="primary-action" onclick="analyzePastedBom()">开始分析</button>
+            <button type="button" class="secondary-btn" onclick="togglePublicPastePanel(false)">收起</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card public-lite-card">
+        <div class="public-lite-stats">
+          <div class="public-lite-stat">
+            <strong id="publicLiteTotalQty">0</strong>
+            <span>总零件数</span>
+          </div>
+          <div class="public-lite-stat">
+            <strong id="publicLiteExactCount">0</strong>
+            <span>可直接匹配</span>
+          </div>
+          <div class="public-lite-stat">
+            <strong id="publicLiteReplaceableCount">0</strong>
+            <span>可替代</span>
+          </div>
+          <div class="public-lite-stat">
+            <strong id="publicLiteBlockedCount">0</strong>
+            <span>暂时缺失</span>
+          </div>
+        </div>
+        <div class="public-lite-conclusion" id="publicLiteConclusion">
+          <strong id="publicLiteConclusionTitle">等待导入清单</strong>
+          <span id="publicLiteConclusionText">导入后，这里会直接告诉你这套设计能不能继续推进。</span>
+        </div>
+      </section>
+
+      <section class="card public-lite-card">
+        <div class="public-lite-task-head">
+          <div>
+            <h2 class="public-lite-task-title">下一步建议</h2>
+            <p class="public-lite-task-subtitle">只保留当前最值得点击的 3 个动作，不把复杂入口铺满整页。</p>
+          </div>
+        </div>
+        <div class="public-lite-action-grid" id="publicLiteActions">
+          <button type="button" class="primary-action" onclick="scrollToPublicTasks()">查看待处理零件</button>
+          <button type="button" class="secondary-btn" onclick="downloadProcurementSuggestionCsv()">生成采购建议</button>
+          <button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>
+        </div>
+      </section>
+
+      <section class="card public-lite-card" id="publicLiteTaskSection">
+        <div class="public-lite-task-head">
+          <div>
+            <h2 class="public-lite-task-title">待处理零件</h2>
+            <p class="public-lite-task-subtitle" id="publicLiteTaskHint">默认只展示最需要处理的前 10 条，不先把完整结果表铺开。</p>
+          </div>
+        </div>
+        <div id="publicLiteTaskList" class="public-lite-task-list">
+          <div class="result-empty">上传并分析后，这里会只保留最关键的待处理零件。</div>
+        </div>
+      </section>
+
+      <section class="public-lite-bottom-links">
+        <button type="button" class="text-link-btn" onclick="showFullWorkspace()">查看完整结果</button>
+        <a class="text-link-btn" href="/admin/part-adapter">进入专业模式</a>
+      </section>
+    </div>
+
+    <div class="wrap" id="fullWorkspaceShell">
       <div class="product-head">
         <div class="product-copy card">
           <div class="eyebrow">给玩家和设计师用</div>
           <h1>乐高零件适配助手</h1>
           <p>
-            把 Studio 导出的零件清单，快速整理成更适合高砖生产的版本。上传后，系统会直接告诉你哪些可以照用、哪些只是缺颜色、
-            哪些需要换件，让你把精力放在真正需要调整的地方。
+            上传 Studio 清单后，先看这套设计能不能在高砖体系里继续做，再决定哪些要换色、换件或人工确认。
           </p>
           <div class="hint" style="margin-top: 12px">
-            设计制作：<strong>酷玩潮</strong>。这里提供的是替换建议和整理结果；最终是否替换、怎么替换，建议结合结构强度、外观效果和库存情况一起确认。
+            设计制作：<strong>酷玩潮</strong>。页面重点不是展示数据，而是告诉你现在最该先处理什么。
           </div>
         </div>
-        <div class="card topbar settings-shell">
+        <div class="card topbar settings-shell" data-public-block>
           <details class="fold-card">
             <summary class="fold-summary">
               <div class="fold-summary-copy">
@@ -1288,7 +2838,7 @@
         </div>
       </div>
 
-      <div class="card module-nav">
+      <div class="card module-nav" data-public-block>
         <a class="link-btn" href="/admin/overview">总览</a>
         <a class="link-btn" href="/admin/projects">项目管理</a>
         <a class="link-btn" href="/admin/orders">订单管理</a>
@@ -1303,27 +2853,26 @@
 
       <div class="card hero">
         <div class="hero-panel">
-          <h2>先看结论，再决定怎么改</h2>
-          <p>
-            复杂的匹配规则已经放在后面。你在前面看到的，只是最关键的结果：能不能直接用、要不要换颜色、需不需要换件，
-            这样看一眼就能知道下一步该怎么改。
+          <h2 id="heroTitle">先看结论，再决定怎么改</h2>
+          <p id="heroCopy">
+            上传后先知道能不能继续做、卡点在哪、下一步先改什么。
           </p>
         </div>
         <div class="hero-metrics" id="topMetrics">
           <div class="metric-box">
-            <div class="label">清单种类数</div>
+            <div class="label">这单有多少种零件</div>
             <div class="value" id="metricTypes">0</div>
           </div>
           <div class="metric-box">
-            <div class="label">清单总数量</div>
+            <div class="label">总共需要多少颗</div>
             <div class="value" id="metricQty">0</div>
           </div>
           <div class="metric-box">
-            <div class="label">可直接处理</div>
+            <div class="label">可以直接照用</div>
             <div class="value" id="metricAutoRate">0%</div>
           </div>
           <div class="metric-box">
-            <div class="label">可继续推进</div>
+            <div class="label">改一改就能推进</div>
             <div class="value" id="metricProdRate">0%</div>
           </div>
         </div>
@@ -1332,37 +2881,44 @@
       <div class="card quick-guide">
         <div class="quick-guide-head">
           <div>
-            <h3>怎么用最快</h3>
-            <div class="muted-strong">按 1、2、3 的顺序走就行：先上传清单，再看高砖判断，最后查看需要修改的部分。</div>
+            <h3 id="guideTitle">怎么用最快</h3>
+            <div class="muted-strong" id="guideCopy">先上传，再拿到高砖判断，最后只看待处理项。</div>
           </div>
           <div class="core-actions">
             <label class="mode-toggle"><input id="simpleMode" type="checkbox" checked /> 简版模式</label>
-            <button onclick="importBomFile()">1. 上传清单</button>
-            <button onclick="convertWithGobricks()">2. 获取高砖结果</button>
-            <button onclick="runAdapter()">3. 生成替换建议</button>
-            <button onclick="downloadCsv()">4. 导出生产清单</button>
+            <button id="primaryActionUpload" onclick="importBomFile()">1. 上传清单</button>
+            <button id="primaryActionConvert" onclick="convertWithGobricks()">2. 获取高砖结果</button>
+            <button id="primaryActionAnalyze" onclick="runAdapter()">3. 生成替换建议</button>
+            <details class="more-actions">
+              <summary><button type="button" id="moreActionsButton">更多操作</button></summary>
+              <div class="more-actions-panel">
+                <button type="button" id="moreActionExport" onclick="downloadCsv()">导出生产清单</button>
+                <button type="button" id="moreActionRefresh" onclick="loadJobs()">刷新记录</button>
+                <button type="button" id="moreActionDemo" onclick="loadDemoBom()">载入示例清单</button>
+              </div>
+            </details>
           </div>
         </div>
         <div class="step-strip">
           <div class="step-card">
             <div class="step-no">1</div>
             <div class="step-title">上传你的清单</div>
-            <div class="step-desc">支持 Studio 导出的 CSV / XLSX，上传后会先自动整理格式。</div>
+            <div class="step-desc">支持 Studio 导出的 CSV / XLSX。</div>
           </div>
           <div class="step-card">
             <div class="step-no">2</div>
             <div class="step-title">看高砖原始结果</div>
-            <div class="step-desc">先帮你看清楚哪些已经能用，哪些是缺颜色，哪些是缺零件。</div>
+            <div class="step-desc">先分清能用、缺色、缺件。</div>
           </div>
           <div class="step-card">
             <div class="step-no">3</div>
             <div class="step-title">看修改建议</div>
-            <div class="step-desc">重点只看需要你动手改的部分，能直接用的会尽量少打扰你。</div>
+            <div class="step-desc">优先只看需要你动手改的部分。</div>
           </div>
           <div class="step-card">
             <div class="step-no">4</div>
             <div class="step-title">需要时再细调</div>
-            <div class="step-desc">想继续补图、对色或维护规则时，再展开高级功能就可以。</div>
+            <div class="step-desc">高级功能放后面，不打断主流程。</div>
           </div>
         </div>
       </div>
@@ -1374,16 +2930,16 @@
         </div>
         <div class="hero-metrics" style="margin-top: 10px">
           <div class="metric-box">
-            <div class="label">今日访问</div>
+            <div class="label">公开首页访问</div>
             <div class="value" id="analyticsTodayViews">0</div>
           </div>
           <div class="metric-box">
-            <div class="label">今日访客</div>
-            <div class="value" id="analyticsTodayUsers">0</div>
+            <div class="label">结果页访问</div>
+            <div class="value" id="analyticsPublicResultsViews">0</div>
           </div>
           <div class="metric-box">
-            <div class="label">今日使用</div>
-            <div class="value" id="analyticsTodayUses">0</div>
+            <div class="label">今日独立访客</div>
+            <div class="value" id="analyticsTodayUsers">0</div>
           </div>
           <div class="metric-box">
             <div class="label">近 7 天使用</div>
@@ -1392,7 +2948,10 @@
         </div>
         <div class="hint" id="analyticsSummaryHint" style="margin-top: 10px">等待加载统计。</div>
         <div class="subtle-card" style="margin-top: 10px">
-          <div class="field-label">最近操作</div>
+          <div class="toolbar" style="justify-content: space-between; align-items: center;">
+            <div class="field-label">最近记录</div>
+            <a class="text-link" href="/admin/part-adapter/analytics" target="_blank" rel="noopener noreferrer">打开只读统计页</a>
+          </div>
           <div id="analyticsRecentList" class="hint" style="margin-top: 8px">暂无数据。</div>
         </div>
       </div>
@@ -1408,7 +2967,20 @@
         <div class="global-status-meta" id="globalStatusMeta">空闲</div>
       </div>
 
-      <div class="card feature-card low-priority" data-advanced-block>
+      <div id="focusOverlay" class="focus-overlay">
+        <div class="focus-overlay-head">
+          <h3 class="focus-overlay-title">先处理这 3 条</h3>
+          <div class="focus-overlay-sub" id="focusOverlaySub">运行适配后，这里会固定提示最值得先看的问题。</div>
+        </div>
+        <div class="focus-overlay-list" id="focusOverlayList">
+          <div class="focus-overlay-item">
+            <strong>等待运行适配</strong>
+            <span>生成结果后，这里会自动列出最优先处理的三条。</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card feature-card low-priority" data-advanced-block data-public-block>
         <details class="fold-card">
           <summary class="fold-summary">
             <div class="fold-summary-copy">
@@ -1480,6 +3052,7 @@
             <div class="field-label">当前策略</div>
             <div class="pill-list">
               <span class="pill" id="modePill">颜色策略：平衡</span>
+              <span class="pill" id="optimizerPill">优化目标：识别成功率优先</span>
               <span class="pill" id="displayPill">展示件替代：开启</span>
               <span class="pill" id="structurePill">结构件替代：关闭</span>
               <span class="pill" id="jobPill">当前记录：未生成</span>
@@ -1497,13 +3070,19 @@
               <option value="aggressive">激进</option>
             </select>
           </div>
+          <div>
+            <label class="field-label" for="optimizerMode">优化目标</label>
+            <select id="optimizerMode">
+              <option value="reliability" selected>识别成功率优先</option>
+              <option value="cost">成本优先</option>
+              <option value="appearance">外观一致优先</option>
+            </select>
+          </div>
           <label><input id="allowDisplaySub" type="checkbox" checked /> 允许展示件相似替换</label>
           <label><input id="allowStructuralSub" type="checkbox" /> 允许结构件相似替换</label>
           <div class="toolbar">
             <button onclick="runAdapter()">生成替换建议</button>
-            <button onclick="loadDemoBom()">载入示例清单</button>
-            <button onclick="downloadCsv()">导出生产清单</button>
-            <button onclick="loadJobs()">刷新记录</button>
+            <span class="hint">前面先完成上传和高砖判断，这里再生成最终建议。</span>
           </div>
           <div class="toolbar">
             <input id="bomFileInput" type="file" accept=".csv,.txt,.tsv,.xlsx" style="min-width: 220px" />
@@ -1516,31 +3095,248 @@
       </div>
 
       <div class="card compact-card">
-        <div class="section-title-row">
-          <h3>1. 清单内容</h3>
-          <span class="section-tip">先把你的原始清单放进来</span>
-        </div>
-        <div class="hint" style="margin-bottom: 10px">优先直接上传文件；只有临时改几条时，再手动编辑下面内容。</div>
-        <textarea id="bomInput" class="code"></textarea>
+        <details class="fold-card" id="bomInputFold">
+          <summary class="fold-summary">
+            <div class="fold-summary-copy">
+              <h3>1. 清单内容</h3>
+              <div class="hint">默认收起。只有临时改几条时，再展开。</div>
+            </div>
+            <span class="fold-toggle"></span>
+          </summary>
+          <div class="fold-body">
+            <div class="hint" style="margin-bottom: 10px">优先直接上传文件；只有临时改几条时，再手动编辑下面内容。</div>
+            <textarea id="bomInput" class="code"></textarea>
+          </div>
+        </details>
       </div>
 
-      <div class="card compact-card">
+      <div class="card compact-card" data-advanced-block>
         <div class="section-title-row">
-          <h3>2. 结果总览</h3>
-          <span class="section-tip">先看整体情况，再往下看详细建议</span>
+          <h3>1.1 3D 模型预览（Beta）</h3>
+          <span class="section-tip">实验功能，内部测试用。支持 .io / .ldr / .mpd / .dat，优先精细外形渲染。</span>
         </div>
-        <div class="status-strip">
-          <div class="pill-list" id="stagePills"></div>
-          <span class="hint" id="projectSummaryLine">等待运行适配。</span>
+        <div class="toolbar">
+          <input id="model3dFileInput" type="file" accept=".io,.ldr,.mpd,.dat" style="min-width: 260px" />
+          <button type="button" onclick="loadModel3dPreview()">加载 3D 预览</button>
+          <button type="button" onclick="resetModel3dView()">重置视角</button>
+          <span class="hint" id="model3dHint">上传模型文件后可在页面直接 3D 查看。</span>
+        </div>
+        <div id="model3dStage" class="viewer-stage" style="margin-top: 12px">
+          <div class="viewer-empty">等待加载 3D 模型</div>
         </div>
       </div>
+
+      <section class="card project-summary-card" id="projectSummaryCard">
+        <div class="section-title-row">
+          <h3>2. 项目基础信息</h3>
+          <span class="section-tip">文件摘要</span>
+        </div>
+        <div class="project-summary-shell">
+          <div class="project-summary-cover">
+            <div class="project-cover-badge" id="projectFileTypeBadge">Studio</div>
+            <div class="project-cover-title">文件摘要</div>
+            <div class="project-cover-note" id="projectCoverNote">当前按文件信息展示。</div>
+          </div>
+          <div class="project-summary-grid" id="projectSummaryGrid">
+            <div class="project-summary-main">
+              <div class="project-status-line">
+                <span class="analysis-status-pill" id="analysisStatusPill">等待分析</span>
+                <span class="hint" id="projectSummaryLine">上传并运行适配后，这里会告诉你当前方案能否继续生成采购建议。</span>
+              </div>
+              <div class="project-main-title" id="projectMainTitle">等待导入 Studio 清单</div>
+              <div class="project-main-meta" id="projectMainMeta">当前还没有可展示的项目基础信息。</div>
+            </div>
+            <div class="project-info-list">
+              <div class="project-info-item">
+                <span class="project-info-label">项目名称</span>
+                <span class="project-info-value" id="projectMetaName">未命名项目</span>
+              </div>
+              <div class="project-info-item">
+                <span class="project-info-label">上传时间</span>
+                <span class="project-info-value" id="projectMetaTime">等待生成</span>
+              </div>
+              <div class="project-info-item">
+                <span class="project-info-label">文件来源</span>
+                <span class="project-info-value" id="projectMetaSource">未导入文件</span>
+              </div>
+              <div class="project-info-item">
+                <span class="project-info-label">文件类型</span>
+                <span class="project-info-value" id="projectMetaType">-</span>
+              </div>
+              <div class="project-info-item">
+                <span class="project-info-label">零件总数</span>
+                <span class="project-info-value" id="projectMetaQty">0</span>
+              </div>
+              <div class="project-info-item">
+                <span class="project-info-label">零件种类数</span>
+                <span class="project-info-value" id="projectMetaTypes">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card match-overview-card" id="matchOverviewCard">
+        <div class="section-title-row">
+          <h3>3. 结果总览驾驶舱</h3>
+          <span class="section-tip">先看结论，再决定怎么处理</span>
+        </div>
+        <div class="match-overview-grid" id="matchOverviewStats">
+          <div class="overview-stat-card is-primary">
+            <div class="overview-stat-label">总零件数</div>
+            <div class="overview-stat-value" id="overviewTotalQty">0</div>
+            <div class="overview-stat-sub">全部颗粒数量</div>
+          </div>
+          <div class="overview-stat-card is-good">
+            <div class="overview-stat-label">完全匹配数</div>
+            <div class="overview-stat-value" id="overviewExactCount">0</div>
+            <div class="overview-stat-sub">可直接按高砖下单</div>
+          </div>
+          <div class="overview-stat-card is-info">
+            <div class="overview-stat-label">可替代数</div>
+            <div class="overview-stat-value" id="overviewReplaceableCount">0</div>
+            <div class="overview-stat-sub">系统已给出建议方案</div>
+          </div>
+          <div class="overview-stat-card is-danger is-key">
+            <div class="overview-stat-label">不可匹配数</div>
+            <div class="overview-stat-value" id="overviewBlockedCount">0</div>
+            <div class="overview-stat-sub">当前没有可落地方案</div>
+          </div>
+          <div class="overview-stat-card is-warning is-key">
+            <div class="overview-stat-label">待确认数</div>
+            <div class="overview-stat-value" id="overviewPendingCount">0</div>
+            <div class="overview-stat-sub">建议先人工看一眼</div>
+          </div>
+          <div class="overview-stat-card is-key">
+            <div class="overview-stat-label">预计适配率</div>
+            <div class="overview-stat-value" id="overviewAdaptRate">0%</div>
+            <div class="overview-stat-sub">按当前方案可继续推进</div>
+          </div>
+          <div class="overview-stat-card">
+            <div class="overview-stat-label">预计总价</div>
+            <div class="overview-stat-value" id="overviewEstimatedCost">¥0.00</div>
+            <div class="overview-stat-sub">按当前建议粗略估算</div>
+          </div>
+          <div class="overview-stat-card">
+            <div class="overview-stat-label">缺失件金额</div>
+            <div class="overview-stat-value" id="overviewBlockedCost">¥0.00</div>
+            <div class="overview-stat-sub">可能影响落地的部分</div>
+          </div>
+        </div>
+        <div class="result-conclusion-bar" id="resultConclusionBar">
+          <span class="result-conclusion-icon">i</span>
+          <div class="result-conclusion-copy">
+            <strong id="resultConclusionTitle">等待分析</strong>
+            <span id="resultConclusionText">等待导入 Studio 清单，导入后将显示适配结果与采购建议。</span>
+          </div>
+          <div class="result-conclusion-actions" id="resultConclusionActions">
+            <button type="button" class="priority-action" onclick="importBomFile()">上传清单</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card processing-hub-card">
+        <div class="section-title-row" style="margin-bottom: 6px">
+          <h3>4. 快捷处理入口</h3>
+          <span class="section-tip">默认先看待处理项，而不是全部零件。</span>
+        </div>
+        <div class="processing-tabs" id="processingTabs">
+          <button type="button" class="processing-tab is-active" data-processing-tab="todo">待处理</button>
+          <button type="button" class="processing-tab" data-processing-tab="high_risk">高风险</button>
+          <button type="button" class="processing-tab" data-processing-tab="replaceable">可替代</button>
+          <button type="button" class="processing-tab" data-processing-tab="all">全部结果</button>
+        </div>
+        <div class="processing-toolbar">
+          <div class="quick-filter-strip" id="resultQuickFilters">
+            <button type="button" class="quick-filter-btn is-active" data-result-filter="all">全部</button>
+            <button type="button" class="quick-filter-btn" data-result-filter="missing">只看缺失</button>
+            <button type="button" class="quick-filter-btn" data-result-filter="structural_risk">只看结构风险</button>
+            <button type="button" class="quick-filter-btn" data-result-filter="color_mismatch">只看颜色不一致</button>
+            <button type="button" class="quick-filter-btn" data-result-filter="price_heavy">只看价格影响大</button>
+            <button type="button" class="quick-filter-btn" data-result-filter="matched">只看已匹配</button>
+          </div>
+          <div class="processing-toolbar-actions">
+            <label class="focus-toggle"><input id="resultFocusTop" type="checkbox" /> 只看前 20 条关键问题</label>
+            <label class="field-label" for="resultSort">排序</label>
+            <select id="resultSort" style="min-width: 160px">
+              <option value="risk" selected>按风险</option>
+              <option value="compatibility">按适配度</option>
+              <option value="price_impact">按价格影响</option>
+              <option value="qty_desc">按数量</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card parts-workbench-card">
+        <div class="section-title-row" style="padding: 14px 16px 2px; margin-bottom: 0">
+          <h3>5. 核心零件结果列表</h3>
+          <span class="section-tip">先看状态、原因和下一步动作；详细差异放到右侧抽屉。</span>
+        </div>
+        <div class="priority-summary" id="prioritySummary">
+          <div class="priority-card">
+            <h4>建议优先处理</h4>
+            <p>运行适配后，这里会自动列出最关键的 3 到 5 个问题，帮助你快速决定先改哪里。</p>
+          </div>
+          <div class="priority-card">
+            <h4>处理建议</h4>
+            <p>优先处理缺件和高风险项，再回头处理缺色和外观兼容项，效率更高。</p>
+          </div>
+        </div>
+        <div class="workbench-toolbar">
+          <label class="field-label" for="resultSearch">搜索</label>
+          <input id="resultSearch" placeholder="搜零件号、名称、颜色或建议原因" style="min-width: 240px" />
+          <label class="field-label" for="resultImageFilter">图片状态</label>
+          <select id="resultImageFilter" style="min-width: 180px">
+            <option value="all">全部</option>
+            <option value="placeholder">只看无图占位</option>
+            <option value="printed_missing">只看无图且印刷件</option>
+            <option value="rebrickable_exact">只看精确图</option>
+            <option value="rebrickable_base">只看基础模具图</option>
+          </select>
+          <span class="hint" id="resultImageFilterHint">用于快速找出还没有准确原零件图的条目。</span>
+        </div>
+        <div class="pager-bar">
+          <div class="pager-actions">
+            <label class="field-label" for="resultPageSize">每页显示</label>
+            <select id="resultPageSize" style="min-width: 100px">
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+          <div class="pager-actions">
+            <span class="hint" id="resultPageSummary">等待运行适配。</span>
+            <button type="button" onclick="changeResultPage(-1)">上一页</button>
+            <button type="button" onclick="changeResultPage(1)">下一页</button>
+          </div>
+        </div>
+        <div class="result-view-summary" id="resultViewSummary">
+          <strong id="resultViewSummaryTitle">当前优先展示待处理项</strong>
+          <span id="resultViewSummaryText">系统会先把需要你处理的零件排在前面，减少长列表带来的阅读压力。</span>
+        </div>
+        <div id="resultRows" class="workbench-result-list">
+          <div class="result-empty">运行适配后显示结果。</div>
+        </div>
+      </section>
 
       <div class="card" id="convertSectionCard">
+        <div class="convert-digest" id="convertDigest">
+          <div class="convert-digest-card">
+            <h4>高砖原始判断</h4>
+            <p>这里保留高砖的原始返回和本地整理结果，方便你追溯系统是怎么得出当前建议的。</p>
+          </div>
+          <div class="convert-digest-card">
+            <h4>什么时候要看</h4>
+            <p>只有当你想核对原始识别、对照导出给设计师的文件，或排查单条异常时，再展开这里。</p>
+          </div>
+        </div>
         <details class="fold-card" id="convertSectionFold">
           <summary class="fold-summary">
             <div class="fold-summary-copy">
-              <h3>2.1 高砖原始结果（已帮你整理）</h3>
-              <div class="hint">默认收起。这里会把高砖的原始结果整理得更容易看，方便你快速判断哪些地方要改。</div>
+              <h3>5.1 高砖原始判断（可选）</h3>
+              <div class="hint">默认收起。主页面已经帮你整理成决策结果，这里只在需要追溯时查看。</div>
             </div>
             <span class="fold-toggle"></span>
           </summary>
@@ -1607,80 +3403,44 @@
         </details>
       </div>
 
-      <div class="card table-wrap">
+      <section class="card risk-feed-card">
         <div class="section-title-row" style="padding: 14px 16px 2px; margin-bottom: 0">
-          <h3>3. 推荐修改清单</h3>
-          <span class="section-tip">这里最重要，优先看这里就够了</span>
+          <h3>5.2 高风险 / 待确认提醒</h3>
+          <span class="section-tip">这里单独列出系统不建议你直接忽略的条目。</span>
         </div>
-        <div class="toolbar" style="margin: 12px 0">
-          <label class="field-label" for="resultSearch">搜索</label>
-          <input id="resultSearch" placeholder="搜零件号/名称/颜色" style="min-width: 220px" />
-          <label class="field-label" for="resultImageFilter">图片状态筛选</label>
-          <select id="resultImageFilter" style="min-width: 180px">
-            <option value="all">全部</option>
-            <option value="placeholder">只看无图占位</option>
-            <option value="printed_missing">只看无图且印刷件</option>
-            <option value="rebrickable_exact">只看精确图</option>
-            <option value="rebrickable_base">只看基础模具图</option>
-          </select>
-          <span class="hint" id="resultImageFilterHint">用于快速找出还没有准确原零件图的条目。</span>
-        </div>
-        <div class="pager-bar">
-          <div class="pager-actions">
-            <label class="field-label" for="resultPageSize">每页显示</label>
-            <select id="resultPageSize" style="min-width: 100px">
-              <option value="30">30</option>
-              <option value="50" selected>50</option>
-              <option value="100">100</option>
-            </select>
+        <div class="risk-summary-bar" id="riskSummaryBar">
+          <div class="risk-summary-copy">
+            <strong id="riskSummaryTitle">当前暂无高风险问题</strong>
+            <span id="riskSummaryText">如果后面出现关键缺件、结构风险或待确认项，这里会先集中提醒你。</span>
           </div>
-          <div class="pager-actions">
-            <span class="hint" id="resultPageSummary">等待运行适配。</span>
-            <button type="button" onclick="changeResultPage(-1)">上一页</button>
-            <button type="button" onclick="changeResultPage(1)">下一页</button>
+          <div class="risk-summary-actions">
+            <button type="button" class="secondary-btn" onclick="jumpToHighRisk()">查看全部高风险项</button>
+            <button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>
+            <button type="button" class="secondary-btn" onclick="contactManualHelp()">联系人工协助</button>
           </div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>原零件</th>
-              <th>原色</th>
-              <th>数量</th>
-              <th>替换后零件</th>
-              <th>替换后颜色</th>
-              <th>阶段</th>
-              <th>风险</th>
-              <th>审核</th>
-              <th>说明</th>
-            </tr>
-          </thead>
-          <tbody id="resultRows">
-            <tr><td colspan="9" class="muted">运行适配后显示结果。</td></tr>
-          </tbody>
-        </table>
-      </div>
+        <div id="reviewRows" class="review-alert-list">
+          <div class="review-empty">暂无待确认项目。</div>
+        </div>
+      </section>
 
-      <div class="card table-wrap">
-        <div class="section-title-row" style="padding: 14px 16px 2px; margin-bottom: 0">
-          <h3>4. 需要你确认的部分</h3>
-          <span class="section-tip">只保留系统拿不准、需要你拍板的条目</span>
+      <section class="action-footer" id="actionFooter">
+        <div class="action-footer-head">
+          <div>
+            <h3 style="margin: 0; color: #173b86">6. 下一步怎么做</h3>
+            <div class="hint" id="actionFooterHint" style="margin-top: 6px">系统会根据当前结果，优先推荐最合适的下一步动作。</div>
+          </div>
+          <span class="analysis-status-pill" id="actionFooterStatus">等待结果</span>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>原零件</th>
-              <th>系统建议</th>
-              <th>风险</th>
-              <th>原因</th>
-              <th>审核状态</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="reviewRows">
-            <tr><td colspan="6" class="muted">暂无待审核项目。</td></tr>
-          </tbody>
-        </table>
-      </div>
+        <div class="action-footer-actions" id="actionFooterActions">
+          <button type="button" onclick="downloadMatchResultCsv()">导出匹配结果</button>
+          <button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>
+          <button type="button" class="secondary-btn" onclick="downloadProcurementSuggestionCsv()">导出采购建议</button>
+          <button type="button" onclick="downloadCsv()">生成采购清单</button>
+          <button type="button" class="secondary-btn" onclick="saveCurrentPlan()">保存方案</button>
+          <button type="button" class="secondary-btn" onclick="contactManualHelp()">联系人工协助</button>
+        </div>
+      </section>
 
         </div>
         <div class="secondary-stack">
@@ -1890,6 +3650,28 @@
         </div>
       </div>
 
+      <div id="replacementDrawerMask" class="replacement-drawer-mask" onclick="closeReplacementDrawer(event)"></div>
+      <aside id="replacementDrawer" class="replacement-drawer" aria-hidden="true">
+        <div class="replacement-drawer-head">
+          <div>
+            <h3 class="modal-title" id="replacementDrawerTitle">替代方案详情</h3>
+            <div class="hint" id="replacementDrawerSubtitle">点击结果行中的“查看方案”查看细节。</div>
+          </div>
+          <button class="modal-close" type="button" onclick="closeReplacementDrawer()">关闭</button>
+        </div>
+        <div class="replacement-drawer-body" id="replacementDrawerBody">
+          <div class="drawer-block">
+            <h4>等待查看</h4>
+            <div class="hint">点开任意一条结果后，这里会展示原始零件、推荐替代件、兼容等级、价格和风险说明。</div>
+          </div>
+        </div>
+        <div class="drawer-foot">
+          <button type="button" onclick="confirmReplacementPlan()">确认替换</button>
+          <button type="button" onclick="keepOriginalLegoPart()">保留乐高件</button>
+          <button type="button" class="secondary-btn" onclick="markManualReview()">标记人工处理</button>
+        </div>
+      </aside>
+
       <div id="detailModal" class="modal-backdrop" onclick="closeDetailModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
           <div class="modal-head">
@@ -1938,8 +3720,195 @@
       let currentConvertPage = 1
       let currentConvertReport = null
       let pendingBomAction = ''
+      let model3dState = null
+      let currentResultQuickFilter = 'all'
+      let currentResultTab = 'todo'
+      let currentReplacementItem = null
+      let publicFullWorkspaceExpanded = false
+      const ADMIN_SESSION_STORAGE_KEY = 'kwc_admin_session_token_v1'
       const GOBRICKS_CFG_KEY = 'kwc_part_adapter_gobricks_cfg_v1'
       let statusBannerTimer = null
+
+      function getStoredAdminSession() {
+        try {
+          return String(localStorage.getItem(ADMIN_SESSION_STORAGE_KEY) || '').trim()
+        } catch (err) {
+          return ''
+        }
+      }
+
+      function formatDateTime(value) {
+        if (!value) {
+          return '等待生成'
+        }
+        const date = new Date(value)
+        if (Number.isNaN(date.getTime())) {
+          return String(value)
+        }
+        return date.toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      }
+
+      function getResultDisplayStatus(item) {
+        const safe = item && typeof item === 'object' ? item : {}
+        const stage = String(safe.stage || '')
+        const risk = String(safe.risk || '').toUpperCase()
+        const note = String(safe.note || '')
+        if (
+          risk === 'D' ||
+          stage === 'manual_required' ||
+          note.includes('缺零件') ||
+          note.includes('不售卖') ||
+          note.includes('限购')
+        ) {
+          return { key: 'blocked', label: '不可匹配', tone: 'is-blocked' }
+        }
+        if (
+          risk === 'C' ||
+          stage === 'manual_color' ||
+          note.includes('库存不足') ||
+          note.includes('存在连接风险')
+        ) {
+          return { key: 'pending', label: '待确认', tone: 'is-pending' }
+        }
+        if (
+          ['near_color', 'smart_color_match', 'indexed_candidate', 'substitute', 'printed_fallback', 'blocked_by_policy'].includes(stage) ||
+          String(safe.resolved_part_no || '').trim() ||
+          note.includes('缺颜色') ||
+          note.includes('印刷')
+        ) {
+          return { key: 'replaceable', label: '可替代', tone: 'is-replaceable' }
+        }
+        return { key: 'exact', label: '完全匹配', tone: 'is-exact' }
+      }
+
+      function getCompatibilityLevel(item) {
+        const safe = item && typeof item === 'object' ? item : {}
+        const risk = String(safe.risk || '').toUpperCase()
+        const stage = String(safe.stage || '')
+        if (risk === 'D' || stage === 'manual_required') {
+          return '不建议替换'
+        }
+        if (risk === 'C' || stage === 'blocked_by_policy') {
+          return '仅供参考'
+        }
+        if (stage === 'printed_fallback' || stage === 'substitute') {
+          return '外观兼容'
+        }
+        if (risk === 'B' || ['manual_color', 'near_color', 'smart_color_match', 'indexed_candidate'].includes(stage)) {
+          return '基本兼容'
+        }
+        return '完全兼容'
+      }
+
+      function getReasonLabel(item) {
+        const safe = item && typeof item === 'object' ? item : {}
+        const note = String(safe.note || '')
+        const stage = String(safe.stage || '')
+        if (note.includes('缺零件') || note.includes('不售卖') || note.includes('限购') || stage === 'manual_required') {
+          return '无对应零件'
+        }
+        if (note.includes('库存不足')) {
+          return '库存不足'
+        }
+        if (note.includes('缺颜色') || ['manual_color', 'near_color', 'smart_color_match'].includes(stage)) {
+          return '颜色不同，但不影响结构'
+        }
+        if (String(safe.tag || '').toLowerCase() === 'printed' || stage === 'printed_fallback' || note.includes('印刷')) {
+          return '印刷件需要降级处理'
+        }
+        if (note.includes('结构') || note.includes('连接风险') || stage === 'blocked_by_policy') {
+          return '该零件影响关键连接'
+        }
+        if (['indexed_candidate', 'substitute'].includes(stage)) {
+          return '结构接近，可替换'
+        }
+        return '高砖已有同款'
+      }
+
+      function getRecommendedAction(item) {
+        const status = getResultDisplayStatus(item)
+        if (status.key === 'blocked') {
+          return '建议先人工处理'
+        }
+        if (status.key === 'pending') {
+          return '建议先确认后再下单'
+        }
+        if (status.key === 'replaceable') {
+          return '查看替代方案'
+        }
+        return '可直接加入采购'
+      }
+
+      function getPriceImpactScore(item) {
+        const lineCost = Number(item && item.line_cost ? item.line_cost : 0)
+        const unit = Number(item && item.unit_cost ? item.unit_cost : 0)
+        return lineCost || unit || 0
+      }
+
+      function getCompatibilityScore(item) {
+        const level = getCompatibilityLevel(item)
+        if (level === '完全兼容') return 100
+        if (level === '基本兼容') return 80
+        if (level === '外观兼容') return 60
+        if (level === '仅供参考') return 35
+        return 10
+      }
+
+      function buildReplacementDetail(item) {
+        const safe = item && typeof item === 'object' ? item : {}
+        const status = getResultDisplayStatus(safe)
+        return {
+          status,
+          compatibility: getCompatibilityLevel(safe),
+          reasonLabel: getReasonLabel(safe),
+          actionLabel: getRecommendedAction(safe),
+          sourceLabel:
+            (safe.optimizer && safe.optimizer.reason_text) ||
+            safe.optimizer_reason ||
+            safe.note ||
+            '系统已按识别成功率、库存和颜色接近度综合排序。',
+        }
+      }
+
+      function getOverviewStats(job) {
+        const results = Array.isArray(job && job.results) ? job.results : []
+        let exactCount = 0
+        let replaceableCount = 0
+        let blockedCount = 0
+        let pendingCount = 0
+        let blockedCost = 0
+        results.forEach((item) => {
+          const status = getResultDisplayStatus(item)
+          if (status.key === 'exact') exactCount += 1
+          if (status.key === 'replaceable') replaceableCount += 1
+          if (status.key === 'blocked') {
+            blockedCount += 1
+            blockedCost += getPriceImpactScore(item)
+          }
+          if (status.key === 'pending') pendingCount += 1
+        })
+        const summary = (job && job.summary) || {}
+        const estimatedCost = Number(summary.estimated_cost_total || 0)
+        const totalTypes = Number(summary.total_types || results.length || 0)
+        const adaptRate = totalTypes ? ((exactCount + replaceableCount) / totalTypes) * 100 : Number(summary.producible_rate || 0)
+        return {
+          totalQty: Number(summary.total_qty || 0),
+          totalTypes,
+          exactCount,
+          replaceableCount,
+          blockedCount,
+          pendingCount,
+          adaptRate,
+          estimatedCost,
+          blockedCost,
+        }
+      }
 
       function getCfg() {
         const baseUrl = String(document.getElementById('baseUrl').value || '').trim().replace(/\/$/, '')
@@ -1948,20 +3917,27 @@
           baseUrl: baseUrl || fallbackBaseUrl || 'http://127.0.0.1:8002',
           adminToken: String(document.getElementById('adminToken').value || '').trim(),
           adminRole: String(document.getElementById('adminRole').value || 'superadmin').trim() || 'superadmin',
+          adminSession: getStoredAdminSession(),
           adminOperator: encodeURIComponent(String(document.getElementById('adminOperator').value || '零件适配').trim() || '零件适配')
         }
+      }
+
+      function getPartAdapterApiPrefix() {
+        return isPublicToolMode() ? '/api/tools/part-adapter' : '/api/admin/part-adapter'
       }
 
       function buildHeaders(withJson = false) {
         const cfg = getCfg()
         const headers = {}
-        if (cfg.adminToken) {
+        if (!isPublicToolMode() && cfg.adminSession) {
+          headers['X-Admin-Session'] = cfg.adminSession
+        } else if (!isPublicToolMode() && cfg.adminToken) {
           headers['X-Admin-Token'] = cfg.adminToken
         }
-        if (cfg.adminRole) {
+        if (!isPublicToolMode() && cfg.adminRole) {
           headers['X-Admin-Role'] = cfg.adminRole
         }
-        if (cfg.adminOperator) {
+        if (!isPublicToolMode() && cfg.adminOperator) {
           headers['X-Admin-Operator'] = cfg.adminOperator
         }
         if (withJson) {
@@ -1989,6 +3965,13 @@
         document.getElementById('bomImportHint').textContent = `已选择 ${file.name}，${pendingBomAction === 'convert' ? '将继续执行直连高砖转换。' : '将继续执行导入。'}`
         const action = pendingBomAction
         pendingBomAction = ''
+        if (action === 'public_quick') {
+          await importBomFile()
+          await convertWithGobricks()
+          await runAdapter()
+          scrollToPublicTasks()
+          return
+        }
         if (action === 'convert') {
           await convertWithGobricks()
           return
@@ -2056,12 +4039,12 @@
           Number(last7.convert_gobricks || 0) +
           Number(last7.analyze || 0) +
           Number(last7.exports || 0)
-        document.getElementById('analyticsTodayViews').textContent = String(Number(today.page_views || 0))
+        document.getElementById('analyticsTodayViews').textContent = String(Number(today.public_home_views || 0))
+        document.getElementById('analyticsPublicResultsViews').textContent = String(Number(today.public_results_views || 0))
         document.getElementById('analyticsTodayUsers').textContent = String(Number(today.unique_visitors || 0))
-        document.getElementById('analyticsTodayUses').textContent = String(todayUses)
         document.getElementById('analyticsLast7Uses').textContent = String(last7Uses)
         document.getElementById('analyticsSummaryHint').textContent =
-          `今日导入 ${Number(today.import_bom || 0)} 次；直连高砖 ${Number(today.convert_gobricks || 0)} 次；运行适配 ${Number(today.analyze || 0)} 次；导出 ${Number(today.exports || 0)} 次。`
+          `今日公开首页 ${Number(today.public_home_views || 0)} 次，结果页 ${Number(today.public_results_views || 0)} 次，后台 ${Number(today.admin_views || 0)} 次；导入 ${Number(today.import_bom || 0)} 次，运行适配 ${Number(today.analyze || 0)} 次。`
         const recent = Array.isArray(safe.recent) ? safe.recent : []
         const host = document.getElementById('analyticsRecentList')
         if (!recent.length) {
@@ -2082,6 +4065,9 @@
       }
 
       async function trackAnalyticsEvent(eventType, sourceName = '') {
+        if (isPublicToolMode()) {
+          return
+        }
         try {
           await apiPost('/api/admin/part-adapter/analytics/event', {
             event_type: String(eventType || '').trim(),
@@ -2137,7 +4123,7 @@
         const cfg = getCfg()
         const form = new FormData()
         form.append('file', file)
-        const res = await fetchWithTimeout(`${cfg.baseUrl}/api/admin/part-adapter/import-bom`, {
+        const res = await fetchWithTimeout(`${cfg.baseUrl}${getPartAdapterApiPrefix()}/import-bom`, {
           method: 'POST',
           headers: buildHeaders(false),
           body: form
@@ -2151,6 +4137,28 @@
         }
         if (!res.ok) {
           throw new Error(body.detail || '上传失败')
+        }
+        return body
+      }
+
+      async function apiUploadPreviewModel(file) {
+        const cfg = getCfg()
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetchWithTimeout(`${cfg.baseUrl}${getPartAdapterApiPrefix()}/preview-model`, {
+          method: 'POST',
+          headers: buildHeaders(false),
+          body: form
+        }, 45000, '模型解析')
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '模型解析失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '模型解析失败')
         }
         return body
       }
@@ -2329,7 +4337,7 @@
         form.append('file', file)
         form.append('auth_token', authToken)
         form.append('base_url', baseUrl)
-        const res = await fetchWithTimeout(`${cfg.baseUrl}/api/admin/part-adapter/convert-gobricks`, {
+        const res = await fetchWithTimeout(`${cfg.baseUrl}${getPartAdapterApiPrefix()}/convert-gobricks`, {
           method: 'POST',
           headers: buildHeaders(false),
           body: form
@@ -2414,6 +4422,10 @@
       function setStatus(message, kind) {
         const text = String(message || '').trim()
         document.getElementById('status').textContent = text
+        const publicStatus = document.getElementById('publicLiteStatus')
+        if (publicStatus) {
+          publicStatus.textContent = text || '等待操作'
+        }
         if (statusBannerTimer) {
           window.clearTimeout(statusBannerTimer)
           statusBannerTimer = null
@@ -2435,12 +4447,181 @@
         return window.location.pathname === '/tools/part-adapter'
       }
 
+      function setPublicWorkspaceVisibility() {
+        const liteShell = document.getElementById('publicLiteShell')
+        const fullShell = document.getElementById('fullWorkspaceShell')
+        const publicMode = isPublicToolMode()
+        if (liteShell) {
+          liteShell.classList.toggle('active', publicMode)
+        }
+        if (fullShell) {
+          fullShell.classList.toggle('public-hidden', publicMode && !publicFullWorkspaceExpanded)
+        }
+      }
+
+      function togglePublicPastePanel(forceOpen) {
+        const panel = document.getElementById('publicPastePanel')
+        if (!panel) {
+          return
+        }
+        const open = typeof forceOpen === 'boolean' ? forceOpen : !panel.classList.contains('open')
+        panel.classList.toggle('open', open)
+        if (open) {
+          document.getElementById('publicBomPaste')?.focus()
+        }
+      }
+
+      function showFullWorkspace() {
+        publicFullWorkspaceExpanded = true
+        setPublicWorkspaceVisibility()
+        document.getElementById('fullWorkspaceShell')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+
+      function scrollToPublicTasks() {
+        document.getElementById('publicLiteTaskSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+
+      function startPublicQuickFlow() {
+        togglePublicPastePanel(false)
+        requestBomFileSelection('public_quick')
+      }
+
+      async function analyzePastedBom() {
+        const text = String(document.getElementById('publicBomPaste')?.value || '').trim()
+        if (!text) {
+          alert('请先粘贴零件清单。')
+          return
+        }
+        document.getElementById('bomInput').value = text
+        document.getElementById('sourceName').value = 'pasted-bom.txt'
+        syncSourceDisplay()
+        collapseBomInput()
+        await runAdapter()
+        scrollToPublicTasks()
+      }
+
+      function getPublicTaskAction(item) {
+        const status = getResultDisplayStatus(item)
+        if (status.key === 'blocked') {
+          return {
+            label: '加入缺失清单',
+            action: 'downloadMissingOnlyCsv()'
+          }
+        }
+        if (status.key === 'replaceable') {
+          return {
+            label: '查看替代方案',
+            action: `openReplacementDrawerByLine(${Number(item.line_no || 0)})`
+          }
+        }
+        return {
+          label: '查看原因',
+          action: `openReplacementDrawerByLine(${Number(item.line_no || 0)})`
+        }
+      }
+
+      function buildPublicTaskItem(item) {
+        const status = getResultDisplayStatus(item)
+        const reason = getReasonLabel(item)
+        const action = getPublicTaskAction(item)
+        return `<div class="public-lite-task-item">
+          <div class="public-lite-task-copy">
+            <div class="public-lite-task-main">
+              <span class="public-lite-task-name">${escapeHtml(item.name || item.part_no || '-')}</span>
+              <span class="status-chip is-${escapeHtml(status.key)}">${escapeHtml(status.label)}</span>
+            </div>
+            <div class="public-lite-task-code">${escapeHtml(item.part_no || '-')}</div>
+            <div class="public-lite-task-reason">${escapeHtml(reason)}</div>
+          </div>
+          <button type="button" class="secondary-btn" onclick="${action.action}">${escapeHtml(action.label)}</button>
+        </div>`
+      }
+
+      function renderPublicLite(job) {
+        const stats = getOverviewStats(job || {})
+        const totalEl = document.getElementById('publicLiteTotalQty')
+        const exactEl = document.getElementById('publicLiteExactCount')
+        const replaceEl = document.getElementById('publicLiteReplaceableCount')
+        const blockedEl = document.getElementById('publicLiteBlockedCount')
+        const conclusion = document.getElementById('publicLiteConclusion')
+        const conclusionTitle = document.getElementById('publicLiteConclusionTitle')
+        const conclusionText = document.getElementById('publicLiteConclusionText')
+        const taskList = document.getElementById('publicLiteTaskList')
+        const taskHint = document.getElementById('publicLiteTaskHint')
+        const actions = document.getElementById('publicLiteActions')
+        if (!totalEl || !taskList || !actions) {
+          return
+        }
+        totalEl.textContent = stats.totalQty || 0
+        exactEl.textContent = stats.exactCount || 0
+        replaceEl.textContent = stats.replaceableCount || 0
+        blockedEl.textContent = stats.blockedCount || 0
+
+        let tone = ''
+        let title = '等待导入清单'
+        let text = '导入后，这里会直接告诉你这套设计能不能继续推进。'
+        let primary = '<button type="button" class="primary-action" onclick="scrollToPublicTasks()">查看待处理零件</button>'
+        let secondaryA = '<button type="button" class="secondary-btn" onclick="downloadProcurementSuggestionCsv()">生成采购建议</button>'
+        let secondaryB = '<button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>'
+
+        if (stats.totalTypes) {
+          if (stats.blockedCount >= Math.max(5, Math.ceil(stats.totalTypes * 0.12))) {
+            tone = 'is-danger'
+            title = `当前缺失较多，建议先导出缺失清单`
+            text = `这单里有 ${stats.blockedCount} 个零件暂时缺失，先处理缺失项会更快判断能不能继续做。`
+            primary = '<button type="button" class="primary-action" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>'
+            secondaryA = '<button type="button" class="secondary-btn" onclick="scrollToPublicTasks()">查看待处理零件</button>'
+            secondaryB = '<button type="button" class="secondary-btn" onclick="showFullWorkspace()">查看完整结果</button>'
+          } else if (stats.pendingCount + stats.replaceableCount >= Math.max(4, Math.ceil(stats.totalTypes * 0.18))) {
+            tone = 'is-warn'
+            title = `有 ${stats.pendingCount + stats.replaceableCount} 个零件需要优先处理`
+            text = '系统已经把最值得先看的待处理零件排在下面，建议先查看替代方案再决定是否继续。'
+            primary = '<button type="button" class="primary-action" onclick="scrollToPublicTasks()">查看待处理零件</button>'
+            secondaryA = '<button type="button" class="secondary-btn" onclick="downloadProcurementSuggestionCsv()">生成采购建议</button>'
+            secondaryB = '<button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>'
+          } else {
+            tone = 'is-good'
+            title = '大部分零件已可匹配，可继续生成采购建议'
+            text = '当前主要是可直接匹配或可替代项，已经具备继续整理采购方案的基础。'
+            primary = '<button type="button" class="primary-action" onclick="downloadProcurementSuggestionCsv()">生成采购建议</button>'
+            secondaryA = '<button type="button" class="secondary-btn" onclick="scrollToPublicTasks()">查看待处理零件</button>'
+            secondaryB = '<button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>'
+          }
+        }
+
+        conclusion.className = `public-lite-conclusion ${tone}`.trim()
+        conclusionTitle.textContent = title
+        conclusionText.textContent = text
+        actions.innerHTML = `${primary}${secondaryA}${secondaryB}`
+
+        const resultList = Array.isArray(job && job.results) ? sortResultsByPriority(orderDisplayItems(job.results)) : []
+        const taskItems = resultList.filter((item) => getResultDisplayStatus(item).key !== 'exact').slice(0, 10)
+        taskHint.textContent = taskItems.length
+          ? `系统已先帮你整理出最需要处理的 ${taskItems.length} 条。`
+          : '如果出现待处理零件，这里只会优先展示最关键的一小部分。'
+        taskList.innerHTML = taskItems.length
+          ? taskItems.map((item) => buildPublicTaskItem(item)).join('')
+          : '<div class="result-empty">导入并分析后，这里会只保留最关键的待处理零件。</div>'
+      }
+
       function applyPublicMode() {
         const enabled = isPublicToolMode()
         document.querySelectorAll('[data-public-block]').forEach((node) => {
           node.classList.toggle('public-hidden', enabled)
         })
+        const heroTitle = document.getElementById('heroTitle')
+        const heroCopy = document.getElementById('heroCopy')
+        const guideTitle = document.getElementById('guideTitle')
+        const guideCopy = document.getElementById('guideCopy')
+        const primaryActionUpload = document.getElementById('primaryActionUpload')
+        const primaryActionConvert = document.getElementById('primaryActionConvert')
+        const primaryActionAnalyze = document.getElementById('primaryActionAnalyze')
+        const moreActionsButton = document.getElementById('moreActionsButton')
+        const moreActionExport = document.getElementById('moreActionExport')
+        const moreActionRefresh = document.getElementById('moreActionRefresh')
+        const moreActionDemo = document.getElementById('moreActionDemo')
         if (enabled) {
+          publicFullWorkspaceExpanded = false
           const workspaceGrid = document.querySelector('.workspace-grid')
           if (workspaceGrid) {
             workspaceGrid.style.gridTemplateColumns = '1fr'
@@ -2462,10 +4643,34 @@
             simpleModeInput.checked = true
             simpleModeInput.disabled = true
           }
+          const resultFocusTop = document.getElementById('resultFocusTop')
+          if (resultFocusTop) {
+            resultFocusTop.checked = true
+          }
           const baseUrlInput = document.getElementById('baseUrl')
           if (baseUrlInput) {
             baseUrlInput.value = window.location.origin
           }
+          if (heroTitle) {
+            heroTitle.textContent = '先知道这套设计能不能继续做'
+          }
+          if (heroCopy) {
+            heroCopy.textContent =
+              '上传后先看结论：哪些能直接用、哪些需要替换、哪些要先人工确认。'
+          }
+          if (guideTitle) {
+            guideTitle.textContent = '三步就够了'
+          }
+          if (guideCopy) {
+            guideCopy.textContent = '先上传，再看高砖判断，最后只看待处理项。'
+          }
+          if (primaryActionUpload) primaryActionUpload.textContent = '1. 上传清单'
+          if (primaryActionConvert) primaryActionConvert.textContent = '2. 获取高砖判断'
+          if (primaryActionAnalyze) primaryActionAnalyze.textContent = '3. 查看修改建议'
+          if (moreActionsButton) moreActionsButton.textContent = '更多'
+          if (moreActionExport) moreActionExport.textContent = '导出生产清单'
+          if (moreActionRefresh) moreActionRefresh.textContent = '刷新结果'
+          if (moreActionDemo) moreActionDemo.textContent = '载入示例清单'
         } else {
           const workspaceGrid = document.querySelector('.workspace-grid')
           if (workspaceGrid) {
@@ -2487,7 +4692,32 @@
           if (simpleModeInput) {
             simpleModeInput.disabled = false
           }
+          const resultFocusTop = document.getElementById('resultFocusTop')
+          if (resultFocusTop && !currentJob) {
+            resultFocusTop.checked = true
+          }
+          if (heroTitle) {
+            heroTitle.textContent = '先看结论，再决定怎么改'
+          }
+          if (heroCopy) {
+            heroCopy.textContent =
+              '先看这单能不能继续推进、卡点在哪，再决定是换色、换件还是人工确认。'
+          }
+          if (guideTitle) {
+            guideTitle.textContent = '怎么用最快'
+          }
+          if (guideCopy) {
+            guideCopy.textContent = '先上传，再看高砖判断，最后只处理真正需要修改的部分。'
+          }
+          if (primaryActionUpload) primaryActionUpload.textContent = '1. 上传清单'
+          if (primaryActionConvert) primaryActionConvert.textContent = '2. 获取高砖结果'
+          if (primaryActionAnalyze) primaryActionAnalyze.textContent = '3. 生成替换建议'
+          if (moreActionsButton) moreActionsButton.textContent = '更多操作'
+          if (moreActionExport) moreActionExport.textContent = '导出生产清单'
+          if (moreActionRefresh) moreActionRefresh.textContent = '刷新记录'
+          if (moreActionDemo) moreActionDemo.textContent = '载入示例清单'
         }
+        setPublicWorkspaceVisibility()
         applySimpleMode()
       }
 
@@ -2551,16 +4781,35 @@
 
       function loadDemoBom() {
         document.getElementById('bomInput').value = demoBom
+        const fold = document.getElementById('bomInputFold')
+        if (fold && !fold.open) {
+          fold.open = true
+        }
+      }
+
+      function collapseBomInput() {
+        const fold = document.getElementById('bomInputFold')
+        if (!fold) {
+          return
+        }
+        fold.open = false
       }
 
       function syncStrategyPills() {
         const colorMode = document.getElementById('colorMode').value
+        const optimizerMode = document.getElementById('optimizerMode').value
         const modeMap = {
           safe: '保守',
           balanced: '平衡',
           aggressive: '激进'
         }
+        const optimizerMap = {
+          reliability: '识别成功率优先',
+          cost: '成本优先',
+          appearance: '外观一致优先'
+        }
         document.getElementById('modePill').textContent = `颜色策略：${modeMap[colorMode] || '平衡'}`
+        document.getElementById('optimizerPill').textContent = `优化目标：${optimizerMap[optimizerMode] || '识别成功率优先'}`
         document.getElementById('displayPill').textContent = `展示件替代：${document.getElementById('allowDisplaySub').checked ? '开启' : '关闭'}`
         document.getElementById('structurePill').textContent = `结构件替代：${document.getElementById('allowStructuralSub').checked ? '开启' : '关闭'}`
         document.getElementById('jobPill').textContent = `当前记录：${currentJob ? currentJob.job_id : '未生成'}`
@@ -2582,6 +4831,38 @@
         return `<span class="risk-pill-${safe.toLowerCase()}">${safe}</span>`
       }
 
+      function getOptimizerSourceLabel(source) {
+        const safe = String(source || '').trim()
+        const map = {
+          exact_combo: '历史精确映射',
+          rule_exact: '本地规则',
+          history_exact: '历史候选',
+          smart_color: '近色候选',
+          index: '高砖在售候选',
+          printed_fallback: '印刷件降级',
+          substitution_display: '展示件替代',
+          substitution_structural: '结构件替代',
+          blocked: '策略拦截',
+          manual: '人工处理',
+        }
+        return map[safe] || safe || '-'
+      }
+
+      function buildOptimizerCell(item) {
+        const optimizer = item && typeof item.optimizer === 'object' ? item.optimizer : {}
+        const score = Number(optimizer.total_score || 0)
+        const source = getOptimizerSourceLabel(optimizer.candidate_source || item.candidate_source || '')
+        const unitCost = Number(item.unit_cost || 0)
+        const lineCost = Number(item.line_cost || 0)
+        const reason = String(optimizer.reason_text || '').trim()
+        const costText = unitCost > 0 ? `¥${unitCost.toFixed(2)} / 合计 ¥${lineCost.toFixed(2)}` : '成本待确认'
+        return `<div class="stack" style="gap:4px;">
+          <div><strong>${score ? score.toFixed(1) : '-'}</strong> · ${escapeHtml(source)}</div>
+          <div class="note-muted">${escapeHtml(costText)}</div>
+          ${reason ? `<div class="note-muted">${escapeHtml(reason)}</div>` : ''}
+        </div>`
+      }
+
       function escapeHtml(value) {
         return String(value || '')
           .replaceAll('&', '&amp;')
@@ -2589,6 +4870,428 @@
           .replaceAll('>', '&gt;')
           .replaceAll('"', '&quot;')
           .replaceAll("'", '&#39;')
+      }
+
+      const ldrawColorHex = {
+        '0': '#05131d',
+        '1': '#0055bf',
+        '2': '#237841',
+        '4': '#c91a09',
+        '5': '#c870a0',
+        '6': '#583927',
+        '7': '#9ba19d',
+        '8': '#6d6e5c',
+        '9': '#b4d2e3',
+        '10': '#4b9f4a',
+        '11': '#55a5af',
+        '12': '#f2705e',
+        '13': '#fc97ac',
+        '14': '#f2cd37',
+        '15': '#ffffff',
+        '16': '#9ba19d',
+        '19': '#9c95c7',
+        '22': '#81007b',
+        '25': '#fe8a18',
+        '26': '#923978',
+        '27': '#bbd9fb',
+        '28': '#958a73',
+        '29': '#e4adc8',
+        '68': '#352100',
+        '70': '#582a12',
+        '71': '#a0a5a9',
+        '72': '#6c6e68',
+        '73': '#0a3463',
+        '74': '#5b5d69',
+        '84': '#aa7f2e',
+        '85': '#af4d0b',
+        '86': '#1b2a34',
+        '89': '#6a2d89',
+        '110': '#6d6e5c',
+        '115': '#b0a06f',
+        '120': '#d9c285',
+        '151': '#a95500',
+        '179': '#898788',
+        '183': '#f2f3f2',
+        '191': '#f8bb3d',
+        '212': '#86c1e1',
+        '216': '#b3d7d1',
+        '226': '#fff03a',
+        '272': '#19325a',
+        '288': '#184632',
+        '308': '#352100',
+        '320': '#720e0f',
+        '321': '#469bc3',
+        '322': '#68bcc5',
+        '323': '#d3f2ea',
+        '326': '#e2f99a',
+        '330': '#77774e',
+        '378': '#a5a9b4',
+        '379': '#6c6e68'
+      }
+
+      function getLdrawColorHex(code) {
+        const safe = String(code == null ? '' : code).trim()
+        if (!safe) return '#9ba19d'
+        return ldrawColorHex[safe] || '#9ba19d'
+      }
+
+      function setModel3dHint(text) {
+        const el = document.getElementById('model3dHint')
+        if (el) {
+          el.textContent = String(text || '')
+        }
+      }
+
+      function ensureThreeImportMap() {
+        if (document.getElementById('threeImportMap')) {
+          return
+        }
+        const map = document.createElement('script')
+        map.id = 'threeImportMap'
+        map.type = 'importmap'
+        map.textContent = JSON.stringify({
+          imports: {
+            three: 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js'
+          }
+        })
+        document.head.appendChild(map)
+      }
+
+      async function ensureModel3dViewer() {
+        if (model3dState) {
+          return model3dState
+        }
+        ensureThreeImportMap()
+        const stage = document.getElementById('model3dStage')
+        if (!stage) {
+          throw new Error('未找到 3D 预览容器')
+        }
+        const [THREE, controlsMod, ldrawMod] = await Promise.all([
+          import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js'),
+          import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js'),
+          import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/LDrawLoader.js')
+        ])
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+        renderer.outputColorSpace = THREE.SRGBColorSpace
+        const width = Math.max(320, stage.clientWidth || 320)
+        const height = Math.max(260, stage.clientHeight || 260)
+        renderer.setSize(width, height, false)
+        stage.innerHTML = ''
+        stage.appendChild(renderer.domElement)
+
+        const scene = new THREE.Scene()
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000)
+        camera.position.set(20, 18, 20)
+        scene.add(new THREE.AmbientLight(0xffffff, 0.95))
+        const keyLight = new THREE.DirectionalLight(0xffffff, 0.72)
+        keyLight.position.set(35, 50, 20)
+        scene.add(keyLight)
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.35)
+        fillLight.position.set(-20, 18, -15)
+        scene.add(fillLight)
+
+        const root = new THREE.Group()
+        scene.add(root)
+        const grid = new THREE.GridHelper(140, 28, 0xc7d7f5, 0xdde7fa)
+        grid.position.y = -0.01
+        scene.add(grid)
+
+        const controls = new controlsMod.OrbitControls(camera, renderer.domElement)
+        controls.enableDamping = true
+        controls.dampingFactor = 0.08
+        controls.minDistance = 2
+        controls.maxDistance = 420
+        controls.target.set(0, 0, 0)
+        controls.update()
+
+        const ldrawLoader = new ldrawMod.LDrawLoader()
+        const ldrawLibraryPath = `${getPartAdapterApiPrefix()}/ldraw-library/`
+        ldrawLoader.setPartsLibraryPath(ldrawLibraryPath)
+        await new Promise((resolve, reject) => {
+          ldrawLoader.preloadMaterials(
+            `${ldrawLibraryPath}LDConfig.ldr`,
+            () => resolve(true),
+            undefined,
+            (err) => reject(err || new Error('加载 LDraw 颜色配置失败'))
+          )
+        })
+
+        const resize = () => {
+          const nextW = Math.max(320, stage.clientWidth || 320)
+          const nextH = Math.max(260, stage.clientHeight || 260)
+          camera.aspect = nextW / nextH
+          camera.updateProjectionMatrix()
+          renderer.setSize(nextW, nextH, false)
+        }
+        window.addEventListener('resize', resize)
+
+        const animate = () => {
+          controls.update()
+          renderer.render(scene, camera)
+          model3dState.rafId = window.requestAnimationFrame(animate)
+        }
+
+        model3dState = {
+          THREE,
+          renderer,
+          scene,
+          camera,
+          controls,
+          ldrawLoader,
+          ldrawLibraryPath,
+          root,
+          grid,
+          rafId: 0
+        }
+        animate()
+        return model3dState
+      }
+
+      function clearModel3dMeshes() {
+        if (!model3dState || !model3dState.root) {
+          return
+        }
+        const root = model3dState.root
+        while (root.children.length) {
+          const child = root.children.pop()
+          if (!child) {
+            continue
+          }
+          if (typeof child.traverse === 'function') {
+            child.traverse((node) => {
+              if (node.geometry && typeof node.geometry.dispose === 'function') {
+                node.geometry.dispose()
+              }
+              const mat = node.material
+              if (Array.isArray(mat)) {
+                mat.forEach((item) => item && typeof item.dispose === 'function' && item.dispose())
+              } else if (mat && typeof mat.dispose === 'function') {
+                mat.dispose()
+              }
+            })
+          }
+        }
+      }
+
+      function normalizeLdrawRef(name) {
+        return String(name || '').trim().replaceAll('\\', '/').toLowerCase()
+      }
+
+      function parseLdrawModelText(text) {
+        const raw = String(text || '')
+        const lines = raw.split(/\r?\n/)
+        const sections = { '__main__': [] }
+        let current = '__main__'
+        let firstNamed = ''
+        lines.forEach((line) => {
+          const trimmed = String(line || '').trim()
+          const match = /^0\s+FILE\s+(.+)$/i.exec(trimmed)
+          if (match && match[1]) {
+            current = normalizeLdrawRef(match[1])
+            if (!sections[current]) {
+              sections[current] = []
+            }
+            if (!firstNamed) {
+              firstNamed = current
+            }
+            return
+          }
+          if (!sections[current]) {
+            sections[current] = []
+          }
+          sections[current].push(line)
+        })
+        const rootName = firstNamed || '__main__'
+        const identR = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+        const identT = [0, 0, 0]
+        const leaves = []
+        const callStack = []
+
+        const mulMatVec = (m, v) => [
+          m[0] * v[0] + m[1] * v[1] + m[2] * v[2],
+          m[3] * v[0] + m[4] * v[1] + m[5] * v[2],
+          m[6] * v[0] + m[7] * v[1] + m[8] * v[2]
+        ]
+        const addVec = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
+        const mulMat = (a, b) => [
+          a[0] * b[0] + a[1] * b[3] + a[2] * b[6],
+          a[0] * b[1] + a[1] * b[4] + a[2] * b[7],
+          a[0] * b[2] + a[1] * b[5] + a[2] * b[8],
+          a[3] * b[0] + a[4] * b[3] + a[5] * b[6],
+          a[3] * b[1] + a[4] * b[4] + a[5] * b[7],
+          a[3] * b[2] + a[4] * b[5] + a[5] * b[8],
+          a[6] * b[0] + a[7] * b[3] + a[8] * b[6],
+          a[6] * b[1] + a[7] * b[4] + a[8] * b[7],
+          a[6] * b[2] + a[7] * b[5] + a[8] * b[8]
+        ]
+
+        const walk = (sectionName, parentR, parentT, parentColor, depth) => {
+          if (depth > 16) {
+            return
+          }
+          const key = normalizeLdrawRef(sectionName)
+          if (!sections[key]) {
+            return
+          }
+          const stackKey = `${key}@${depth}`
+          if (callStack.includes(stackKey)) {
+            return
+          }
+          callStack.push(stackKey)
+          sections[key].forEach((line) => {
+            const trimmed = String(line || '').trim()
+            if (!trimmed || trimmed.startsWith('0')) {
+              return
+            }
+            const parts = trimmed.split(/\s+/)
+            if (parts[0] !== '1' || parts.length < 15) {
+              return
+            }
+            const rawColor = String(parts[1] || '16').trim()
+            const nums = parts.slice(2, 14).map((item) => Number(item))
+            if (nums.some((num) => !Number.isFinite(num))) {
+              return
+            }
+            const localT = [nums[0], nums[1], nums[2]]
+            const localR = [nums[3], nums[4], nums[5], nums[6], nums[7], nums[8], nums[9], nums[10], nums[11]]
+            const worldR = mulMat(parentR, localR)
+            const worldT = addVec(parentT, mulMatVec(parentR, localT))
+            const refName = normalizeLdrawRef(parts.slice(14).join(' '))
+            const nextColor = rawColor === '16' ? parentColor : rawColor
+            if (sections[refName]) {
+              walk(refName, worldR, worldT, nextColor, depth + 1)
+              return
+            }
+            leaves.push({
+              ref: refName,
+              color: nextColor || parentColor || '16',
+              x: worldT[0],
+              y: worldT[1],
+              z: worldT[2]
+            })
+          })
+          callStack.pop()
+        }
+
+        walk(rootName, identR, identT, '16', 0)
+        return leaves
+      }
+
+      function fitModel3dCamera() {
+        if (!model3dState || !model3dState.root || !model3dState.root.children.length) {
+          return
+        }
+        const { THREE, root, camera, controls } = model3dState
+        const box = new THREE.Box3().setFromObject(root)
+        if (box.isEmpty()) {
+          return
+        }
+        const center = box.getCenter(new THREE.Vector3())
+        const size = box.getSize(new THREE.Vector3())
+        const maxSize = Math.max(size.x, size.y, size.z, 1)
+        const distance = Math.max(8, maxSize * 1.6)
+        camera.position.set(center.x + distance, center.y + distance * 0.8, center.z + distance)
+        controls.target.copy(center)
+        controls.update()
+      }
+
+      async function renderModel3dApprox(text, meta) {
+        const state = await ensureModel3dViewer()
+        clearModel3dMeshes()
+        const leaves = parseLdrawModelText(text)
+        if (!Array.isArray(leaves) || !leaves.length) {
+          throw new Error('未解析出可显示的零件位置，请检查文件是否为 LDraw 格式')
+        }
+        const groups = {}
+        leaves.forEach((item) => {
+          const key = String(item.color || '16')
+          if (!groups[key]) {
+            groups[key] = []
+          }
+          groups[key].push(item)
+        })
+        const scale = 1 / 20
+        const { THREE } = state
+        Object.keys(groups).forEach((colorCode) => {
+          const list = groups[colorCode]
+          const geometry = new THREE.BoxGeometry(0.9, 0.32, 0.9)
+          const material = new THREE.MeshStandardMaterial({
+            color: getLdrawColorHex(colorCode),
+            metalness: 0.06,
+            roughness: 0.78
+          })
+          const mesh = new THREE.InstancedMesh(geometry, material, list.length)
+          const matrix = new THREE.Matrix4()
+          list.forEach((item, idx) => {
+            const px = Number(item.x || 0) * scale
+            const py = Number(-item.y || 0) * scale
+            const pz = Number(item.z || 0) * scale
+            matrix.setPosition(px, py, pz)
+            mesh.setMatrixAt(idx, matrix)
+          })
+          mesh.instanceMatrix.needsUpdate = true
+          state.root.add(mesh)
+        })
+        fitModel3dCamera()
+        const stageInfo = `${meta && meta.source_entry ? meta.source_entry : '模型文件'} · 简化预览（${leaves.length} 个零件实例）`
+        setModel3dHint(stageInfo)
+      }
+
+      async function renderModel3dPrecise(text, meta) {
+        const state = await ensureModel3dViewer()
+        clearModel3dMeshes()
+        const sourceText = String(text || '').trim()
+        if (!sourceText) {
+          throw new Error('模型内容为空')
+        }
+        const model = await new Promise((resolve, reject) => {
+          state.ldrawLoader.parse(
+            sourceText,
+            state.ldrawLibraryPath,
+            (group) => resolve(group),
+            (err) => reject(err || new Error('LDraw 解析失败'))
+          )
+        })
+        if (!model) {
+          throw new Error('LDraw 模型解析为空')
+        }
+        state.root.add(model)
+        fitModel3dCamera()
+        let meshCount = 0
+        model.traverse((node) => {
+          if (node && node.isMesh) {
+            meshCount += 1
+          }
+        })
+        const stageInfo = `${meta && meta.source_entry ? meta.source_entry : '模型文件'} · 精细渲染（网格 ${meshCount}）`
+        setModel3dHint(stageInfo)
+      }
+
+      async function loadModel3dPreview() {
+        const input = document.getElementById('model3dFileInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          alert('请先选择 .io / .ldr / .mpd / .dat 文件')
+          return
+        }
+        try {
+          setModel3dHint('正在解析模型...')
+          const ret = await apiUploadPreviewModel(file)
+          try {
+            await renderModel3dPrecise(ret.source_text || '', ret)
+          } catch (preciseErr) {
+            await renderModel3dApprox(ret.source_text || '', ret)
+            setModel3dHint(`精细渲染失败，已回退简化预览：${preciseErr && preciseErr.message ? preciseErr.message : '未知错误'}`)
+          }
+        } catch (err) {
+          setModel3dHint(`模型预览失败：${err.message || '请求异常'}`)
+          alert(err.message || '模型预览失败')
+        }
+      }
+
+      function resetModel3dView() {
+        fitModel3dCamera()
       }
 
       function buildThumb(imageUrl, fallbackText, fallbackUrls = []) {
@@ -2788,6 +5491,11 @@
           suggested_image_kind: String(item.resolved_meta && item.resolved_meta.image_kind || '').trim(),
           action_text: getDesignerAction(item),
           note_text: String(item.detail || '').trim() || String(item.note || '').trim() || '',
+          optimizer_source: getOptimizerSourceLabel(item.optimizer && item.optimizer.candidate_source || item.candidate_source || ''),
+          optimizer_score: Number(item.optimizer && item.optimizer.total_score || 0),
+          unit_cost: Number(item.unit_cost || 0),
+          line_cost: Number(item.line_cost || 0),
+          optimizer_reason: String(item.optimizer && item.optimizer.reason_text || '').trim(),
           tag: String(item.tag || '').trim().toLowerCase(),
         }))
       }
@@ -3013,7 +5721,7 @@
       }
 
       function buildDesignerExportCsv(rows) {
-        const header = ['序号', '原零件名称', '原零件编号', '原颜色', '数量', '当前判断', '建议高砖件', '建议高砖颜色', '建议动作', '备注', '图片链接']
+        const header = ['序号', '原零件名称', '原零件编号', '原颜色', '数量', '当前判断', '建议高砖件', '建议高砖颜色', '建议动作', '建议来源', '建议分数', '单件成本', '总成本', '备注', '图片链接']
         const csvRows = rows.map((item) => {
           const imageUrl = [item.image_url].concat(Array.isArray(item.image_fallbacks) ? item.image_fallbacks : []).find(Boolean) || ''
           return [
@@ -3026,7 +5734,11 @@
             item.suggested_part,
             item.suggested_color,
             item.action_text,
-            item.note_text || '',
+            item.optimizer_source || '',
+            item.optimizer_score || '',
+            item.unit_cost || '',
+            item.line_cost || '',
+            item.optimizer_reason || item.note_text || '',
             imageUrl,
           ]
         })
@@ -3180,6 +5892,138 @@
         </div>`
       }
 
+      function getResultActionMeta(item) {
+        const status = getResultDisplayStatus(item)
+        let text = getRecommendedAction(item)
+        let tone = 'action-warning'
+        if (status.key === 'blocked') {
+          tone = 'action-critical'
+        } else if (status.key === 'exact') {
+          tone = 'action-ok'
+        } else if (status.key === 'replaceable') {
+          tone = 'action-warning'
+        }
+        return { text, tone }
+      }
+
+      function buildResultSummaryLine(item) {
+        const meta = getResultActionMeta(item)
+        const resolvedPart = String(item.resolved_part_no || '').trim()
+        const resolvedColor = String(item.resolved_color_no || '').trim()
+        const partText = resolvedPart ? `建议件 ${resolvedPart}` : '零件待确认'
+        const colorText = resolvedColor ? `建议色 ${resolvedColor}` : '颜色待确认'
+        return `${meta.text}：${partText}，${colorText}`
+      }
+
+      function buildResultCard(item) {
+        const action = getResultActionMeta(item)
+        const detail = buildReplacementDetail(item)
+        const status = detail.status
+        const lineCost = formatPrice(item.line_cost || item.unit_cost || 0) || '成本待确认'
+        const subtotal = item.line_cost ? formatPrice(item.line_cost) : lineCost
+        return `<article class="result-card ${status.tone}">
+          <div class="result-card-head">
+            <div class="result-card-meta">
+              <div class="result-card-status">
+                <span class="status-chip ${status.tone}">${escapeHtml(status.label)}</span>
+                <span class="compat-chip">${escapeHtml(detail.compatibility)}</span>
+                ${riskBadge(item.risk)}
+              </div>
+              <div class="result-card-title">${escapeHtml(item.name || item.part_no || '-')}</div>
+              <div class="result-card-subtitle">${escapeHtml(
+                [item.part_no || '-', item.color_name || item.color_no ? `原色 ${item.color_name || item.color_no}` : '', item.qty ? `数量 x${item.qty}` : '']
+                  .filter(Boolean)
+                  .join(' · ')
+              )}</div>
+            </div>
+            <span class="action-chip ${action.tone}">${escapeHtml(action.text)}</span>
+          </div>
+          <div class="result-card-body">
+            <div class="result-primary-pane">
+              <div class="result-pane-title">原始零件</div>
+              ${buildSourceCell(item)}
+              <div class="note-muted">原色：${buildColorCell(item.color_no, 'lego', item.color_name || '')}</div>
+            </div>
+            <div class="result-target-pane">
+              <div class="result-pane-title">推荐高砖件</div>
+              ${buildResolvedCell(item)}
+              <div class="note-muted">建议色：${buildColorCell(item.resolved_color_no, 'gobricks')}</div>
+              <div class="meta-badges">
+                <span class="mini-badge">数量 x${escapeHtml(item.qty || 0)}</span>
+                <span class="mini-badge">单价 ${escapeHtml(lineCost)}</span>
+                <span class="mini-badge">小计 ${escapeHtml(subtotal)}</span>
+              </div>
+            </div>
+            <div class="result-decision-pane">
+              <div class="result-pane-title">原因与下一步</div>
+              <div class="decision-strip">
+                <div class="decision-row">
+                  <strong>触发原因</strong>
+                  <span>${escapeHtml(detail.reasonLabel)}</span>
+                </div>
+                <div class="decision-row">
+                  <strong>推荐动作</strong>
+                  <span>${escapeHtml(detail.actionLabel)}</span>
+                </div>
+                <div class="decision-row">
+                  <strong>一句话说明</strong>
+                  <span>${escapeHtml(detail.sourceLabel)}</span>
+                </div>
+                <div class="decision-actions">
+                  <button type="button" class="primary-inline-btn" onclick="openReplacementDrawerByLine(${Number(item.line_no || 0)})">查看替代方案</button>
+                  <button type="button" class="ghost-btn" onclick="keepOriginalLegoPart()">保留乐高件</button>
+                  <button type="button" class="ghost-btn" onclick="markManualReviewByLine(${Number(item.line_no || 0)})">标记人工处理</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>`
+      }
+
+      function buildReviewAlertCard(item) {
+        const risk = String(item.risk || '').toUpperCase()
+        const isCritical = risk === 'D' || risk === 'C'
+        const resolvedText = [item.resolved_part_no || '-', item.resolved_color_no ? `色 ${item.resolved_color_no}` : '']
+          .filter(Boolean)
+          .join(' · ')
+        return `<article class="review-alert-card ${isCritical ? 'is-critical' : ''}">
+          <div class="review-alert-head">
+            <div>
+              <div class="review-alert-title">${escapeHtml(item.name || item.part_no || '-')}</div>
+              <div class="review-alert-sub">${escapeHtml(
+                [item.part_no || '-', item.color_no ? `色 ${item.color_no}` : '', item.qty ? `x${item.qty}` : ''].filter(Boolean).join(' · ')
+              )}</div>
+            </div>
+            ${riskBadge(item.risk)}
+          </div>
+          <div class="review-alert-grid">
+            <div class="review-alert-box">
+              <div class="result-meta-label">系统建议</div>
+              <div class="result-meta-value">${escapeHtml(resolvedText || '-')}</div>
+            </div>
+            <div class="review-alert-box">
+              <div class="result-meta-label">为什么要确认</div>
+              <div class="result-meta-value">${escapeHtml(getReasonLabel(item) || item.note || '系统判断信心不足，建议人工复核。')}</div>
+            </div>
+            <div class="review-alert-box">
+              <div class="result-meta-label">兼容等级</div>
+              <div class="result-meta-value">${escapeHtml(getCompatibilityLevel(item))}</div>
+            </div>
+            <div class="review-alert-box">
+              <div class="result-meta-label">处理动作</div>
+              <div class="result-meta-value">
+                <div class="review-actions">
+                  <button onclick="openReplacementDrawerByLine(${item.line_no})">查看方案</button>
+                  <button onclick="updateReviewStatus(${item.line_no}, 'approved')">通过</button>
+                  <button onclick="updateReviewStatus(${item.line_no}, 'hold')">挂起</button>
+                  <button onclick="updateReviewStatus(${item.line_no}, 'rejected')">退回</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>`
+      }
+
       function openDetailModal(meta) {
         currentDetailMeta = meta || {}
         const safe = currentDetailMeta || {}
@@ -3309,6 +6153,10 @@
       }
 
       function renderStageSummary(results) {
+        const stagePills = document.getElementById('stagePills')
+        if (!stagePills) {
+          return
+        }
         const counter = {}
         ;(results || []).forEach((item) => {
           const key = String(item.stage || '')
@@ -3317,7 +6165,7 @@
           }
           counter[key] = (counter[key] || 0) + 1
         })
-        document.getElementById('stagePills').innerHTML = Object.keys(counter)
+        stagePills.innerHTML = Object.keys(counter)
           .map((key) => `<span class="pill">${stageNames[key] || key} ${counter[key]}</span>`)
           .join('')
       }
@@ -3530,7 +6378,9 @@
 
       function changeResultPage(delta) {
         const fullList = currentJob && Array.isArray(currentJob.results) ? currentJob.results : []
-        const filtered = filterResultsBySearch(filterByImageKind(sortResultsByPriority(orderDisplayItems(fullList))))
+        const filtered = applyResultFocusWindow(
+          filterResultsBySearch(filterResultsByQuickMode(filterResultsByTab(filterByImageKind(sortResultsByPriority(orderDisplayItems(fullList))))))
+        )
         const pageSize = getResultPageSize()
         const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
         currentResultPage = Math.max(1, Math.min(totalPages, currentResultPage + Number(delta || 0)))
@@ -3539,11 +6389,21 @@
 
       function getResultPriority(item) {
         const safe = item && typeof item === 'object' ? item : {}
+        const status = getResultDisplayStatus(safe)
         const stage = String(safe.stage || '').trim()
         const risk = String(safe.risk || '').trim().toUpperCase()
         const note = String(safe.note || '').trim()
         const tag = String(safe.tag || '').trim().toLowerCase()
 
+        if (status.key === 'blocked') {
+          return 1
+        }
+        if (status.key === 'pending') {
+          return 2
+        }
+        if (status.key === 'replaceable') {
+          return 3
+        }
         if (note.includes('缺零件') || note.includes('不售卖') || note.includes('限购') || stage === 'manual_required') {
           return 1
         }
@@ -3570,7 +6430,17 @@
 
       function sortResultsByPriority(items) {
         const list = Array.isArray(items) ? [...items] : []
+        const mode = String(document.getElementById('resultSort')?.value || 'risk')
         list.sort((a, b) => {
+          if (mode === 'compatibility') {
+            return getCompatibilityScore(b) - getCompatibilityScore(a) || Number(b.qty || 0) - Number(a.qty || 0)
+          }
+          if (mode === 'price_impact') {
+            return getPriceImpactScore(b) - getPriceImpactScore(a) || getResultPriority(a) - getResultPriority(b)
+          }
+          if (mode === 'qty_desc') {
+            return Number(b.qty || 0) - Number(a.qty || 0) || getResultPriority(a) - getResultPriority(b)
+          }
           const p = getResultPriority(a) - getResultPriority(b)
           if (p !== 0) {
             return p
@@ -3602,6 +6472,8 @@
             safe.resolved_color_no,
             safe.stage,
             safe.note,
+            safe.candidate_source,
+            safe.optimizer && safe.optimizer.reason_text,
           ]
             .map((value) => String(value == null ? '' : value))
             .join(' ')
@@ -3610,27 +6482,219 @@
         })
       }
 
+      function filterResultsByQuickMode(items) {
+        const list = Array.isArray(items) ? items : []
+        const mode = String(currentResultQuickFilter || 'all')
+        if (mode === 'all') {
+          return list
+        }
+        return list.filter((item) => {
+          const status = getResultDisplayStatus(item)
+          if (mode === 'missing') {
+            return status.key === 'blocked'
+          }
+          if (mode === 'structural_risk') {
+            return getReasonLabel(item) === '该零件影响关键连接'
+          }
+          if (mode === 'color_mismatch') {
+            return getReasonLabel(item) === '颜色不同，但不影响结构'
+          }
+          if (mode === 'price_heavy') {
+            return getPriceImpactScore(item) >= 5
+          }
+          if (mode === 'matched') {
+            return status.key === 'exact'
+          }
+          return true
+        })
+      }
+
+      function filterResultsByTab(items) {
+        const list = Array.isArray(items) ? items : []
+        const tab = String(currentResultTab || 'todo')
+        if (tab === 'all') {
+          return list
+        }
+        return list.filter((item) => {
+          const status = getResultDisplayStatus(item)
+          if (tab === 'todo') {
+            return status.key !== 'exact'
+          }
+          if (tab === 'high_risk') {
+            return ['pending', 'blocked'].includes(status.key)
+          }
+          if (tab === 'replaceable') {
+            return status.key === 'replaceable'
+          }
+          return true
+        })
+      }
+
+      function applyResultFocusWindow(items) {
+        const list = Array.isArray(items) ? items : []
+        const enabled = Boolean(document.getElementById('resultFocusTop')?.checked)
+        if (!enabled) {
+          return list
+        }
+        return list.slice(0, 20)
+      }
+
+      function renderPrioritySummary(results) {
+        const el = document.getElementById('prioritySummary')
+        const list = Array.isArray(results) ? sortResultsByPriority(orderDisplayItems(results)) : []
+        if (!el) {
+          return
+        }
+        if (!list.length) {
+          el.innerHTML = `<div class="priority-card">
+            <h4>这单先处理什么</h4>
+            <p>运行适配后，这里会自动告诉你应该先改哪一类问题，以及最值得先看的几条。</p>
+          </div>
+          <div class="priority-card">
+            <h4>当前节奏</h4>
+            <p>建议先处理缺件和高风险项，再回头处理缺色与印刷件。</p>
+          </div>`
+          return
+        }
+        const counters = { part: 0, color: 0, printed: 0, highRisk: 0 }
+        list.forEach((item) => {
+          const reason = getReasonLabel(item)
+          const status = getResultDisplayStatus(item)
+          if (reason === '无对应零件') counters.part += 1
+          if (reason === '颜色不同，但不影响结构' || reason === '库存不足') counters.color += 1
+          if (reason === '印刷件需要降级处理') counters.printed += 1
+          if (['pending', 'blocked'].includes(status.key)) counters.highRisk += 1
+        })
+        const rhythm = []
+        if (counters.part) rhythm.push(`先补 ${counters.part} 条缺件/停售项`)
+        if (counters.highRisk) rhythm.push(`优先确认 ${counters.highRisk} 条高风险项`)
+        if (counters.color) rhythm.push(`随后处理 ${counters.color} 条缺色/库存不足项`)
+        if (counters.printed) rhythm.push(`最后复核 ${counters.printed} 条印刷件`)
+        const focusLines = list
+          .filter((item) => getResultPriority(item) <= 3)
+          .slice(0, 3)
+          .map(
+            (item) => `<div class="priority-item">
+              <strong>${escapeHtml(item.name || item.part_no || '-')}</strong>
+              <span>${escapeHtml(`${getRecommendedAction(item)} · ${item.part_no || '-'} · 数量 ${item.qty || 0} · ${getReasonLabel(item)}`)}</span>
+            </div>`
+          )
+          .join('')
+        el.innerHTML = `<div class="priority-card">
+          <h4>这单先处理什么</h4>
+          <p>${escapeHtml(rhythm.join('，') || '本单主要是常规替换项，可按列表顺序处理。')}</p>
+          <div class="priority-list">${focusLines || '<div class="priority-item"><strong>当前没有高优先级问题</strong><span>可以直接从推荐修改清单顶部开始顺序处理。</span></div>'}</div>
+        </div>
+        <div class="priority-card">
+          <h4>问题分布</h4>
+          <div class="pill-list">
+            <span class="pill">缺件 ${counters.part}</span>
+            <span class="pill">缺色 ${counters.color}</span>
+            <span class="pill">印刷件 ${counters.printed}</span>
+            <span class="pill">高风险 ${counters.highRisk}</span>
+          </div>
+          <p style="margin-top:10px;">你前面只需要盯住高优先级项，下面的完整列表再逐条确认即可。</p>
+        </div>`
+      }
+
+      function renderFocusOverlay(results) {
+        const shell = document.getElementById('focusOverlay')
+        const sub = document.getElementById('focusOverlaySub')
+        const listEl = document.getElementById('focusOverlayList')
+        const list = Array.isArray(results) ? sortResultsByPriority(orderDisplayItems(results)) : []
+        if (!shell || !sub || !listEl) {
+          return
+        }
+        if (!list.length) {
+          shell.classList.remove('visible')
+          sub.textContent = '运行适配后，这里会固定提示最值得先看的问题。'
+          listEl.innerHTML = `<div class="focus-overlay-item">
+            <strong>等待运行适配</strong>
+            <span>生成结果后，这里会自动列出最优先处理的三条。</span>
+          </div>`
+          return
+        }
+        const focusList = list.filter((item) => getResultPriority(item) <= 3).slice(0, 3)
+        if (!focusList.length) {
+          shell.classList.remove('visible')
+          return
+        }
+        shell.classList.add('visible')
+        sub.textContent = '滚动到下面长列表时，也能一直看到最优先要处理的条目。'
+        listEl.innerHTML = focusList
+          .map(
+            (item) => `<div class="focus-overlay-item">
+              <strong>${escapeHtml(item.name || item.part_no || '-')}</strong>
+              <span>${escapeHtml(`${getRecommendedAction(item)} · ${item.part_no || '-'} · 数量 ${item.qty || 0} · ${getReasonLabel(item)}`)}</span>
+            </div>`
+          )
+          .join('')
+      }
+
+      function renderResultViewSummary(fullList, currentList) {
+        const titleEl = document.getElementById('resultViewSummaryTitle')
+        const textEl = document.getElementById('resultViewSummaryText')
+        if (!titleEl || !textEl) {
+          return
+        }
+        const total = Array.isArray(fullList) ? fullList.length : 0
+        const visible = Array.isArray(currentList) ? currentList.length : 0
+        const focusTop = Boolean(document.getElementById('resultFocusTop')?.checked)
+        const quickMode = String(currentResultQuickFilter || 'all')
+        if (!total) {
+          titleEl.textContent = '等待生成结果'
+          textEl.textContent = '运行适配后，这里会告诉你当前展示的是哪一类任务，以及系统为什么先把这些零件排在前面。'
+          return
+        }
+
+        const tabConfig = {
+          todo: ['当前优先展示待处理项', '系统已经先把需要你处理的零件排在前面，方便你从关键问题开始推进。'],
+          high_risk: ['当前优先展示高风险项', '这些条目更容易卡住下单或影响结构，建议先处理完再继续导出采购建议。'],
+          replaceable: ['当前优先展示可替代项', '这批零件大多有替换方案，适合集中确认替代等级和价格影响。'],
+          all: ['当前展示全部结果', '如果你想整体浏览这单的落地情况，可以从这里往下看完整结果。']
+        }
+        const [baseTitle, baseText] = tabConfig[currentResultTab] || tabConfig.todo
+        const quickTextMap = {
+          missing: '当前又额外筛出了缺失件，方便你先补最影响落地的部分。',
+          structural_risk: '当前只看结构风险件，建议逐条打开详情确认是否需要保留乐高件。',
+          color_mismatch: '当前只看颜色不一致项，适合集中处理外观偏差。',
+          price_heavy: '当前只看价格影响较大的零件，适合先做成本取舍。',
+          matched: '当前只看已匹配项，适合快速确认可直接下单的部分。'
+        }
+        const suffix = quickTextMap[quickMode] || baseText
+        titleEl.textContent = `${baseTitle} · ${visible}/${total} 条`
+        textEl.textContent = `${suffix}${focusTop ? ' 系统已帮你收缩到最值得先看的前 20 条。' : ' 如果想更聚焦，可以勾选“只看前 20 条关键问题”。'}`
+      }
+
       function renderResults(results) {
         const rows = document.getElementById('resultRows')
         const fullList = sortResultsByPriority(orderDisplayItems(results))
-        const list = filterResultsBySearch(filterByImageKind(fullList))
+        const list = applyResultFocusWindow(filterResultsBySearch(filterResultsByQuickMode(filterResultsByTab(filterByImageKind(fullList)))))
         const filterMode = String(document.getElementById('resultImageFilter')?.value || 'all')
         const keyword = String(document.getElementById('resultSearch')?.value || '').trim()
+        const quickMode = String(currentResultQuickFilter || 'all')
+        const focusTop = Boolean(document.getElementById('resultFocusTop')?.checked)
         const hint =
-          !keyword && filterMode === 'all'
+          !keyword && filterMode === 'all' && quickMode === 'all' && !focusTop
             ? `已按问题优先级排序，显示 ${list.length} 条。`
-            : `已筛选显示 ${list.length} / ${fullList.length} 条。`
+            : `已筛选显示 ${list.length} / ${fullList.length} 条${focusTop ? '（仅看前 20 条关键问题）' : ''}。`
         document.getElementById('resultImageFilterHint').textContent = hint
         if (!fullList.length) {
           currentResultPage = 1
           renderResultPager(0, getResultPageSize(), 1)
-          rows.innerHTML = '<tr><td colspan="9" class="muted">未解析到有效 BOM。</td></tr>'
+          renderPrioritySummary([])
+          renderFocusOverlay([])
+          renderResultViewSummary([], [])
+          rows.innerHTML = '<div class="result-empty">未解析到有效 BOM。</div>'
           return
         }
+        renderPrioritySummary(fullList)
+        renderFocusOverlay(fullList)
+        renderResultViewSummary(fullList, list)
         if (!list.length) {
           currentResultPage = 1
           renderResultPager(0, getResultPageSize(), 1)
-          rows.innerHTML = '<tr><td colspan="9" class="muted">当前筛选条件下没有匹配条目。</td></tr>'
+          rows.innerHTML = '<div class="result-empty">当前筛选条件下没有匹配条目。</div>'
           return
         }
         const pageSize = getResultPageSize()
@@ -3639,56 +6703,38 @@
         const startIndex = (currentResultPage - 1) * pageSize
         const pagedList = list.slice(startIndex, startIndex + pageSize)
         renderResultPager(list.length, pageSize, currentResultPage)
-        rows.innerHTML = pagedList
-          .map(
-            (item) => `<tr>
-              <td>${buildSourceCell(item)}</td>
-              <td>${buildColorCell(item.color_no, 'lego', item.color_name || '')}</td>
-              <td>${item.qty || 0}</td>
-              <td>${buildResolvedCell(item)}</td>
-              <td>${buildColorCell(item.resolved_color_no, 'gobricks')}</td>
-              <td>${stageNames[item.stage] || item.stage || '-'}</td>
-              <td>${riskBadge(item.risk)}</td>
-              <td>${item.review_status || '-'}</td>
-              <td>${buildNoteCell(item.note || '-', item.resolved_meta && item.resolved_meta.item_id ? `主库ID：${item.resolved_meta.item_id}` : '')}</td>
-            </tr>`
-          )
-          .join('')
+        rows.innerHTML = pagedList.map((item) => buildResultCard(item)).join('')
       }
 
       function renderReviewQueue(results) {
         const rows = document.getElementById('reviewRows')
         const baseList = (results || []).filter((item) => String(item.risk || '').toUpperCase() !== 'A')
-        const list = sortResultsByPriority(orderDisplayItems(filterResultsBySearch(filterByImageKind(baseList))))
+        const list = sortResultsByPriority(orderDisplayItems(filterResultsBySearch(filterResultsByQuickMode(filterByImageKind(baseList)))))
         if (!baseList.length) {
-          rows.innerHTML = '<tr><td colspan="6" class="muted">当前没有需要人工复核的条目。</td></tr>'
+          rows.innerHTML = '<div class="review-empty">当前没有需要人工复核的条目。</div>'
           return
         }
         if (!list.length) {
-          rows.innerHTML = '<tr><td colspan="6" class="muted">当前筛选条件下没有待复核条目。</td></tr>'
+          rows.innerHTML = '<div class="review-empty">当前筛选条件下没有待复核条目。</div>'
           return
         }
-        rows.innerHTML = list
-          .map(
-            (item) => `<tr>
-              <td>${item.part_no || '-'} / ${item.color_no || '-'} / ${item.qty || 0}</td>
-              <td>${item.resolved_part_no || '-'} / ${item.resolved_color_no || '-'}</td>
-              <td>${riskBadge(item.risk)}</td>
-              <td>${buildNoteCell(item.note || '-')}</td>
-              <td>${item.review_status || '-'}</td>
-              <td>
-                <details class="review-inline">
-                  <summary><span class="review-trigger">处理</span></summary>
-                  <div class="review-actions">
-                    <button onclick="updateReviewStatus(${item.line_no}, 'approved')">通过</button>
-                    <button onclick="updateReviewStatus(${item.line_no}, 'hold')">挂起</button>
-                    <button onclick="updateReviewStatus(${item.line_no}, 'rejected')">退回</button>
-                  </div>
-                </details>
-              </td>
-            </tr>`
-          )
-          .join('')
+        rows.innerHTML = list.map((item) => buildReviewAlertCard(item)).join('')
+      }
+
+      function renderRiskSummary(results) {
+        const title = document.getElementById('riskSummaryTitle')
+        const text = document.getElementById('riskSummaryText')
+        const list = Array.isArray(results) ? results : []
+        const riskList = list.filter((item) => ['pending', 'blocked'].includes(getResultDisplayStatus(item).key))
+        if (!riskList.length) {
+          title.textContent = '当前暂无高风险问题'
+          text.textContent = '如果后面出现关键缺件、结构风险或待确认项，这里会先集中提醒你。'
+          return
+        }
+        const blocked = riskList.filter((item) => getResultDisplayStatus(item).key === 'blocked').length
+        const structural = riskList.filter((item) => getReasonLabel(item) === '该零件影响关键连接').length
+        title.textContent = `当前有 ${riskList.length} 个高风险 / 待确认零件`
+        text.textContent = `${blocked ? `其中 ${blocked} 个当前不可匹配，` : ''}${structural ? `${structural} 个会影响关键连接，` : ''}建议先处理后再导出采购方案。`
       }
 
       function renderImageGaps(results) {
@@ -3787,7 +6833,343 @@
         setMetric('metricAutoRate', `${Number(safe.auto_match_rate || 0).toFixed(0)}%`)
         setMetric('metricProdRate', `${Number(safe.producible_rate || 0).toFixed(0)}%`)
         document.getElementById('projectSummaryLine').textContent =
-          `共 ${safe.total_types || 0} 种 / ${safe.total_qty || 0} 件；自动通过 ${safe.auto_qty || 0} 件；待审核 ${safe.review_qty || 0} 件；不可直接落地 ${safe.blocked_qty || 0} 件。`
+          `这单共有 ${safe.total_types || 0} 种零件、${safe.total_qty || 0} 颗；其中可直接照用 ${safe.auto_qty || 0} 颗，仍需你确认 ${safe.review_qty || 0} 颗，暂时不能直接落地 ${safe.blocked_qty || 0} 颗；预估成本 ¥${Number(safe.estimated_cost_total || 0).toFixed(2)}。`
+      }
+
+      function renderProjectSummary(job) {
+        const summary = (job && job.summary) || {}
+        const project = (job && job.project) || {}
+        const sourceName = String(project.source_name || document.getElementById('sourceName').value || '').trim()
+        const fileType = sourceName.includes('.') ? sourceName.split('.').pop().toUpperCase() : 'Studio'
+        const statusPill = document.getElementById('analysisStatusPill')
+        const meta = getOverviewStats(job || {})
+        const status = meta.blockedCount
+          ? { text: '存在关键缺失', tone: 'is-danger' }
+          : meta.pendingCount
+            ? { text: '建议先确认', tone: 'is-warn' }
+            : meta.replaceableCount
+              ? { text: '可继续生成采购建议', tone: 'is-good' }
+              : { text: '等待分析', tone: '' }
+        statusPill.className = `analysis-status-pill ${status.tone}`.trim()
+        statusPill.textContent = status.text
+        document.getElementById('projectFileTypeBadge').textContent = fileType || 'Studio'
+        document.getElementById('projectCoverNote').textContent = sourceName
+          ? `当前文件：${sourceName}`
+          : '当前按文件信息展示。'
+        document.getElementById('projectMainTitle').textContent =
+          project.project_name || sourceName || '等待导入 Studio 清单'
+        document.getElementById('projectMainMeta').textContent =
+          sourceName
+            ? `这份清单已经整理完成。先看下面的结论，再决定哪些要替换。`
+            : '当前还没有可展示的文件摘要。'
+        document.getElementById('projectMetaName').textContent = project.project_name || '未命名项目'
+        document.getElementById('projectMetaTime').textContent = formatDateTime(job && job.created_at)
+        document.getElementById('projectMetaSource').textContent = sourceName || '未导入文件'
+        document.getElementById('projectMetaType').textContent = fileType || '-'
+        document.getElementById('projectMetaQty').textContent = summary.total_qty || 0
+        document.getElementById('projectMetaTypes').textContent = summary.total_types || 0
+      }
+
+      function renderMatchOverviewStats(job) {
+        const stats = getOverviewStats(job || {})
+        const actions = document.getElementById('resultConclusionActions')
+        document.getElementById('overviewTotalQty').textContent = stats.totalQty || 0
+        document.getElementById('overviewExactCount').textContent = stats.exactCount || 0
+        document.getElementById('overviewReplaceableCount').textContent = stats.replaceableCount || 0
+        document.getElementById('overviewBlockedCount').textContent = stats.blockedCount || 0
+        document.getElementById('overviewPendingCount').textContent = stats.pendingCount || 0
+        document.getElementById('overviewAdaptRate').textContent = `${Number(stats.adaptRate || 0).toFixed(0)}%`
+        document.getElementById('overviewEstimatedCost').textContent = formatPrice(stats.estimatedCost) || '¥0.00'
+        document.getElementById('overviewBlockedCost').textContent = formatPrice(stats.blockedCost) || '¥0.00'
+        const bar = document.getElementById('resultConclusionBar')
+        let title = '等待分析'
+        let text = '等待导入 Studio 清单，导入后将显示适配结果与采购建议。'
+        let tone = ''
+        let actionHtml = '<button type="button" class="priority-action" onclick="importBomFile()">上传清单</button>'
+        if (stats.blockedCount) {
+          title = `当前有 ${stats.blockedCount} 个关键零件缺失`
+          text = '建议先处理不可匹配项和高风险项，暂不建议直接下单。'
+          tone = 'is-danger'
+          actionHtml = '<button type="button" class="priority-action" onclick="jumpToHighRisk()">先看高风险项</button>'
+        } else if (stats.pendingCount) {
+          title = `当前有 ${stats.pendingCount} 个待确认零件`
+          text = '主体方案已经形成，建议先确认高风险或颜色差异项，再下单更稳妥。'
+          tone = 'is-warn'
+          actionHtml = '<button type="button" class="priority-action" onclick="jumpToHighRisk()">先看待确认项</button>'
+        } else if (stats.totalTypes) {
+          title = `当前适配率 ${Number(stats.adaptRate || 0).toFixed(0)}%，可继续生成采购方案`
+          text = '大部分零件已经可用或可替代，先看待处理列表中的少量异常项即可。'
+          tone = 'is-good'
+          actionHtml =
+            stats.replaceableCount >= Math.max(3, stats.exactCount)
+              ? '<button type="button" class="priority-action" onclick="setProcessingTab(\'replaceable\')">先看替代建议</button>'
+              : '<button type="button" class="priority-action" onclick="downloadProcurementSuggestionCsv()">生成采购建议</button>'
+        }
+        bar.className = `result-conclusion-bar ${tone}`.trim()
+        document.getElementById('resultConclusionTitle').textContent = title
+        document.getElementById('resultConclusionText').textContent = text
+        if (actions) {
+          actions.innerHTML = actionHtml
+        }
+      }
+
+      function renderActionFooter(job) {
+        const stats = getOverviewStats(job || {})
+        const status = document.getElementById('actionFooterStatus')
+        const hint = document.getElementById('actionFooterHint')
+        const shell = document.getElementById('actionFooter')
+        const actions = document.getElementById('actionFooterActions')
+        if (!stats.totalTypes) {
+          status.className = 'analysis-status-pill'
+          status.textContent = '等待结果'
+          shell.className = 'action-footer'
+          hint.textContent = '先上传清单并生成结果，系统会根据结果告诉你当前最建议做什么。'
+          actions.innerHTML = `
+            <button type="button" class="priority-action" onclick="importBomFile()">上传清单</button>
+            <button type="button" class="secondary-btn" onclick="loadDemoBom()">载入示例清单</button>
+          `
+          return
+        }
+        if (stats.blockedCount) {
+          status.className = 'analysis-status-pill is-danger'
+          status.textContent = '建议先处理缺件'
+          shell.className = 'action-footer is-danger'
+          hint.textContent = `当前最推荐先看高风险和缺失件。处理完这 ${stats.blockedCount} 条不可匹配项，再考虑导出采购方案。`
+          actions.innerHTML = `
+            <button type="button" class="priority-action" onclick="jumpToHighRisk()">查看高风险项</button>
+            <button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>
+            <button type="button" class="secondary-btn" onclick="contactManualHelp()">联系人工协助</button>
+            <button type="button" class="secondary-btn" onclick="downloadMatchResultCsv()">导出当前结果</button>
+          `
+          return
+        }
+        if (stats.pendingCount) {
+          status.className = 'analysis-status-pill is-warn'
+          status.textContent = '先确认再下单'
+          shell.className = 'action-footer is-warn'
+          hint.textContent = `当前最推荐先确认这 ${stats.pendingCount} 条待确认项。看完差异和风险后，再导出采购建议更稳妥。`
+          actions.innerHTML = `
+            <button type="button" class="priority-action" onclick="jumpToHighRisk()">查看待确认项</button>
+            <button type="button" class="secondary-btn" onclick="downloadProcurementSuggestionCsv()">导出采购建议</button>
+            <button type="button" class="secondary-btn" onclick="downloadMatchResultCsv()">导出匹配结果</button>
+            <button type="button" class="secondary-btn" onclick="saveCurrentPlan()">保存当前方案</button>
+          `
+          return
+        }
+        status.className = 'analysis-status-pill is-good'
+        status.textContent = '可以继续采购'
+        shell.className = 'action-footer is-good'
+        hint.textContent = '当前最推荐直接生成采购建议；如果你更关心替换成本，也可以先看可替代项。'
+        if (stats.replaceableCount >= Math.max(3, stats.exactCount)) {
+          actions.innerHTML = `
+            <button type="button" class="priority-action" onclick="setProcessingTab('replaceable')">查看替代建议</button>
+            <button type="button" class="secondary-btn" onclick="downloadProcurementSuggestionCsv()">生成低成本方案</button>
+            <button type="button" class="secondary-btn" onclick="downloadCsv()">生成采购清单</button>
+            <button type="button" class="secondary-btn" onclick="saveCurrentPlan()">保存当前方案</button>
+          `
+          return
+        }
+        actions.innerHTML = `
+          <button type="button" class="priority-action" onclick="downloadCsv()">生成采购清单</button>
+          <button type="button" class="secondary-btn" onclick="downloadMatchResultCsv()">导出匹配结果</button>
+          <button type="button" class="secondary-btn" onclick="downloadProcurementSuggestionCsv()">导出采购建议</button>
+          <button type="button" class="secondary-btn" onclick="saveCurrentPlan()">保存当前方案</button>
+        `
+      }
+
+      function setProcessingTab(tab) {
+        currentResultTab = String(tab || 'todo')
+        document.querySelectorAll('#processingTabs [data-processing-tab]').forEach((node) => {
+          node.classList.toggle('is-active', String(node.dataset.processingTab || '') === currentResultTab)
+        })
+        currentResultPage = 1
+        renderResults(currentJob && currentJob.results ? currentJob.results : [])
+      }
+
+      function jumpToHighRisk() {
+        setProcessingTab('high_risk')
+        document.getElementById('reviewRows')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+
+      function triggerClientCsv(filename, headers, rows) {
+        const csv = [headers.join(','), ...rows.map((row) => row.map((cell) => `"${String(cell == null ? '' : cell).replace(/"/g, '""')}"`).join(','))].join('\n')
+        const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(url)
+      }
+
+      function downloadMatchResultCsv() {
+        const list = currentJob && Array.isArray(currentJob.results) ? currentJob.results : []
+        if (!list.length) {
+          alert('当前没有可导出的匹配结果。')
+          return
+        }
+        triggerClientCsv(
+          `match-result-${new Date().toISOString().slice(0, 10)}.csv`,
+          ['状态', '乐高零件名', '乐高编号', '数量', '原始颜色', '建议高砖件', '建议颜色', '兼容等级', '原因', '推荐动作', '小计'],
+          list.map((item) => [
+            getResultDisplayStatus(item).label,
+            item.name || '',
+            item.part_no || '',
+            item.qty || 0,
+            item.color_name || item.color_no || '',
+            item.resolved_part_name || item.resolved_part_no || '',
+            item.resolved_color_no || '',
+            getCompatibilityLevel(item),
+            getReasonLabel(item),
+            getRecommendedAction(item),
+            formatPrice(item.line_cost || 0) || '',
+          ])
+        )
+      }
+
+      function downloadMissingOnlyCsv() {
+        const list = (currentJob && Array.isArray(currentJob.results) ? currentJob.results : []).filter(
+          (item) => getResultDisplayStatus(item).key === 'blocked'
+        )
+        if (!list.length) {
+          alert('当前没有缺失清单。')
+          return
+        }
+        triggerClientCsv(
+          `missing-parts-${new Date().toISOString().slice(0, 10)}.csv`,
+          ['乐高零件名', '乐高编号', '数量', '颜色', '原因', '建议动作'],
+          list.map((item) => [
+            item.name || '',
+            item.part_no || '',
+            item.qty || 0,
+            item.color_name || item.color_no || '',
+            getReasonLabel(item),
+            getRecommendedAction(item),
+          ])
+        )
+      }
+
+      function downloadProcurementSuggestionCsv() {
+        const list = (currentJob && Array.isArray(currentJob.results) ? currentJob.results : []).filter((item) =>
+          ['exact', 'replaceable'].includes(getResultDisplayStatus(item).key)
+        )
+        if (!list.length) {
+          alert('当前没有可导出的采购建议。')
+          return
+        }
+        triggerClientCsv(
+          `procurement-suggestion-${new Date().toISOString().slice(0, 10)}.csv`,
+          ['建议高砖件', '建议颜色', '数量', '状态', '兼容等级', '单价', '小计'],
+          list.map((item) => [
+            item.resolved_part_name || item.resolved_part_no || '',
+            item.resolved_color_no || '',
+            item.qty || 0,
+            getResultDisplayStatus(item).label,
+            getCompatibilityLevel(item),
+            formatPrice(item.unit_cost || 0) || '',
+            formatPrice(item.line_cost || 0) || '',
+          ])
+        )
+      }
+
+      function openReplacementDrawerByLine(lineNo) {
+        const list = currentJob && Array.isArray(currentJob.results) ? currentJob.results : []
+        const match = list.find((item) => Number(item.line_no || 0) === Number(lineNo || 0))
+        if (!match) {
+          return
+        }
+        currentReplacementItem = match
+        const detail = buildReplacementDetail(match)
+        document.getElementById('replacementDrawerTitle').textContent = match.name || match.part_no || '替代方案详情'
+        document.getElementById('replacementDrawerSubtitle').textContent = `${match.part_no || '-'} · ${detail.status.label} · ${detail.compatibility}`
+        document.getElementById('replacementDrawerBody').innerHTML = `
+          <div class="drawer-block">
+            <h4>原始乐高零件</h4>
+            <div class="drawer-kv">
+              <div class="drawer-kv-item"><div class="label">零件</div><div class="value">${escapeHtml(match.name || match.part_no || '-')}</div></div>
+              <div class="drawer-kv-item"><div class="label">编号 / 数量</div><div class="value">${escapeHtml(`${match.part_no || '-'} · x${match.qty || 0}`)}</div></div>
+              <div class="drawer-kv-item"><div class="label">原始颜色</div><div class="value">${buildColorCell(match.color_no, 'lego', match.color_name || '')}</div></div>
+              <div class="drawer-kv-item"><div class="label">当前状态</div><div class="value">${escapeHtml(detail.status.label)}</div></div>
+            </div>
+          </div>
+          <div class="drawer-block">
+            <h4>推荐高砖替代件</h4>
+            <div class="drawer-kv">
+              <div class="drawer-kv-item"><div class="label">建议件</div><div class="value">${escapeHtml(match.resolved_part_name || match.resolved_part_no || '待确认')}</div></div>
+              <div class="drawer-kv-item"><div class="label">建议编号</div><div class="value">${escapeHtml(match.resolved_part_no || '-')}</div></div>
+              <div class="drawer-kv-item"><div class="label">建议颜色</div><div class="value">${buildColorCell(match.resolved_color_no, 'gobricks')}</div></div>
+              <div class="drawer-kv-item"><div class="label">库存 / 可采购</div><div class="value">${escapeHtml(
+                match.resolved_meta && match.resolved_meta.inventory !== undefined
+                  ? `库存 ${match.resolved_meta.inventory}`
+                  : '库存待确认'
+              )}</div></div>
+            </div>
+          </div>
+          <div class="drawer-block">
+            <h4>为什么推荐这样替换</h4>
+            <div class="drawer-kv">
+              <div class="drawer-kv-item"><div class="label">替代理由</div><div class="value">${escapeHtml(detail.sourceLabel)}</div></div>
+              <div class="drawer-kv-item"><div class="label">差异点</div><div class="value">${escapeHtml(getReasonLabel(match))}</div></div>
+              <div class="drawer-kv-item"><div class="label">兼容等级</div><div class="value">${escapeHtml(detail.compatibility)}</div></div>
+              <div class="drawer-kv-item"><div class="label">是否推荐</div><div class="value">${escapeHtml(getRecommendedAction(match))}</div></div>
+              <div class="drawer-kv-item"><div class="label">单价 / 小计</div><div class="value">${escapeHtml(
+                `${formatPrice(match.unit_cost || 0) || '成本待确认'} / ${formatPrice(match.line_cost || 0) || '成本待确认'}`
+              )}</div></div>
+              <div class="drawer-kv-item"><div class="label">风险等级</div><div class="value">${escapeHtml(match.risk || '-')}</div></div>
+            </div>
+            <details class="result-details">
+              <summary><span class="result-details-trigger">展开技术说明</span></summary>
+              <div class="drawer-kv" style="margin-top:10px;">
+                <div class="drawer-kv-item"><div class="label">stage</div><div class="value">${escapeHtml(match.stage || '-')}</div></div>
+                <div class="drawer-kv-item"><div class="label">source</div><div class="value">${escapeHtml(match.candidate_source || '-')}</div></div>
+                <div class="drawer-kv-item"><div class="label">score</div><div class="value">${escapeHtml(
+                  match.optimizer && Number.isFinite(Number(match.optimizer.total_score)) ? Number(match.optimizer.total_score).toFixed(1) : '-'
+                )}</div></div>
+                <div class="drawer-kv-item"><div class="label">备注</div><div class="value">${escapeHtml(match.note || '-')}</div></div>
+              </div>
+            </details>
+          </div>`
+        document.getElementById('replacementDrawerMask').classList.add('open')
+        document.getElementById('replacementDrawer').classList.add('open')
+        document.getElementById('replacementDrawer').setAttribute('aria-hidden', 'false')
+      }
+
+      function closeReplacementDrawer(event) {
+        if (event && event.target && event.target.id && event.target.id !== 'replacementDrawerMask') {
+          return
+        }
+        document.getElementById('replacementDrawerMask').classList.remove('open')
+        document.getElementById('replacementDrawer').classList.remove('open')
+        document.getElementById('replacementDrawer').setAttribute('aria-hidden', 'true')
+      }
+
+      function saveCurrentPlan() {
+        alert('保存方案会在专业版提供。当前可先导出匹配结果或采购建议。')
+      }
+
+      function contactManualHelp() {
+        alert('联系人工协助入口预留中。当前可先导出缺失清单，方便人工跟进。')
+      }
+
+      function confirmReplacementPlan() {
+        closeReplacementDrawer()
+        alert('已确认当前替换方案。当前公开版不写回后端，仅作临时查看。')
+      }
+
+      function keepOriginalLegoPart() {
+        closeReplacementDrawer()
+        alert('已记录“保留乐高件”的操作意图。当前公开版不写回后端，仅作临时查看。')
+      }
+
+      function markManualReview() {
+        closeReplacementDrawer()
+        alert('已标记为人工处理。当前公开版不写回后端，仅作临时查看。')
+      }
+
+      function markManualReviewByLine(lineNo) {
+        openReplacementDrawerByLine(lineNo)
       }
 
       function renderJob(job) {
@@ -3795,11 +7177,16 @@
         currentResultPage = 1
         syncStrategyPills()
         if (!currentJob) {
+          renderPublicLite(null)
           renderStageSummary([])
+          renderProjectSummary(null)
+          renderMatchOverviewStats(null)
           renderResults([])
           renderReviewQueue([])
+          renderRiskSummary([])
           renderImageGaps([])
           renderExport([])
+          renderActionFooter(null)
           updateMetrics({})
           return
         }
@@ -3810,14 +7197,20 @@
         document.getElementById('sourceName').value = project.source_name || ''
         syncSourceDisplay()
         document.getElementById('colorMode').value = strategy.color_mode || 'balanced'
+        document.getElementById('optimizerMode').value = strategy.optimizer_mode || 'reliability'
         document.getElementById('allowDisplaySub').checked = Boolean(strategy.allow_display_sub)
         document.getElementById('allowStructuralSub').checked = Boolean(strategy.allow_structural_sub)
         syncStrategyPills()
+        renderPublicLite(currentJob)
         renderStageSummary(currentJob.results || [])
+        renderProjectSummary(currentJob)
+        renderMatchOverviewStats(currentJob)
         renderResults(currentJob.results || [])
         renderReviewQueue(currentJob.results || [])
+        renderRiskSummary(currentJob.results || [])
         renderImageGaps(currentJob.results || [])
         renderExport(currentJob.results || [])
+        renderActionFooter(currentJob)
         updateMetrics(currentJob.summary || {})
       }
 
@@ -3912,6 +7305,7 @@
 
       function renderConvertReport(report) {
         const summaryEl = document.getElementById('convertSummaryLine')
+        const digestEl = document.getElementById('convertDigest')
         const rows = document.getElementById('convertRows')
         const safe = report || {}
         currentConvertReport = report || null
@@ -3920,6 +7314,16 @@
         if (!fullList.length) {
           currentConvertPage = 1
           summaryEl.textContent = '暂无高砖直连结果。'
+          if (digestEl) {
+            digestEl.innerHTML = `<div class="convert-digest-card">
+              <h4>高砖判断先看这里</h4>
+              <p>上传后，这里会先告诉你哪些已经能用、哪些只是缺颜色、哪些要换件，不用先看下面的大列表。</p>
+            </div>
+            <div class="convert-digest-card">
+              <h4>什么时候再展开</h4>
+              <p>只有当你想逐条核对高砖原始返回、筛选问题类型或导出设计师版时，再展开下面详情。</p>
+            </div>`
+          }
           document.getElementById('designerExportHint').textContent = '基于当前直连结果导出，仅保留设计师调整所需信息。'
           renderConvertPager(0, getConvertPageSize(), 1)
           rows.innerHTML = '<tr><td colspan="6" class="muted">尚未执行高砖直连转换。</td></tr>'
@@ -3928,8 +7332,21 @@
         let list = sortConvertItems(filterConvertItemsBySearch(filterConvertItems(fullList)))
         const keyword = String(document.getElementById('convertSearch')?.value || '').trim()
         const suggestionText = sum.indexed_candidates ? `；补充候选建议 ${sum.indexed_candidates || 0}` : ''
+        const readableSummary = `这次共识别 ${sum.input_rows || 0} 行，其中直接命中 ${sum.remote_success || 0} 行，缺颜色 ${sum.remote_color_deficiency || 0} 行，库存不足 ${sum.remote_inventory_deficiency || 0} 行，缺零件 ${sum.remote_miss || 0} 行${sum.indexed_candidates ? `，另外补出 ${sum.indexed_candidates || 0} 条候选建议` : ''}。`
         const baseSummary =
           `输入 ${sum.input_rows || 0} 行；本地缓存命中 ${sum.local_cached_hits || 0}；印刷件回退 ${sum.local_printed_fallbacks || 0}；高砖成功 ${sum.remote_success || 0}；缺颜色 ${sum.remote_color_deficiency || 0}；库存不足 ${sum.remote_inventory_deficiency || 0}；缺零件 ${sum.remote_miss || 0}${suggestionText}。`
+        if (digestEl) {
+          digestEl.innerHTML = `<div class="convert-digest-card">
+            <h4>高砖判断先看这里</h4>
+            <p>${escapeHtml(readableSummary)}</p>
+          </div>
+          <div class="convert-digest-card">
+            <h4>建议处理顺序</h4>
+            <p>${escapeHtml(
+              `${sum.remote_miss ? `先看 ${sum.remote_miss} 条缺件/不售卖项，` : ''}${sum.remote_color_deficiency || sum.remote_inventory_deficiency ? `再处理 ${Number(sum.remote_color_deficiency || 0) + Number(sum.remote_inventory_deficiency || 0)} 条缺色或库存不足项，` : ''}最后再核对印刷件和候选建议。`
+            )}</p>
+          </div>`
+        }
         if (!list.length) {
           currentConvertPage = 1
           summaryEl.textContent = `${baseSummary} 当前筛选条件下没有匹配条目。`
@@ -4171,8 +7588,15 @@
       }
 
       async function loadRules() {
-        const ret = await apiGet('/api/admin/part-adapter/rules')
+        const ret = await apiGet(
+          isPublicToolMode() ? '/api/tools/part-adapter/catalogs' : '/api/admin/part-adapter/rules'
+        )
         currentLegoColorCatalog = ret.lego_color_catalog || {}
+        if (isPublicToolMode()) {
+          currentGobricksColorCatalog = ret.gobricks_color_catalog || {}
+          renderGobricksColorReference(ret.gobricks_color_reference || [])
+          return
+        }
         setJsonTextarea('exactPartMapInput', ret.exact_part_map || {})
         setJsonTextarea('partMetaInput', ret.part_meta || {})
         setJsonTextarea('colorRulesInput', ret.color_rules || {})
@@ -4250,6 +7674,7 @@
           document.getElementById('sourceName').value = ret.filename || file.name || ''
           syncSourceDisplay()
           document.getElementById('bomImportHint').textContent = `已导入 ${ret.filename || file.name}，解析 ${ret.row_count || 0} 行。`
+          collapseBomInput()
           if (!isPublicToolMode()) {
             await loadAnalytics()
           }
@@ -4297,13 +7722,14 @@
             document.getElementById('sourceName').value = bom.filename || file.name || ''
             syncSourceDisplay()
             document.getElementById('bomImportHint').textContent = `已导入 ${bom.filename || file.name}，解析 ${bom.row_count || 0} 行。`
+            collapseBomInput()
           }
           renderConvertReport(ret.report || null)
           await loadRules()
           if (!isPublicToolMode()) {
             await loadAnalytics()
           }
-          if (isPublicToolMode()) {
+          if (isPublicToolMode() && publicFullWorkspaceExpanded) {
             focusConvertSection()
           }
           setStatus('高砖直连转换完成')
@@ -4328,12 +7754,16 @@
             source_name: document.getElementById('sourceName').value.trim(),
             bom_text: document.getElementById('bomInput').value,
             color_mode: document.getElementById('colorMode').value,
+            optimizer_mode: document.getElementById('optimizerMode').value,
+            optimizer_profile: 'v1',
             allow_display_sub: document.getElementById('allowDisplaySub').checked,
             allow_structural_sub: document.getElementById('allowStructuralSub').checked
           }
-          const ret = await apiPost('/api/admin/part-adapter/analyze', payload)
+          const ret = await apiPost(`${getPartAdapterApiPrefix()}/analyze`, payload)
           renderJob(ret.job || null)
-          await loadJobs()
+          if (!isPublicToolMode()) {
+            await loadJobs()
+          }
           if (!isPublicToolMode()) {
             await loadAnalytics()
           }
@@ -4345,6 +7775,10 @@
       }
 
       async function loadJobs() {
+        if (isPublicToolMode()) {
+          renderJobs([], 0)
+          return
+        }
         try {
           const ret = await apiGet('/api/admin/part-adapter/jobs?limit=12')
           renderJobs(ret.items || [], ret.total || 0)
@@ -4354,6 +7788,9 @@
       }
 
       async function loadJobDetail(jobId) {
+        if (isPublicToolMode()) {
+          return
+        }
         try {
           setStatus('加载记录中...')
           const ret = await apiGet(`/api/admin/part-adapter/jobs/${encodeURIComponent(jobId)}`)
@@ -4366,6 +7803,9 @@
       }
 
       async function updateReviewStatus(lineNo, nextStatus) {
+        if (isPublicToolMode()) {
+          return
+        }
         if (!currentJob || !currentJob.job_id) {
           return
         }
@@ -4391,7 +7831,7 @@
         }
         try {
           const cfg = getCfg()
-          const res = await fetch(`${cfg.baseUrl}/api/admin/part-adapter/jobs/${encodeURIComponent(currentJob.job_id)}/export.csv`, {
+          const res = await fetch(`${cfg.baseUrl}${getPartAdapterApiPrefix()}/jobs/${encodeURIComponent(currentJob.job_id)}/export.csv`, {
             headers: buildHeaders(false)
           })
           if (!res.ok) {
@@ -4428,7 +7868,10 @@
           setStatus('加载中...')
           syncStrategyPills()
           renderConvertReport(null)
-          const tasks = [loadRules(), loadJobs()]
+          const tasks = [loadRules()]
+          if (!isPublicToolMode()) {
+            tasks.push(loadJobs())
+          }
           if (!isPublicToolMode()) {
             tasks.push(loadAnalytics())
           }
@@ -4440,6 +7883,7 @@
       }
 
       document.getElementById('colorMode').addEventListener('change', syncStrategyPills)
+      document.getElementById('optimizerMode').addEventListener('change', syncStrategyPills)
       document.getElementById('simpleMode').addEventListener('change', applySimpleMode)
       document.getElementById('allowDisplaySub').addEventListener('change', syncStrategyPills)
       document.getElementById('allowStructuralSub').addEventListener('change', syncStrategyPills)
@@ -4456,12 +7900,49 @@
         }
         void handleBomFilePicked()
       })
+      document.getElementById('model3dFileInput').addEventListener('change', () => {
+        const input = document.getElementById('model3dFileInput')
+        const file = input && input.files ? input.files[0] : null
+        if (!file) {
+          setModel3dHint('上传模型文件后可在页面直接 3D 查看。')
+          return
+        }
+        setModel3dHint(`已选择 ${file.name}，点击“加载 3D 预览”。`)
+      })
       document.getElementById('resultImageFilter').addEventListener('change', () => {
         currentResultPage = 1
         renderResults(currentJob && currentJob.results ? currentJob.results : [])
         renderReviewQueue(currentJob && currentJob.results ? currentJob.results : [])
       })
       document.getElementById('resultSearch').addEventListener('input', () => {
+        currentResultPage = 1
+        renderResults(currentJob && currentJob.results ? currentJob.results : [])
+        renderReviewQueue(currentJob && currentJob.results ? currentJob.results : [])
+      })
+      document.getElementById('resultFocusTop').addEventListener('change', () => {
+        currentResultPage = 1
+        renderResults(currentJob && currentJob.results ? currentJob.results : [])
+      })
+      document.getElementById('resultSort').addEventListener('change', () => {
+        currentResultPage = 1
+        renderResults(currentJob && currentJob.results ? currentJob.results : [])
+      })
+      document.getElementById('processingTabs').addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-processing-tab]')
+        if (!btn) {
+          return
+        }
+        setProcessingTab(String(btn.dataset.processingTab || 'todo'))
+      })
+      document.getElementById('resultQuickFilters').addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-result-filter]')
+        if (!btn) {
+          return
+        }
+        currentResultQuickFilter = String(btn.dataset.resultFilter || 'all')
+        document.querySelectorAll('#resultQuickFilters [data-result-filter]').forEach((node) => {
+          node.classList.toggle('is-active', node === btn)
+        })
         currentResultPage = 1
         renderResults(currentJob && currentJob.results ? currentJob.results : [])
         renderReviewQueue(currentJob && currentJob.results ? currentJob.results : [])
@@ -4496,6 +7977,7 @@
         if (event.key === 'Escape') {
           closeImagePreview()
           closeDetailModal()
+          closeReplacementDrawer()
         }
       })
 
@@ -4505,6 +7987,7 @@
       syncStrategyPills()
       syncSourceDisplay()
       applySimpleMode()
+      renderPublicLite(null)
       reloadAll()
     </script>
   </body>

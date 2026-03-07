@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>零件适配访问统计</title>
+    <style>
+      :root {
+        --bg: #eff4fb;
+        --surface: rgba(255, 255, 255, 0.96);
+        --border: #dbe4f5;
+        --text: #1f304d;
+        --subtle: #66758f;
+        --primary: #173b86;
+        --primary-strong: #0f2f78;
+        --shadow: 0 18px 42px rgba(20, 45, 95, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top right, rgba(83, 129, 216, 0.14), transparent 28%),
+          linear-gradient(180deg, #f7faff 0%, var(--bg) 100%);
+      }
+
+      .page {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 28px 16px 40px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .card {
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        padding: 22px;
+      }
+
+      .back-link,
+      button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid #d6e3fb;
+        background: #fff;
+        color: var(--primary);
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #33579e;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--primary);
+      }
+
+      h1, h2 {
+        margin: 0;
+        color: #12294f;
+      }
+
+      h1 {
+        font-size: 30px;
+        line-height: 1.12;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .subtitle,
+      .hint {
+        margin-top: 10px;
+        font-size: 14px;
+        line-height: 1.7;
+        color: var(--subtle);
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .metric .label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #687994;
+      }
+
+      .metric .value {
+        margin-top: 10px;
+        font-size: 34px;
+        line-height: 1;
+        font-weight: 900;
+        color: var(--primary);
+      }
+
+      .metric .sub {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #7b89a0;
+      }
+
+      .delta {
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .delta.is-up {
+        background: #edf9f0;
+        border: 1px solid #cde8d6;
+        color: #0c7a3f;
+      }
+
+      .delta.is-down {
+        background: #fff0f0;
+        border: 1px solid #f3c7c7;
+        color: #b42318;
+      }
+
+      .delta.is-flat {
+        background: #f5f8fe;
+        border: 1px solid #dce6fa;
+        color: #536885;
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .list-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px dashed #dbe4f8;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .list-item strong {
+        color: #173b86;
+      }
+
+      .empty {
+        padding: 8px 0 2px;
+        color: #6c7d97;
+        line-height: 1.65;
+      }
+
+      .funnel-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .funnel-card {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .funnel-card h3 {
+        margin: 0;
+        font-size: 15px;
+        color: #173b86;
+      }
+
+      .funnel-value {
+        margin-top: 10px;
+        font-size: 30px;
+        line-height: 1;
+        font-weight: 900;
+        color: var(--primary);
+      }
+
+      .funnel-sub {
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 1.6;
+        color: #6d7f99;
+      }
+
+      @media (max-width: 900px) {
+        .metrics,
+        .detail-grid,
+        .funnel-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <section class="card">
+        <div class="toolbar">
+          <a class="back-link" href="/admin/part-adapter">返回零件适配工作台</a>
+          <button type="button" id="refreshButton">刷新统计</button>
+        </div>
+        <div class="eyebrow">Analytics</div>
+        <h1>零件适配访问统计</h1>
+        <div class="subtitle">只读页面。把公开首页访问、公开结果页访问、独立访客和实际使用动作拆开显示，便于看清工具真实使用情况。</div>
+        <div class="hint" id="updatedAtHint">等待加载统计。</div>
+      </section>
+
+      <section class="card">
+        <h2>今日概览</h2>
+        <div class="metrics" style="margin-top: 12px;">
+          <div class="metric">
+            <div class="label">公开首页访问</div>
+            <div class="value" id="todayPublicHomeViews">0</div>
+            <div class="sub">访问快速判断页的人次</div>
+            <div class="delta is-flat" id="todayPublicHomeDelta">较昨日持平</div>
+          </div>
+          <div class="metric">
+            <div class="label">公开结果页访问</div>
+            <div class="value" id="todayPublicResultsViews">0</div>
+            <div class="sub">进入完整结果页的人次</div>
+            <div class="delta is-flat" id="todayPublicResultsDelta">较昨日持平</div>
+          </div>
+          <div class="metric">
+            <div class="label">今日独立访客</div>
+            <div class="value" id="todayUniqueVisitors">0</div>
+            <div class="sub">按访客指纹去重</div>
+            <div class="delta is-flat" id="todayUniqueVisitorsDelta">较昨日持平</div>
+          </div>
+          <div class="metric">
+            <div class="label">今日工具使用</div>
+            <div class="value" id="todayUses">0</div>
+            <div class="sub">导入 / 直连 / 适配 / 导出总次数</div>
+            <div class="delta is-flat" id="todayUsesDelta">较昨日持平</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>转化漏斗</h2>
+        <div class="hint">看公开用户从进入首页，到打开完整结果，再到真正开始使用工具的转化情况。</div>
+        <div class="detail-grid" style="margin-top: 12px;">
+          <div>
+            <div class="hint" style="margin-top: 0;">今日漏斗</div>
+            <div class="funnel-grid" style="margin-top: 10px;">
+              <div class="funnel-card">
+                <h3>首页访问</h3>
+                <div class="funnel-value" id="funnelTodayHomeViews">0</div>
+                <div class="funnel-sub">公开快速判断页访问量</div>
+              </div>
+              <div class="funnel-card">
+                <h3>结果页访问</h3>
+                <div class="funnel-value" id="funnelTodayResultsViews">0</div>
+                <div class="funnel-sub" id="funnelTodayResultsRate">打开完整结果率 0%</div>
+              </div>
+              <div class="funnel-card">
+                <h3>实际使用</h3>
+                <div class="funnel-value" id="funnelTodayUses">0</div>
+                <div class="funnel-sub" id="funnelTodayUseRate">首页到使用转化率 0%</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="hint" style="margin-top: 0;">近 7 天漏斗</div>
+            <div class="funnel-grid" style="margin-top: 10px;">
+              <div class="funnel-card">
+                <h3>首页访问</h3>
+                <div class="funnel-value" id="funnelLast7HomeViews">0</div>
+                <div class="funnel-sub">近 7 天公开首页访问累计</div>
+              </div>
+              <div class="funnel-card">
+                <h3>结果页访问</h3>
+                <div class="funnel-value" id="funnelLast7ResultsViews">0</div>
+                <div class="funnel-sub" id="funnelLast7ResultsRate">打开完整结果率 0%</div>
+              </div>
+              <div class="funnel-card">
+                <h3>实际使用</h3>
+                <div class="funnel-value" id="funnelLast7Uses">0</div>
+                <div class="funnel-sub" id="funnelLast7UseRate">首页到使用转化率 0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>近 7 天趋势</h2>
+        <div class="metrics" style="margin-top: 12px;">
+          <div class="metric">
+            <div class="label">公开首页访问</div>
+            <div class="value" id="last7PublicHomeViews">0</div>
+            <div class="sub">快速判断页访问累计</div>
+          </div>
+          <div class="metric">
+            <div class="label">公开结果页访问</div>
+            <div class="value" id="last7PublicResultsViews">0</div>
+            <div class="sub">完整结果页访问累计</div>
+          </div>
+          <div class="metric">
+            <div class="label">后台工作台访问</div>
+            <div class="value" id="last7AdminViews">0</div>
+            <div class="sub">内部工作台和统计页访问</div>
+          </div>
+          <div class="metric">
+            <div class="label">近 7 天使用</div>
+            <div class="value" id="last7Uses">0</div>
+            <div class="sub">真实操作次数累计</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="detail-grid">
+          <div>
+            <h2>今日动作分布</h2>
+            <div class="list" id="todayActionList" style="margin-top: 12px;">
+              <div class="empty">等待加载统计。</div>
+            </div>
+          </div>
+          <div>
+            <h2>最近记录</h2>
+            <div class="list" id="recentList" style="margin-top: 12px;">
+              <div class="empty">暂无数据。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const ADMIN_SESSION_STORAGE_KEY = 'kwc_admin_session_token_v1'
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;')
+      }
+
+      function getHeaders() {
+        const token = String(localStorage.getItem(ADMIN_SESSION_STORAGE_KEY) || '').trim()
+        return token ? { 'X-Admin-Session': token } : {}
+      }
+
+      function formatDateTime(value) {
+        if (!value) return '等待加载统计。'
+        const date = new Date(value)
+        if (Number.isNaN(date.getTime())) return String(value)
+        return `最近更新：${date.toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}`
+      }
+
+      async function apiGet(path) {
+        const res = await fetch(window.location.origin + path, { headers: getHeaders() })
+        const text = await res.text()
+        let body = {}
+        try {
+          body = text ? JSON.parse(text) : {}
+        } catch (err) {
+          body = { detail: text || '请求失败' }
+        }
+        if (!res.ok) {
+          throw new Error(body.detail || '请求失败')
+        }
+        return body
+      }
+
+      function renderActionList(today) {
+        const host = document.getElementById('todayActionList')
+        const entries = [
+          ['导入清单', Number(today.import_bom || 0)],
+          ['直连高砖', Number(today.convert_gobricks || 0)],
+          ['运行适配', Number(today.analyze || 0)],
+          ['导出结果', Number(today.exports || 0)],
+        ]
+        host.innerHTML = entries
+          .map(([label, value]) => `<div class="list-item"><span><strong>${escapeHtml(label)}</strong></span><span>${escapeHtml(String(value))}</span></div>`)
+          .join('')
+      }
+
+      function renderRecentList(recent) {
+        const host = document.getElementById('recentList')
+        const list = Array.isArray(recent) ? recent : []
+        if (!list.length) {
+          host.innerHTML = '<div class="empty">暂无数据。</div>'
+          return
+        }
+        host.innerHTML = list.map((item) => {
+          const safe = item && typeof item === 'object' ? item : {}
+          const detail = String(safe.source_name || safe.route || '-').trim() || '-'
+          return `<div class="list-item"><span><strong>${escapeHtml(String(safe.event_type || '-'))}</strong><br />${escapeHtml(detail)}</span><span>${escapeHtml(String(safe.at || '-'))}</span></div>`
+        }).join('')
+      }
+
+      function formatDelta(todayValue, yesterdayValue) {
+        const today = Number(todayValue || 0)
+        const yesterday = Number(yesterdayValue || 0)
+        const diff = today - yesterday
+        if (diff > 0) {
+          return { cls: 'is-up', text: `较昨日 +${diff}` }
+        }
+        if (diff < 0) {
+          return { cls: 'is-down', text: `较昨日 ${diff}` }
+        }
+        return { cls: 'is-flat', text: '较昨日持平' }
+      }
+
+      function renderDelta(id, todayValue, yesterdayValue) {
+        const node = document.getElementById(id)
+        if (!node) return
+        const delta = formatDelta(todayValue, yesterdayValue)
+        node.className = `delta ${delta.cls}`
+        node.textContent = delta.text
+      }
+
+      function renderFunnel(prefix, funnel) {
+        const safe = funnel && typeof funnel === 'object' ? funnel : {}
+        document.getElementById(`${prefix}HomeViews`).textContent = String(Number(safe.home_views || 0))
+        document.getElementById(`${prefix}ResultsViews`).textContent = String(Number(safe.results_views || 0))
+        document.getElementById(`${prefix}Uses`).textContent = String(Number(safe.uses || 0))
+        document.getElementById(`${prefix}ResultsRate`).textContent = `打开完整结果率 ${Number(safe.result_view_rate || 0).toFixed(1)}%`
+        document.getElementById(`${prefix}UseRate`).textContent = `首页到使用转化率 ${Number(safe.use_rate || 0).toFixed(1)}%`
+      }
+
+      function render(summary) {
+        const safe = summary && typeof summary === 'object' ? summary : {}
+        const today = safe.today && typeof safe.today === 'object' ? safe.today : {}
+        const yesterday = safe.yesterday && typeof safe.yesterday === 'object' ? safe.yesterday : {}
+        const last7 = safe.last_7_days && typeof safe.last_7_days === 'object' ? safe.last_7_days : {}
+        const funnelToday = safe.funnel_today && typeof safe.funnel_today === 'object' ? safe.funnel_today : {}
+        const funnelLast7 = safe.funnel_last_7_days && typeof safe.funnel_last_7_days === 'object' ? safe.funnel_last_7_days : {}
+        const todayUses =
+          Number(today.import_bom || 0) +
+          Number(today.convert_gobricks || 0) +
+          Number(today.analyze || 0) +
+          Number(today.exports || 0)
+        const yesterdayUses =
+          Number(yesterday.import_bom || 0) +
+          Number(yesterday.convert_gobricks || 0) +
+          Number(yesterday.analyze || 0) +
+          Number(yesterday.exports || 0)
+        const last7Uses =
+          Number(last7.import_bom || 0) +
+          Number(last7.convert_gobricks || 0) +
+          Number(last7.analyze || 0) +
+          Number(last7.exports || 0)
+
+        document.getElementById('updatedAtHint').textContent = formatDateTime(safe.updated_at || '')
+        document.getElementById('todayPublicHomeViews').textContent = String(Number(today.public_home_views || 0))
+        document.getElementById('todayPublicResultsViews').textContent = String(Number(today.public_results_views || 0))
+        document.getElementById('todayUniqueVisitors').textContent = String(Number(today.unique_visitors || 0))
+        document.getElementById('todayUses').textContent = String(todayUses)
+        renderDelta('todayPublicHomeDelta', today.public_home_views || 0, yesterday.public_home_views || 0)
+        renderDelta('todayPublicResultsDelta', today.public_results_views || 0, yesterday.public_results_views || 0)
+        renderDelta('todayUniqueVisitorsDelta', today.unique_visitors || 0, yesterday.unique_visitors || 0)
+        renderDelta('todayUsesDelta', todayUses, yesterdayUses)
+        document.getElementById('last7PublicHomeViews').textContent = String(Number(last7.public_home_views || 0))
+        document.getElementById('last7PublicResultsViews').textContent = String(Number(last7.public_results_views || 0))
+        document.getElementById('last7AdminViews').textContent = String(Number(last7.admin_views || 0))
+        document.getElementById('last7Uses').textContent = String(last7Uses)
+        renderFunnel('funnelToday', funnelToday)
+        renderFunnel('funnelLast7', funnelLast7)
+        renderActionList(today)
+        renderRecentList(safe.recent || [])
+      }
+
+      async function loadAnalytics() {
+        try {
+          const ret = await apiGet('/api/admin/part-adapter/analytics')
+          render(ret.summary || {})
+        } catch (err) {
+          document.getElementById('updatedAtHint').textContent = `加载失败：${err.message || '请求异常'}`
+          document.getElementById('todayActionList').innerHTML = '<div class="empty">请先进入内部工作台完成登录，再返回这里查看统计。</div>'
+          document.getElementById('recentList').innerHTML = '<div class="empty">当前无法读取统计。</div>'
+        }
+      }
+
+      document.getElementById('refreshButton').addEventListener('click', () => {
+        loadAnalytics()
+      })
+
+      loadAnalytics()
+    </script>
+  </body>
+</html>

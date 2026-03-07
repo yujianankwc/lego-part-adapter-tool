@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>零件适配助手</title>
+    <link rel="icon" type="image/svg+xml" href="/static/part_adapter_ui/part-adapter-favicon.svg" />
+    <link rel="shortcut icon" href="/static/part_adapter_ui/part-adapter-favicon.svg" />
+    <style>
+      :root {
+        --bg: #eff4fb;
+        --surface: rgba(255, 255, 255, 0.94);
+        --border: #dbe4f5;
+        --text: #1f304d;
+        --subtle: #66758f;
+        --primary: #173b86;
+        --primary-strong: #0f2f78;
+        --good: #15803d;
+        --warn: #a16207;
+        --danger: #b42318;
+        --shadow: 0 18px 42px rgba(20, 45, 95, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top right, rgba(83, 129, 216, 0.14), transparent 28%),
+          linear-gradient(180deg, #f7faff 0%, var(--bg) 100%);
+      }
+
+      .page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 28px 16px 44px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .card {
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .upload-card,
+      .summary-card,
+      .action-card,
+      .tasks-card {
+        padding: 22px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #33579e;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--primary);
+      }
+
+      .brand-lockup {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+      }
+
+      .brand-mark {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        flex: 0 0 auto;
+      }
+
+      .brand-mark img {
+        width: 60px;
+        height: 60px;
+        display: block;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 34px;
+        line-height: 1.08;
+        color: #12294f;
+      }
+
+      .subtitle {
+        margin: 12px 0 0;
+        font-size: 15px;
+        line-height: 1.7;
+        color: #5d6f8d;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      button,
+      .link-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 0 16px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .primary-btn {
+        background: linear-gradient(180deg, var(--primary) 0%, var(--primary-strong) 100%);
+        color: #fff;
+        box-shadow: 0 14px 28px rgba(23, 59, 134, 0.16);
+      }
+
+      .secondary-btn,
+      .link-btn {
+        border-color: #d6e3fb;
+        background: #fff;
+        color: var(--primary);
+      }
+
+      .upload-hint,
+      .status-line,
+      .task-subtitle {
+        margin-top: 12px;
+        font-size: 13px;
+        line-height: 1.65;
+        color: var(--subtle);
+      }
+
+      .status-line {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid #dde6f8;
+        background: #f8fbff;
+      }
+
+      .file-notice {
+        display: none;
+        margin-top: 10px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid #d6e3fb;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        font-size: 13px;
+        line-height: 1.6;
+        color: #4f6384;
+      }
+
+      .file-notice strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+        color: #73839d;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .paste-shell {
+        display: none;
+        margin-top: 14px;
+      }
+
+      .paste-shell.open {
+        display: grid;
+        gap: 10px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 140px;
+        resize: vertical;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid #d6e3fb;
+        font: 13px/1.6 SFMono-Regular, Menlo, Consolas, monospace;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .stat {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .stat-value {
+        font-size: 34px;
+        line-height: 1;
+        font-weight: 900;
+        color: var(--primary);
+      }
+
+      .stat-label {
+        margin-top: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #687994;
+      }
+
+      .stat-sub {
+        margin-top: 6px;
+        font-size: 11px;
+        line-height: 1.5;
+        color: #8391a8;
+      }
+
+      .conclusion {
+        display: grid;
+        gap: 6px;
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 20px;
+        border: 1px solid #d8e4fb;
+        background: linear-gradient(180deg, #f9fbff 0%, #f2f6ff 100%);
+      }
+
+      .conclusion.is-good {
+        border-color: #d0e8d7;
+        background: linear-gradient(180deg, #f8fef9 0%, #eef8f0 100%);
+      }
+
+      .conclusion.is-warn {
+        border-color: #f0deb0;
+        background: linear-gradient(180deg, #fffdf8 0%, #fff7e4 100%);
+      }
+
+      .conclusion.is-danger {
+        border-color: #f0cfcf;
+        background: linear-gradient(180deg, #fffafa 0%, #fff1f1 100%);
+      }
+
+      .conclusion-title {
+        font-size: 18px;
+        font-weight: 900;
+        color: #173b86;
+      }
+
+      .conclusion-text {
+        font-size: 14px;
+        line-height: 1.65;
+        color: #5a6d8c;
+      }
+
+      .action-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 12px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .section-title {
+        margin: 0;
+        font-size: 20px;
+        color: #12294f;
+      }
+
+      .task-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .task-item {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        padding: 14px;
+        border-radius: 18px;
+        border: 1px solid #dce6fa;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      }
+
+      .thumb {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        border: 1px solid #d6e3fb;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: #6f7f99;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+
+      .task-main {
+        min-width: 0;
+        display: grid;
+        gap: 5px;
+      }
+
+      .task-top {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .task-name {
+        font-size: 15px;
+        font-weight: 800;
+        color: #17304f;
+      }
+
+      .task-code {
+        font-size: 12px;
+        color: #6c7d97;
+      }
+
+      .task-reason {
+        font-size: 13px;
+        color: #5a6d8c;
+        line-height: 1.6;
+      }
+
+      .task-name-line {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px;
+      }
+
+      .status-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .status-chip.is-replaceable {
+        background: #eef4ff;
+        border: 1px solid #cfe0fc;
+        color: #1d4a9a;
+      }
+
+      .status-chip.is-pending {
+        background: #fff7de;
+        border: 1px solid #f2dfab;
+        color: #9a6700;
+      }
+
+      .status-chip.is-blocked {
+        background: #fff0f0;
+        border: 1px solid #f3c7c7;
+        color: #b42318;
+      }
+
+      .bottom-links {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .page-footer {
+        display: grid;
+        gap: 4px;
+        justify-items: center;
+        padding: 4px 8px 0;
+        font-size: 12px;
+        line-height: 1.6;
+        color: #8a98af;
+      }
+
+      .compliance-note {
+        padding: 14px 16px;
+        border-radius: 18px;
+        border: 1px solid #dfe7f8;
+        background: rgba(255, 255, 255, 0.72);
+        font-size: 12px;
+        line-height: 1.75;
+        color: #74839d;
+      }
+
+      .is-hidden {
+        display: none !important;
+      }
+
+      .empty {
+        padding: 14px 0 2px;
+        font-size: 14px;
+        color: #6b7c96;
+      }
+
+      @media (max-width: 900px) {
+        .brand-lockup {
+          gap: 12px;
+          align-items: flex-start;
+        }
+
+        .brand-mark {
+          width: 52px;
+          height: 52px;
+        }
+
+        .brand-mark img {
+          width: 52px;
+          height: 52px;
+        }
+
+        .summary-grid,
+        .action-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .task-item {
+          grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .task-item > button {
+          grid-column: 1 / -1;
+        }
+
+        .page-footer {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <section class="card upload-card">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">
+            <img src="/static/part_adapter_ui/part-adapter-favicon.svg" alt="" />
+          </div>
+          <div>
+            <div class="eyebrow">Quick Check</div>
+            <h1>零件适配助手</h1>
+            <p class="subtitle">支持导入 LEGO® Studio 清单，帮助整理可直接匹配、替代或补缺的零件方案。</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="primary-btn" id="uploadButton">上传 Studio 清单</button>
+          <button type="button" class="secondary-btn" id="pasteToggleButton">粘贴零件清单</button>
+        </div>
+        <div class="upload-hint">
+          支持 `.csv / .txt / .tsv / .xlsx`。当前优先支持 LEGO® Studio 导出清单，以及包含零件编号、颜色、数量的常见零件列表；如果表里带有
+          `element_id` 或 `ldraw_id`，也可以尝试识别。
+        </div>
+        <div class="status-line" id="statusLine">上传后，系统会直接告诉你能不能做、缺什么、下一步该点哪里。</div>
+        <div class="file-notice" id="fileNotice"><strong>当前文件</strong><span id="fileNoticeName">未导入文件</span></div>
+        <div class="paste-shell" id="pasteShell">
+          <textarea id="pasteInput" placeholder="把零件清单直接粘贴到这里，然后点击“开始分析”。"></textarea>
+          <div class="actions" style="margin-top:0;">
+            <button type="button" class="primary-btn" id="analyzePasteButton">开始分析</button>
+            <button type="button" class="secondary-btn" id="closePasteButton">收起</button>
+          </div>
+        </div>
+        <input id="fileInput" type="file" accept=".csv,.txt,.tsv,.xlsx" hidden />
+      </section>
+
+      <section class="compliance-note">
+        本工具为第三方零件清单分析与适配建议工具，用于帮助用户整理零件匹配、替代与缺失信息，不代表相关品牌之间存在合作、授权或认可关系。
+      </section>
+
+      <section class="card summary-card" id="summarySection">
+        <div class="summary-grid">
+          <div class="stat"><div class="stat-value" id="totalQty">0</div><div class="stat-label">零件总数（颗）</div><div class="stat-sub" id="totalTypesHint">共 0 种零件</div></div>
+          <div class="stat"><div class="stat-value" id="exactCount">0</div><div class="stat-label">可直接匹配（种）</div><div class="stat-sub">按零件种类统计</div></div>
+          <div class="stat"><div class="stat-value" id="replaceableCount">0</div><div class="stat-label">可替代（种）</div><div class="stat-sub">已有可参考方案</div></div>
+          <div class="stat"><div class="stat-value" id="blockedCount">0</div><div class="stat-label">暂时缺失（种）</div><div class="stat-sub">当前无稳定方案</div></div>
+        </div>
+        <div class="conclusion" id="conclusion">
+          <div class="conclusion-title" id="conclusionTitle">等待导入清单</div>
+          <div class="conclusion-text" id="conclusionText">导入后，这里会直接告诉你这套设计能不能继续推进。</div>
+        </div>
+      </section>
+
+      <section class="card action-card" id="actionSection">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">推荐动作</h2>
+            <div class="task-subtitle">只保留当前最值得点击的 3 个动作。</div>
+          </div>
+        </div>
+        <div class="action-grid" id="actionGrid">
+          <button type="button" class="primary-btn" onclick="scrollToTasks()">查看待处理零件</button>
+          <button type="button" class="secondary-btn" onclick="downloadProcurementSuggestionCsv()">生成采购建议</button>
+          <button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>
+        </div>
+      </section>
+
+      <section class="card tasks-card" id="taskSection">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">待处理零件</h2>
+            <div class="task-subtitle" id="taskHint">默认只展示最需要处理的前 6 条。</div>
+          </div>
+        </div>
+        <div class="task-list" id="taskList">
+          <div class="empty">上传并分析后，这里只会保留最关键的待处理零件。</div>
+        </div>
+      </section>
+
+      <div class="bottom-links" id="bottomLinks">
+        <a class="link-btn" href="/tools/part-adapter/results">查看完整结果</a>
+        <button type="button" class="link-btn" id="clearResultButton">清空当前结果</button>
+      </div>
+
+      <footer class="page-footer">
+        <div>版本 1.0：人人都是积木设计师。万物皆可积木</div>
+        <div>鲁ICP备2020043483号-1，©2020-2026 酷玩潮®</div>
+        <div>LEGO® 为 LEGO 集团的商标。LEGO 集团未赞助、授权或认可本工具。</div>
+        <div>LEGO® is a trademark of the LEGO Group, which does not sponsor, authorize, or endorse this tool.</div>
+      </footer>
+    </div>
+
+    <script>
+      const STORAGE_KEY = 'kwc_public_part_adapter_last_job_v2'
+      const DEFAULT_BASE_URL = window.location.origin
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;')
+      }
+
+      function setStatus(message) {
+        document.getElementById('statusLine').textContent = String(message || '').trim() || '等待操作'
+      }
+
+      function saveJob(job) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(job || null))
+        } catch (err) {
+          // ignore quota/localStorage issues
+        }
+      }
+
+      function loadJob() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY)
+          return raw ? JSON.parse(raw) : null
+        } catch (err) {
+          return null
+        }
+      }
+
+      function clearStoredJob() {
+        try {
+          localStorage.removeItem(STORAGE_KEY)
+        } catch (err) {
+          // ignore
+        }
+      }
+
+      function getJobSourceName(job) {
+        const project = job && typeof job.project === 'object' ? job.project : {}
+        return String(
+          project.source_name ||
+          job && job.__public_source_name ||
+          ''
+        ).trim()
+      }
+
+      function buildExportFilename(job, suffix) {
+        const rawName = getJobSourceName(job) || 'studio-bom'
+        const stem = rawName.replace(/\.[^.]+$/, '').trim() || 'studio-bom'
+        const safeStem = stem.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '-').replace(/-+/g, '-')
+        return `${safeStem}-${suffix}-${new Date().toISOString().slice(0, 10)}.csv`
+      }
+
+      function getResultStatus(item) {
+        const stage = String(item && item.stage || '').trim()
+        const risk = String(item && item.risk || '').toUpperCase()
+        if (stage === 'blocked' || stage === 'manual_required' || !String(item && item.resolved_part_no || '').trim()) {
+          return { key: 'blocked', label: '暂时缺失' }
+        }
+        if (stage === 'substitute' || stage === 'manual_color' || stage === 'printed_fallback') {
+          return { key: 'replaceable', label: '可替代' }
+        }
+        if (risk && risk !== 'A') {
+          return { key: 'pending', label: '待确认' }
+        }
+        return { key: 'exact', label: '可直接匹配' }
+      }
+
+      function getReasonLabel(item) {
+        const stage = String(item && item.stage || '').trim()
+        const note = String(item && item.note || '').trim()
+        const tag = String(item && item.tag || '').trim()
+        if (stage === 'blocked' || stage === 'manual_required') return '当前无稳定替代件'
+        if (stage === 'manual_color' || note.includes('颜色')) return '结构兼容，颜色不同'
+        if (tag === 'printed' || stage === 'printed_fallback') return '印刷件需要单独确认'
+        if (note.includes('结构') || String(item && item.risk || '').toUpperCase() === 'D') return '可能影响关键连接'
+        if (stage === 'substitute') return '结构兼容，可尝试替换'
+        return '高砖已有同款'
+      }
+
+      function getImageUrl(item) {
+        const candidates = [
+          item && item.source_image_url,
+          item && item.image_url,
+          item && item.primary_image_url,
+          item && item.image
+        ]
+        return candidates.map((v) => String(v || '').trim()).find(Boolean) || ''
+      }
+
+      function getOverview(job) {
+        const summary = (job && job.summary) || {}
+        const results = Array.isArray(job && job.results) ? job.results : []
+        let exactCount = 0
+        let replaceableCount = 0
+        let blockedCount = 0
+        let pendingCount = 0
+        results.forEach((item) => {
+          const status = getResultStatus(item)
+          if (status.key === 'exact') exactCount += 1
+          if (status.key === 'replaceable') replaceableCount += 1
+          if (status.key === 'blocked') blockedCount += 1
+          if (status.key === 'pending') pendingCount += 1
+        })
+        return {
+          totalQty: Number(summary.total_qty || 0),
+          totalTypes: Number(summary.total_types || results.length || 0),
+          exactCount,
+          replaceableCount,
+          blockedCount,
+          pendingCount
+        }
+      }
+
+      function sortByPriority(items) {
+        return [...(items || [])].sort((a, b) => {
+          const order = { blocked: 0, pending: 1, replaceable: 2, exact: 3 }
+          const aStatus = getResultStatus(a).key
+          const bStatus = getResultStatus(b).key
+          if (order[aStatus] !== order[bStatus]) return order[aStatus] - order[bStatus]
+          return Number(b && b.qty || 0) - Number(a && a.qty || 0)
+        })
+      }
+
+      function render(job) {
+        const stats = getOverview(job)
+        const hasResults = stats.totalTypes > 0
+        ;['summarySection', 'actionSection', 'taskSection', 'bottomLinks'].forEach((id) => {
+          const node = document.getElementById(id)
+          if (node) node.classList.toggle('is-hidden', !hasResults)
+        })
+        const fileNotice = document.getElementById('fileNotice')
+        const sourceName = getJobSourceName(job)
+        fileNotice.style.display = hasResults && sourceName ? 'block' : 'none'
+        document.getElementById('fileNoticeName').textContent = sourceName || '未导入文件'
+        document.getElementById('totalQty').textContent = stats.totalQty || 0
+        document.getElementById('totalTypesHint').textContent = `共 ${stats.totalTypes || 0} 种零件`
+        document.getElementById('exactCount').textContent = stats.exactCount || 0
+        document.getElementById('replaceableCount').textContent = stats.replaceableCount || 0
+        document.getElementById('blockedCount').textContent = stats.blockedCount || 0
+
+        const conclusion = document.getElementById('conclusion')
+        const conclusionTitle = document.getElementById('conclusionTitle')
+        const conclusionText = document.getElementById('conclusionText')
+        const actionGrid = document.getElementById('actionGrid')
+        const results = Array.isArray(job && job.results) ? sortByPriority(job.results) : []
+        const tasks = results.filter((item) => getResultStatus(item).key !== 'exact').slice(0, 6)
+
+        let tone = ''
+        let title = '等待导入清单'
+        let text = '导入后，这里会直接告诉你这套设计能不能继续推进。'
+        let primary = '<button type="button" class="primary-btn" onclick="scrollToTasks()">查看待处理零件</button>'
+        let secondaryA = '<button type="button" class="secondary-btn" onclick="downloadProcurementSuggestionCsv()">生成采购建议</button>'
+        let secondaryB = '<button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>'
+
+        if (hasResults) {
+          if (stats.blockedCount >= Math.max(4, Math.ceil(stats.totalTypes * 0.15))) {
+            tone = 'is-danger'
+            title = '这份清单还不能直接推进'
+            text = `当前有 ${stats.blockedCount} 种零件暂时缺失，建议优先处理缺失件，再决定是否继续采购。`
+            primary = '<button type="button" class="primary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>'
+            secondaryA = '<button type="button" class="secondary-btn" onclick="scrollToTasks()">查看待处理零件</button>'
+            secondaryB = '<a class="link-btn" href="/tools/part-adapter/results">查看完整结果</a>'
+          } else if (stats.replaceableCount + stats.pendingCount >= Math.max(4, Math.ceil(stats.totalTypes * 0.18))) {
+            tone = 'is-warn'
+            title = '当前缺失和待确认零件较多'
+            text = `有 ${stats.replaceableCount + stats.pendingCount} 种零件需要优先确认，建议先查看待处理零件和替代方案。`
+            primary = '<button type="button" class="primary-btn" onclick="scrollToTasks()">查看待处理零件</button>'
+            secondaryA = '<button type="button" class="secondary-btn" onclick="downloadProcurementSuggestionCsv()">生成采购建议</button>'
+            secondaryB = '<button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>'
+          } else {
+            tone = 'is-good'
+            title = '大部分零件已可落地'
+            text = `当前 ${stats.exactCount + stats.replaceableCount} 种零件已可匹配或可替代，可继续生成采购建议。`
+            primary = '<button type="button" class="primary-btn" onclick="downloadProcurementSuggestionCsv()">生成采购建议</button>'
+            secondaryA = '<button type="button" class="secondary-btn" onclick="scrollToTasks()">查看待处理零件</button>'
+            secondaryB = '<button type="button" class="secondary-btn" onclick="downloadMissingOnlyCsv()">导出缺失清单</button>'
+          }
+        }
+
+        conclusion.className = `conclusion ${tone}`.trim()
+        conclusionTitle.textContent = title
+        conclusionText.textContent = text
+        actionGrid.innerHTML = `${primary}${secondaryA}${secondaryB}`
+
+        const taskHint = document.getElementById('taskHint')
+        const taskList = document.getElementById('taskList')
+        taskHint.textContent = tasks.length ? `系统已先帮你整理出最需要处理的 ${tasks.length} 条。` : '如果出现待处理零件，这里只会优先展示最关键的少量条目。'
+        taskList.innerHTML = tasks.length
+          ? tasks.map((item) => {
+              const status = getResultStatus(item)
+              const imageUrl = getImageUrl(item)
+              const actionLabel = status.key === 'blocked' ? '加入缺失清单' : (status.key === 'replaceable' ? '查看替代方案' : '查看原因')
+              return `<div class="task-item">
+                <div class="thumb">${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(item.name || item.part_no || '零件')}" loading="lazy" />` : escapeHtml(String(item.part_no || '-').slice(0, 6))}</div>
+                <div class="task-main">
+                  <div class="task-top">
+                    <span class="task-name-line"><span class="task-name">${escapeHtml(item.name || item.part_no || '-')}</span><span class="task-code">${escapeHtml(item.part_no || '-')}</span></span>
+                    <span class="status-chip is-${escapeHtml(status.key)}">${escapeHtml(status.label)}</span>
+                  </div>
+                  <div class="task-reason">${escapeHtml(getReasonLabel(item))}</div>
+                </div>
+                <a class="link-btn" href="/tools/part-adapter/results#line-${Number(item.line_no || 0)}">${escapeHtml(actionLabel)}</a>
+              </div>`
+            }).join('')
+          : '<div class="empty">上传并分析后，这里只会保留最关键的待处理零件。</div>'
+
+        if (!hasResults) {
+          setStatus('先上传清单，分析完成后再看结论、推荐动作和待处理零件。')
+        }
+      }
+
+      function triggerCsv(filename, headers, rows) {
+        const csv = [headers.join(','), ...rows.map((row) => row.map((cell) => `"${String(cell == null ? '' : cell).replace(/"/g, '""')}"`).join(','))].join('\n')
+        const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(url)
+      }
+
+      function downloadMissingOnlyCsv() {
+        const job = loadJob()
+        const items = (job && Array.isArray(job.results) ? job.results : []).filter((item) => getResultStatus(item).key === 'blocked')
+        if (!items.length) {
+          alert('当前没有缺失清单。')
+          return
+        }
+        triggerCsv(buildExportFilename(job, 'missing-parts'), ['零件名称', '零件编号', '数量', '原因'], items.map((item) => [
+          item.name || '',
+          item.part_no || '',
+          item.qty || 0,
+          getReasonLabel(item)
+        ]))
+      }
+
+      function downloadProcurementSuggestionCsv() {
+        const job = loadJob()
+        const items = (job && Array.isArray(job.results) ? job.results : []).filter((item) => ['exact', 'replaceable'].includes(getResultStatus(item).key))
+        if (!items.length) {
+          alert('当前还没有可导出的采购建议。')
+          return
+        }
+        triggerCsv(buildExportFilename(job, 'procurement-suggestion'), ['建议件', '颜色', '数量', '状态'], items.map((item) => [
+          item.resolved_part_name || item.resolved_part_no || '',
+          item.resolved_color_no || '',
+          item.qty || 0,
+          getResultStatus(item).label
+        ]))
+      }
+
+      async function apiUploadBom(file) {
+        const form = new FormData()
+        form.append('file', file)
+        const res = await fetch(`${DEFAULT_BASE_URL}/api/tools/part-adapter/import-bom`, { method: 'POST', body: form })
+        const body = await res.json().catch(() => ({ detail: '导入失败' }))
+        if (!res.ok) throw new Error(body.detail || '导入失败')
+        return body
+      }
+
+      async function apiConvertWithGobricks(file) {
+        const form = new FormData()
+        form.append('file', file)
+        form.append('auth_token', '')
+        form.append('base_url', 'https://api.gobricks.cn')
+        const res = await fetch(`${DEFAULT_BASE_URL}/api/tools/part-adapter/convert-gobricks`, { method: 'POST', body: form })
+        const body = await res.json().catch(() => ({ detail: '转换失败' }))
+        if (!res.ok) throw new Error(body.detail || '转换失败')
+        return body
+      }
+
+      async function apiAnalyze(payload) {
+        const res = await fetch(`${DEFAULT_BASE_URL}/api/tools/part-adapter/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        const body = await res.json().catch(() => ({ detail: '分析失败' }))
+        if (!res.ok) throw new Error(body.detail || '分析失败')
+        return body
+      }
+
+      async function runQuickFlow(file) {
+        setStatus('正在导入清单...')
+        const bom = await apiUploadBom(file)
+        let bomText = String(bom.bom_text || '')
+        let sourceName = String(bom.filename || file.name || 'studio-bom.txt')
+        try {
+          setStatus('正在获取高砖判断...')
+          const converted = await apiConvertWithGobricks(file)
+          if (converted && converted.bom && converted.bom.bom_text) {
+            bomText = String(converted.bom.bom_text || bomText)
+            sourceName = String(converted.bom.filename || sourceName)
+          }
+        } catch (err) {
+          setStatus(`高砖判断未完成，继续使用本地清单分析：${err.message || '请求异常'}`)
+        }
+        setStatus('正在生成适配结果...')
+        const analyzed = await apiAnalyze({
+          project_name: '',
+          designer_name: '',
+          source_name: sourceName,
+          bom_text: bomText,
+          color_mode: 'balanced',
+          optimizer_mode: 'reliability',
+          optimizer_profile: 'v1',
+          allow_display_sub: true,
+          allow_structural_sub: false
+        })
+        const job = analyzed.job ? { ...analyzed.job, __public_source_name: sourceName } : null
+        saveJob(job)
+        render(job)
+        setStatus('分析完成，可以直接看结论和待处理零件。')
+      }
+
+      async function analyzePastedBom() {
+        const text = String(document.getElementById('pasteInput').value || '').trim()
+        if (!text) {
+          alert('请先粘贴零件清单。')
+          return
+        }
+        setStatus('正在分析粘贴清单...')
+        const analyzed = await apiAnalyze({
+          project_name: '',
+          designer_name: '',
+          source_name: 'pasted-bom.txt',
+          bom_text: text,
+          color_mode: 'balanced',
+          optimizer_mode: 'reliability',
+          optimizer_profile: 'v1',
+          allow_display_sub: true,
+          allow_structural_sub: false
+        })
+        const job = analyzed.job ? { ...analyzed.job, __public_source_name: 'pasted-bom.txt' } : null
+        saveJob(job)
+        render(job)
+        setStatus('分析完成，可以直接看结论和待处理零件。')
+      }
+
+      function scrollToTasks() {
+        document.getElementById('taskSection').scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+
+      document.getElementById('uploadButton').addEventListener('click', () => document.getElementById('fileInput').click())
+      document.getElementById('pasteToggleButton').addEventListener('click', () => document.getElementById('pasteShell').classList.add('open'))
+      document.getElementById('closePasteButton').addEventListener('click', () => document.getElementById('pasteShell').classList.remove('open'))
+      document.getElementById('clearResultButton').addEventListener('click', () => {
+        clearStoredJob()
+        document.getElementById('pasteInput').value = ''
+        document.getElementById('pasteShell').classList.remove('open')
+        render(null)
+        setStatus('当前结果已清空，可以重新上传清单。')
+      })
+      document.getElementById('analyzePasteButton').addEventListener('click', () => {
+        analyzePastedBom().catch((err) => {
+          alert(err.message || '分析失败')
+          setStatus(`分析失败：${err.message || '请求异常'}`)
+        })
+      })
+      document.getElementById('fileInput').addEventListener('change', () => {
+        const file = document.getElementById('fileInput').files ? document.getElementById('fileInput').files[0] : null
+        if (!file) return
+        runQuickFlow(file).catch((err) => {
+          alert(err.message || '分析失败')
+          setStatus(`分析失败：${err.message || '请求异常'}`)
+        })
+      })
+
+      render(loadJob())
+    </script>
+  </body>
+</html>
