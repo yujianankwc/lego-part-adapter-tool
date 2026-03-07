@@ -7,6 +7,7 @@ import time
 import threading
 import uuid
 import zipfile
+from collections import deque
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -41,6 +42,19 @@ PUBLIC_PART_ADAPTER_MAX_UPLOAD_BYTES = 2 * 1024 * 1024
 PUBLIC_PART_ADAPTER_MAX_MODEL_BYTES = 20 * 1024 * 1024
 PUBLIC_PART_ADAPTER_MAX_BOM_LINES = 5000
 PUBLIC_PART_ADAPTER_MAX_BOM_TEXT_CHARS = 300000
+PUBLIC_PART_ADAPTER_ALLOWED_UPLOAD_EXTS = {'.csv', '.txt', '.tsv', '.xlsx'}
+PUBLIC_PART_ADAPTER_ALLOWED_MODEL_EXTS = {'.io', '.ldr', '.mpd', '.dat'}
+PUBLIC_RATE_LIMIT_RULES: Dict[str, Dict[str, int]] = {
+    'import_bom': {'limit': 10, 'window_seconds': 60},
+    'convert_gobricks': {'limit': 6, 'window_seconds': 60},
+    'analyze': {'limit': 6, 'window_seconds': 60},
+    'analyze_async_submit': {'limit': 6, 'window_seconds': 60},
+    'analyze_async_status': {'limit': 30, 'window_seconds': 60},
+    'export': {'limit': 20, 'window_seconds': 60},
+    'preview_model': {'limit': 6, 'window_seconds': 60},
+}
+PUBLIC_RATE_LIMIT_LOCK = threading.Lock()
+PUBLIC_RATE_LIMIT_BUCKETS: Dict[str, deque] = {}
 PUBLIC_ANALYZE_TASKS_PATH = DATA_DIR / 'part_adapter' / 'public_analyze_tasks.json'
 PUBLIC_ANALYZE_TASKS_PATH.parent.mkdir(parents=True, exist_ok=True)
 PUBLIC_ANALYZE_TASKS_LOCK = threading.Lock()
@@ -524,6 +538,15 @@ def _validate_public_upload_content(content: bytes, max_bytes: int = PUBLIC_PART
         raise HTTPException(status_code=400, detail=f'文件过大，请控制在 {int(max_bytes / 1024 / 1024)}MB 以内')
 
 
+def _validate_public_filename(filename: str, allowed_exts: set[str], label: str = '文件') -> str:
+    safe_name = str(filename or '').strip()
+    suffix = Path(safe_name).suffix.lower()
+    if not safe_name or suffix not in allowed_exts:
+        allowed = ' / '.join(sorted(allowed_exts))
+        raise HTTPException(status_code=400, detail=f'{label}格式不支持，请上传 {allowed} 文件')
+    return safe_name
+
+
 def _validate_public_bom_text(bom_text: str) -> str:
     safe_text = str(bom_text or '').strip()
     if not safe_text:
@@ -533,6 +556,42 @@ def _validate_public_bom_text(bom_text: str) -> str:
     if len(safe_text.splitlines()) > PUBLIC_PART_ADAPTER_MAX_BOM_LINES:
         raise HTTPException(status_code=400, detail=f'BOM 行数过多，请控制在 {PUBLIC_PART_ADAPTER_MAX_BOM_LINES} 行以内')
     return safe_text
+
+
+def _public_rate_limit_actor(request: Request) -> str:
+    safe_visitor = _part_adapter_visitor_hash(request)
+    if safe_visitor:
+        return safe_visitor
+    if request.client and request.client.host:
+        return str(request.client.host).strip()
+    return 'anonymous'
+
+
+def _enforce_public_rate_limit(request: Request, action_key: str) -> None:
+    rule = PUBLIC_RATE_LIMIT_RULES.get(action_key) or {}
+    limit = int(rule.get('limit') or 0)
+    window_seconds = int(rule.get('window_seconds') or 0)
+    if limit <= 0 or window_seconds <= 0:
+        return
+    actor = _public_rate_limit_actor(request)
+    bucket_key = f'{action_key}:{actor}'
+    now_ts = time.time()
+    with PUBLIC_RATE_LIMIT_LOCK:
+        bucket = PUBLIC_RATE_LIMIT_BUCKETS.get(bucket_key)
+        if not isinstance(bucket, deque):
+            bucket = deque()
+            PUBLIC_RATE_LIMIT_BUCKETS[bucket_key] = bucket
+        cutoff = now_ts - window_seconds
+        while bucket and bucket[0] <= cutoff:
+            bucket.popleft()
+        if len(bucket) >= limit:
+            retry_after = max(1, int(window_seconds - (now_ts - bucket[0])))
+            raise HTTPException(
+                status_code=429,
+                detail=f'请求过于频繁，请在 {retry_after} 秒后重试',
+                headers={'Retry-After': str(retry_after)},
+            )
+        bucket.append(now_ts)
 
 
 def _public_part_adapter_catalogs_payload() -> Dict[str, Any]:
@@ -2523,6 +2582,8 @@ async def api_tools_part_adapter_import_bom(
     request: Request,
     file: UploadFile = File(...),
 ) -> Dict[str, Any]:
+    _enforce_public_rate_limit(request, 'import_bom')
+    _validate_public_filename(file.filename or '', PUBLIC_PART_ADAPTER_ALLOWED_UPLOAD_EXTS, label='清单')
     content = await file.read()
     _validate_public_upload_content(content)
     try:
@@ -2571,6 +2632,8 @@ async def api_tools_part_adapter_preview_model(
     request: Request,
     file: UploadFile = File(...),
 ) -> Dict[str, Any]:
+    _enforce_public_rate_limit(request, 'preview_model')
+    _validate_public_filename(file.filename or '', PUBLIC_PART_ADAPTER_ALLOWED_MODEL_EXTS, label='模型')
     content = await file.read()
     _validate_public_upload_content(content, max_bytes=PUBLIC_PART_ADAPTER_MAX_MODEL_BYTES)
     try:
@@ -2864,6 +2927,8 @@ async def api_tools_part_adapter_convert_gobricks(
     base_url: str = Form(default='https://api.gobricks.cn'),
     file: UploadFile = File(...),
 ) -> Dict[str, Any]:
+    _enforce_public_rate_limit(request, 'convert_gobricks')
+    _validate_public_filename(file.filename or '', PUBLIC_PART_ADAPTER_ALLOWED_UPLOAD_EXTS, label='清单')
     safe_token = _resolve_gobricks_auth_token(auth_token)
     if not safe_token:
         raise HTTPException(status_code=400, detail='请先提供高砖 auth_token，或在服务端配置 GOBRICKS_AUTH_TOKEN')
@@ -2965,6 +3030,7 @@ def api_tools_part_adapter_analyze(
     payload: PartAdapterAnalyzeRequest,
     request: Request,
 ) -> Dict[str, Any]:
+    _enforce_public_rate_limit(request, 'analyze')
     bom_text = _validate_public_bom_text(payload.bom_text)
     color_mode = str(payload.color_mode or 'balanced').strip().lower()
     if color_mode not in {'safe', 'balanced', 'aggressive'}:
@@ -2997,6 +3063,7 @@ def api_tools_part_adapter_analyze_async(
     payload: PartAdapterAnalyzeRequest,
     request: Request,
 ) -> Dict[str, Any]:
+    _enforce_public_rate_limit(request, 'analyze_async_submit')
     _validate_public_bom_text(payload.bom_text)
     visitor_key = _part_adapter_visitor_hash(request)
     task = _create_public_analyze_task(
@@ -3019,7 +3086,8 @@ def api_tools_part_adapter_analyze_async(
 
 
 @app.get('/api/tools/part-adapter/analyze-async/{task_id}')
-def api_tools_part_adapter_analyze_async_status(task_id: str) -> Dict[str, Any]:
+def api_tools_part_adapter_analyze_async_status(task_id: str, request: Request) -> Dict[str, Any]:
+    _enforce_public_rate_limit(request, 'analyze_async_status')
     task = _get_public_analyze_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail='分析任务不存在')
@@ -3099,6 +3167,7 @@ def api_admin_part_adapter_export(job_id: str, admin: Dict[str, Any] = Depends(r
 
 @app.get('/api/tools/part-adapter/jobs/{job_id}/export.csv')
 def api_tools_part_adapter_export(job_id: str, request: Request) -> Response:
+    _enforce_public_rate_limit(request, 'export')
     csv_text = part_adapter_store.export_job_csv(job_id)
     if csv_text is None:
         raise HTTPException(status_code=404, detail='适配记录不存在')
