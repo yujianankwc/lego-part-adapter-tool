@@ -3726,6 +3726,7 @@
       let currentReplacementItem = null
       let publicFullWorkspaceExpanded = false
       const ADMIN_SESSION_STORAGE_KEY = 'kwc_admin_session_token_v1'
+      const ADMIN_TOKEN_STORAGE_KEY = 'kwc_part_adapter_admin_token_v1'
       const GOBRICKS_CFG_KEY = 'kwc_part_adapter_gobricks_cfg_v1'
       let statusBannerTimer = null
 
@@ -3734,6 +3735,26 @@
           return String(localStorage.getItem(ADMIN_SESSION_STORAGE_KEY) || '').trim()
         } catch (err) {
           return ''
+        }
+      }
+
+      function getStoredAdminToken() {
+        try {
+          return String(localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY) || '').trim()
+        } catch (err) {
+          return ''
+        }
+      }
+
+      function setStoredAdminToken(value) {
+        try {
+          const safeValue = String(value || '').trim()
+          if (safeValue) {
+            localStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, safeValue)
+          } else {
+            localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY)
+          }
+        } catch (err) {
         }
       }
 
@@ -3920,6 +3941,29 @@
           adminSession: getStoredAdminSession(),
           adminOperator: encodeURIComponent(String(document.getElementById('adminOperator').value || '零件适配').trim() || '零件适配')
         }
+      }
+
+      function hasInternalAuth() {
+        const cfg = getCfg()
+        return Boolean(cfg.adminSession || cfg.adminToken)
+      }
+
+      function isInternalAuthError(message) {
+        const text = String(message || '').trim()
+        return text.includes('后台登录态失效') || text.includes('请重新登录')
+      }
+
+      function openInternalSettings() {
+        const detail = document.querySelector('.settings-shell details')
+        if (detail) {
+          detail.open = true
+        }
+      }
+
+      function showInternalAuthRequired(message) {
+        const safeMessage = String(message || '').trim() || '请先登录后台，或在工具设置中填写访问凭证后再刷新……'
+        setStatus(safeMessage, 'error')
+        openInternalSettings()
       }
 
       function getPartAdapterApiPrefix() {
@@ -7865,6 +7909,13 @@
 
       async function reloadAll() {
         try {
+          if (!isPublicToolMode()) {
+            setStoredAdminToken(document.getElementById('adminToken').value || '')
+            if (!hasInternalAuth()) {
+              showInternalAuthRequired('请先登录后台，或在工具设置中填写访问凭证后再刷新……')
+              return
+            }
+          }
           setStatus('加载中...')
           syncStrategyPills()
           renderConvertReport(null)
@@ -7878,6 +7929,10 @@
           await Promise.all(tasks)
           setStatus('已刷新')
         } catch (err) {
+          if (!isPublicToolMode() && isInternalAuthError(err.message || '')) {
+            showInternalAuthRequired('后台登录态已失效，请重新登录后台，或填写访问凭证后再刷新……')
+            return
+          }
           setStatus(`加载失败：${err.message || '请求异常'}`)
         }
       }
@@ -7887,6 +7942,12 @@
       document.getElementById('simpleMode').addEventListener('change', applySimpleMode)
       document.getElementById('allowDisplaySub').addEventListener('change', syncStrategyPills)
       document.getElementById('allowStructuralSub').addEventListener('change', syncStrategyPills)
+      document.getElementById('adminToken').addEventListener('change', (event) => {
+        setStoredAdminToken(event && event.target ? event.target.value : '')
+      })
+      document.getElementById('adminToken').addEventListener('blur', (event) => {
+        setStoredAdminToken(event && event.target ? event.target.value : '')
+      })
       document.getElementById('bomFileInput').addEventListener('change', () => {
         const input = document.getElementById('bomFileInput')
         const file = input && input.files ? input.files[0] : null
@@ -7987,6 +8048,7 @@
       syncStrategyPills()
       syncSourceDisplay()
       applySimpleMode()
+      document.getElementById('adminToken').value = getStoredAdminToken()
       renderPublicLite(null)
       reloadAll()
     </script>
