@@ -571,7 +571,7 @@ def _create_public_analyze_task(source_name: str, visitor_key: str = '') -> Dict
         'task_id': f'pat-{uuid.uuid4().hex[:12]}',
         'status': 'queued',
         'source_name': str(source_name or '').strip(),
-        'progress_text': '排队中，正在准备分析任务。',
+        'progress_text': '排队中，正在准备分析任务……',
         'error': '',
         'result_job_id': '',
         'created_at': now_iso(),
@@ -647,7 +647,7 @@ def _public_task_response(task: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _run_public_part_adapter_analyze_task(task_id: str, payload: PartAdapterAnalyzeRequest, visitor_key: str = '') -> None:
-    task = _update_public_analyze_task(task_id, status='running', progress_text='正在分析零件匹配与替代方案。')
+    task = _update_public_analyze_task(task_id, status='running', progress_text='正在分析零件匹配与替代方案……')
     if not task:
         return
     try:

@@ -4,6 +4,7 @@ import json
 import os
 import re
 import threading
+import time
 import uuid
 from copy import deepcopy
 from datetime import datetime, timedelta
@@ -1143,9 +1144,22 @@ class PartAdapterStore:
         allow_display_sub: bool = True,
         allow_structural_sub: bool = False,
     ) -> Dict[str, Any]:
+        overall_started = time.perf_counter()
+        timing_marks: Dict[str, float] = {}
+
+        def mark(name: str, started_at: float) -> None:
+            timing_marks[name] = round((time.perf_counter() - started_at) * 1000, 2)
+
+        step_started = time.perf_counter()
         with self.lock:
             rules = self._get_cached_rules_payload()
+        mark('load_rules_ms', step_started)
+
+        step_started = time.perf_counter()
         parsed = self._parse_bom_text(bom_text)
+        mark('parse_bom_ms', step_started)
+
+        step_started = time.perf_counter()
         results = [
             self._resolve_row(
                 item=row,
@@ -1157,8 +1171,24 @@ class PartAdapterStore:
             )
             for row in parsed
         ]
+        mark('resolve_rows_ms', step_started)
+
+        step_started = time.perf_counter()
         results = self._decorate_result_rows(results=results, rules=rules)
+        mark('decorate_rows_ms', step_started)
+
+        step_started = time.perf_counter()
         summary = self._build_summary(results)
+        mark('build_summary_ms', step_started)
+        timing_marks['row_count'] = len(parsed)
+        timing_marks['result_count'] = len(results)
+        timing_marks['avg_resolve_row_ms'] = round(
+            timing_marks.get('resolve_rows_ms', 0) / max(1, len(parsed)),
+            2,
+        )
+        timing_marks['pre_write_total_ms'] = round((time.perf_counter() - overall_started) * 1000, 2)
+        timing_marks['pre_write_total_seconds'] = round(timing_marks['pre_write_total_ms'] / 1000, 2)
+        summary['performance'] = deepcopy(timing_marks)
         job = {
             'job_id': f'pa-{uuid.uuid4().hex[:12]}',
             'project': {
@@ -1175,9 +1205,11 @@ class PartAdapterStore:
             },
             'results': results,
             'summary': summary,
+            'performance': deepcopy(timing_marks),
             'created_at': _now_iso(),
             'updated_at': _now_iso(),
         }
+        step_started = time.perf_counter()
         with self.lock:
             payload = self._read_json(JOBS_PATH, DEFAULT_JOBS)
             items = payload.get('items')
@@ -1185,6 +1217,23 @@ class PartAdapterStore:
             source.insert(0, job)
             payload['items'] = source[:200]
             self._write_json(JOBS_PATH, payload)
+        mark('write_job_ms', step_started)
+        timing_marks['total_ms'] = round((time.perf_counter() - overall_started) * 1000, 2)
+        timing_marks['total_seconds'] = round(timing_marks['total_ms'] / 1000, 2)
+        summary['performance'] = deepcopy(timing_marks)
+        job['summary'] = summary
+        job['performance'] = deepcopy(timing_marks)
+        print(
+            '[part-adapter.analyze]',
+            json.dumps(
+                {
+                    'source_name': str(source_name or '').strip(),
+                    'project_name': str(project_name or '').strip(),
+                    'timings': timing_marks,
+                },
+                ensure_ascii=False,
+            ),
+        )
         return deepcopy(job)
 
     def import_gobricks_result_file(self, filename: str, content: bytes) -> Dict[str, Any]:
