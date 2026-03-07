@@ -570,6 +570,18 @@ class PartAdapterStore:
                 total += int(counts.get(event_name) or 0)
             return total
 
+        def _sum_count_values(counts: Dict[str, Any], *event_names: str) -> int:
+            total = 0
+            for event_name in event_names:
+                total += int(counts.get(event_name) or 0)
+            return total
+
+        def _count_for_many(keys: List[str], *event_names: str) -> int:
+            total = 0
+            for event_name in event_names:
+                total += _count_for(keys, event_name)
+            return total
+
         def _single_day_summary(day_key: str) -> Dict[str, int]:
             bucket = daily.get(day_key) if isinstance(daily.get(day_key), dict) else {}
             counts = bucket.get('counts') if isinstance(bucket.get('counts'), dict) else {}
@@ -580,10 +592,10 @@ class PartAdapterStore:
                 'admin_views': int(counts.get('page_view_admin') or 0),
                 'page_views': int(counts.get('page_view_public') or 0) + int(counts.get('page_view_admin') or 0),
                 'unique_visitors': len(visitors),
-                'import_bom': int(counts.get('import_bom') or 0),
-                'convert_gobricks': int(counts.get('convert_gobricks') or 0),
-                'analyze': int(counts.get('analyze') or 0),
-                'exports': int(counts.get('export_csv') or 0) + int(counts.get('export_designer_pdf') or 0) + int(counts.get('export_designer_csv') or 0),
+                'import_bom': _sum_count_values(counts, 'import_bom', 'import_bom_public'),
+                'convert_gobricks': _sum_count_values(counts, 'convert_gobricks', 'convert_gobricks_public'),
+                'analyze': _sum_count_values(counts, 'analyze', 'analyze_public', 'analyze_public_async_submit', 'analyze_public_async'),
+                'exports': _sum_count_values(counts, 'export_csv', 'export_csv_public', 'export_designer_pdf', 'export_designer_csv'),
             }
 
         def _funnel(summary: Dict[str, int]) -> Dict[str, Any]:
@@ -622,19 +634,19 @@ class PartAdapterStore:
                 'public_results_views': _count_for(last_7_keys, 'page_view_public_results'),
                 'admin_views': _count_for(last_7_keys, 'page_view_admin'),
                 'page_views': _count_for(last_7_keys, 'page_view_public') + _count_for(last_7_keys, 'page_view_admin'),
-                'import_bom': _count_for(last_7_keys, 'import_bom'),
-                'convert_gobricks': _count_for(last_7_keys, 'convert_gobricks'),
-                'analyze': _count_for(last_7_keys, 'analyze'),
-                'exports': _count_for(last_7_keys, 'export_csv') + _count_for(last_7_keys, 'export_designer_pdf') + _count_for(last_7_keys, 'export_designer_csv'),
+                'import_bom': _count_for_many(last_7_keys, 'import_bom', 'import_bom_public'),
+                'convert_gobricks': _count_for_many(last_7_keys, 'convert_gobricks', 'convert_gobricks_public'),
+                'analyze': _count_for_many(last_7_keys, 'analyze', 'analyze_public', 'analyze_public_async_submit', 'analyze_public_async'),
+                'exports': _count_for_many(last_7_keys, 'export_csv', 'export_csv_public', 'export_designer_pdf', 'export_designer_csv'),
             },
             'funnel_today': _funnel(today_summary),
             'funnel_last_7_days': _funnel({
                 'public_home_views': _count_for(last_7_keys, 'page_view_public'),
                 'public_results_views': _count_for(last_7_keys, 'page_view_public_results'),
-                'import_bom': _count_for(last_7_keys, 'import_bom'),
-                'convert_gobricks': _count_for(last_7_keys, 'convert_gobricks'),
-                'analyze': _count_for(last_7_keys, 'analyze'),
-                'exports': _count_for(last_7_keys, 'export_csv') + _count_for(last_7_keys, 'export_designer_pdf') + _count_for(last_7_keys, 'export_designer_csv'),
+                'import_bom': _count_for_many(last_7_keys, 'import_bom', 'import_bom_public'),
+                'convert_gobricks': _count_for_many(last_7_keys, 'convert_gobricks', 'convert_gobricks_public'),
+                'analyze': _count_for_many(last_7_keys, 'analyze', 'analyze_public', 'analyze_public_async_submit', 'analyze_public_async'),
+                'exports': _count_for_many(last_7_keys, 'export_csv', 'export_csv_public', 'export_designer_pdf', 'export_designer_csv'),
             }),
             'totals': deepcopy(payload.get('totals') if isinstance(payload.get('totals'), dict) else {}),
             'recent': deepcopy(recent[:12]),
